@@ -230,5 +230,6 @@ async function searchCompanies(options) {
   console.log("");
 
   return filtered;
+}
 
 module.exports = { searchCompanies };
