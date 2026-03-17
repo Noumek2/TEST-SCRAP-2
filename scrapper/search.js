@@ -351,7 +351,12 @@ async function searchCompanies(options) {
   // Deduplicate
   const unique = deduplicate(allResults.filter((r) => r.name && r.name.length > 3));
 
+  // Remove companies we've already scraped in earlier runs
+  const { filterNew } = require("./scraped");
+  const filtered = filterNew(unique);
+
   console.log("\n✅ Search complete. Total unique companies: " + unique.length);
+  console.log("✅ New companies (not seen before): " + filtered.length);
 
   // Breakdown by source
   const sources = {};
@@ -362,7 +367,7 @@ async function searchCompanies(options) {
   });
   console.log("");
 
-  return unique;
+  return filtered;
 }
 
 module.exports = { searchCompanies };

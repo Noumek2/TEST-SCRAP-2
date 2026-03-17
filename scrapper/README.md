@@ -23,6 +23,26 @@ cameroon-scraper/
 npm install
 ```
 
+### Si Puppeteer ne trouve pas Chromium
+
+Certaines configurations Windows empêchent `npx` de lancer l'installation de Chromium (erreur PowerShell et politique d'exécution).
+
+- Pour forcer Puppeteer à télécharger Chromium :
+
+```bash
+npm run puppeteer-install
+```
+
+- Si tu veux utiliser un Chrome/Chromium déjà installé, définis une variable d'environnement :
+
+```bash
+# Exemple Windows PowerShell
+$env:PUPPETEER_EXECUTABLE_PATH = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+node index.js
+```
+
+Les variables suivantes sont aussi prises en compte : `CHROME_PATH`, `CHROMIUM_PATH`.
+
 ## Usage
 
 ```bash

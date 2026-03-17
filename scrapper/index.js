@@ -11,6 +11,7 @@
 const { searchCompanies }    = require("./search");
 const { detectAll }          = require("./detect");
 const { saveAll, printSummary } = require("./save");
+const { markScraped }        = require("./scraped");
 const { exec }               = require("child_process");
 const path                   = require("path");
 
@@ -52,6 +53,9 @@ async function main() {
     // STEP 2 — Detect Facebook + extract contact info
     console.log("STEP 2 — Detecting Facebook pages & extracting details...");
     const enriched = await detectAll(companies, { facebookOnly: false, delayMs: 2500 });
+
+    // Track processed companies so we don't re-scrape them on next run
+    markScraped(enriched);
 
     // STEP 3 — Save CSV + XML + HTML
     console.log("STEP 3 — Saving results...");

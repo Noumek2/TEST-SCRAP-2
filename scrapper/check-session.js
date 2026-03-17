@@ -10,13 +10,15 @@
 const puppeteer = require("puppeteer");
 const fs        = require("fs");
 const path      = require("path");
+const { getChromeExecutablePath } = require("./chrome-path");
 
 const SESSION_FILE = path.join(__dirname, "fb_session.json");
 
 async function checkSession() {
   console.log("\n=== Facebook Session Setup ===\n");
 
-  const browser = await puppeteer.launch({
+  const executablePath = getChromeExecutablePath();
+  const launchOpts = {
     headless: false,          // Opens a real visible Chrome window
     defaultViewport: null,    // Full size window
     args: [
@@ -25,7 +27,21 @@ async function checkSession() {
       "--disable-blink-features=AutomationControlled",  // Hides bot detection
     ],
     ignoreDefaultArgs: ["--enable-automation"],          // Remove automation banner
-  });
+  };
+
+  if (executablePath) {
+    launchOpts.executablePath = executablePath;
+  }
+
+  let browser;
+  try {
+    browser = await puppeteer.launch(launchOpts);
+  } catch (err) {
+    console.error("Failed to launch browser: " + err.message);
+    console.error("  - Run: npm run puppeteer-install");
+    console.error("  - Or set PUPPETEER_EXECUTABLE_PATH / CHROME_PATH to a valid chrome.exe");
+    process.exit(1);
+  }
 
   const page = await browser.newPage();
 

@@ -35,6 +35,24 @@ function parseCount(str) {
   return isNaN(n) ? null : n;
 }
 
+// ── Extract the most recent year found in a string (e.g. from post timestamps)
+function extractYearFromString(str) {
+  if (!str || typeof str !== "string") return null;
+  const matches = [...str.matchAll(/\b(20\d{2})\b/g)];
+  const years = matches
+    .map((m) => parseInt(m[1], 10))
+    .filter((y) => !isNaN(y) && y >= 2020);
+  if (years.length === 0) return null;
+  return Math.max(...years);
+}
+
+function findLatestPostYear(html) {
+  if (!html) return null;
+  // Heuristic: look for years in the HTML (prefer newer values)
+  const yearFromHtml = extractYearFromString(html);
+  return yearFromHtml;
+}
+
 // ── Facebook URL utilities ─────────────────────────────────────────────────
 function normalizeFacebookUrl(url) {
   try {
@@ -72,8 +90,11 @@ function loadSession() {
 }
 
 // ── Launch Puppeteer browser ───────────────────────────────────────────────
+const { getChromeExecutablePath } = require("./chrome-path");
+
 async function launchBrowser() {
-  const browser = await puppeteer.launch({
+  const executablePath = getChromeExecutablePath();
+  const launchOpts = {
     headless: "new",   // Invisible browser — runs in background
     args: [
       "--no-sandbox",
@@ -83,8 +104,21 @@ async function launchBrowser() {
       "--window-size=1366,768",
     ],
     ignoreDefaultArgs: ["--enable-automation"],
-  });
-  return browser;
+  };
+
+  if (executablePath) {
+    launchOpts.executablePath = executablePath;
+  }
+
+  try {
+    const browser = await puppeteer.launch(launchOpts);
+    return browser;
+  } catch (err) {
+    console.error("Failed to launch browser: " + err.message);
+    console.error("  - Run: npm run puppeteer-install");
+    console.error("  - Or set PUPPETEER_EXECUTABLE_PATH / CHROME_PATH to a valid chrome.exe");
+    process.exit(1);
+  }
 }
 
 // ── Apply session to a Puppeteer page ─────────────────────────────────────
@@ -124,6 +158,10 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
     const html = await page.content();
     const $    = cheerio.load(html);
     const text = $.text();
+
+    // Determine most recent year found in the page (used to filter stale pages)
+    const pageYear = findLatestPostYear(html);
+    if (pageYear) info.lastPostYear = pageYear;
 
     // ── Page name ──────────────────────────────────────────────
     info.facebookPageName =
@@ -252,6 +290,12 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
               } catch {}
             }
           });
+        }
+
+        // Keep the latest year we can find (posts, timestamps)
+        const aboutYear = findLatestPostYear(aboutHtml);
+        if (aboutYear) {
+          info.lastPostYear = Math.max(info.lastPostYear || 0, aboutYear);
         }
 
         // ── Rating ─────────────────────────────────────────────
