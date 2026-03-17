@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cameroon Construction &amp; Real Estate Companies</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #1a1f35 0%, #16213e 50%, #0f3460 100%);
+      padding: 32px 40px 28px;
+      border-bottom: 1px solid #2d3748;
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header h1 { font-size: 1.7rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .header h1 span { color: #4299e1; }
+    .header-meta { font-size: 0.78rem; color: #718096; margin-top: 6px; }
+
+    /* ── Stats cards ─────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      padding: 28px 40px;
+      background: #0f1117;
+    }
+    .stat-card {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: #4299e1; }
+    .stat-card::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent, #4299e1);
+      border-radius: 12px 12px 0 0;
+    }
+    .stat-card.green  { --accent: #48bb78; }
+    .stat-card.purple { --accent: #9f7aea; }
+    .stat-card.yellow { --accent: #ecc94b; }
+    .stat-card.pink   { --accent: #f687b3; }
+    .stat-label { font-size: 0.72rem; color: #718096; text-transform: uppercase; letter-spacing: 0.8px; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: #fff; margin-top: 6px; line-height: 1; }
+    .stat-sub   { font-size: 0.75rem; color: #a0aec0; margin-top: 4px; }
+
+    /* ── Controls ────────────────────────────────────────── */
+    .controls {
+      padding: 0 40px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1; min-width: 240px;
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px 16px 10px 40px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+    }
+    .search-box:focus { border-color: #4299e1; }
+    .search-box::placeholder { color: #4a5568; }
+
+    .filter-btn {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px 18px;
+      color: #a0aec0;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #2b4c7e;
+      border-color: #4299e1;
+      color: #fff;
+    }
+
+    .count-label {
+      font-size: 0.8rem;
+      color: #718096;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ── Table wrapper ───────────────────────────────────── */
+    .table-wrap {
+      padding: 0 40px 40px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    thead th {
+      background: #1a202c;
+      color: #a0aec0;
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 2px solid #2d3748;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    thead th:hover { color: #e2e8f0; background: #2d3748; }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    thead th.sorted-asc .sort-icon::after  { content: " ▲"; opacity: 1; }
+    thead th.sorted-desc .sort-icon::after { content: " ▼"; opacity: 1; }
+
+    tbody tr {
+      border-bottom: 1px solid #1e2533;
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: #1a2035; }
+    tbody tr.no-fb  { opacity: 0.6; }
+
+    td {
+      padding: 12px 14px;
+      vertical-align: top;
+      max-width: 220px;
+    }
+    td.nowrap { white-space: nowrap; }
+
+    /* Company name cell */
+    .company-name { font-weight: 600; color: #e2e8f0; }
+    .company-source { font-size: 0.7rem; color: #4a5568; margin-top: 2px; }
+
+    /* Facebook badge */
+    .fb-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #1877f2;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .fb-badge:hover { background: #1464d8; }
+    .no-fb-badge {
+      font-size: 0.72rem; color: #4a5568;
+    }
+    .verified-icon { color: #4299e1; font-size: 0.75rem; margin-left: 4px; }
+
+    /* Follower count */
+    .followers-value { font-weight: 700; color: #48bb78; }
+    .likes-value     { font-weight: 700; color: #9f7aea; }
+
+    /* Rating stars */
+    .rating-stars { color: #ecc94b; font-size: 0.8rem; }
+    .rating-num   { color: #a0aec0; font-size: 0.75rem; }
+
+    /* Links */
+    a.link-ext {
+      color: #4299e1;
+      text-decoration: none;
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+    a.link-ext:hover { text-decoration: underline; }
+
+    /* Contact chips */
+    .chip {
+      display: inline-block;
+      background: #2d3748;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.72rem;
+      color: #a0aec0;
+      margin: 2px 2px 0 0;
+      word-break: break-all;
+    }
+
+    /* About text */
+    .about-text {
+      font-size: 0.78rem;
+      color: #718096;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: help;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #4a5568;
+    }
+    .empty .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+    /* Top companies bar */
+    .top-bar {
+      margin: 0 40px 20px;
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .top-bar h3 { font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+    .top-list { display: flex; gap: 12px; flex-wrap: wrap; }
+    .top-item {
+      background: #2d3748;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+    }
+    .top-item strong { color: #48bb78; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      .header, .stats, .controls, .table-wrap, .top-bar { padding-left: 16px; padding-right: 16px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .header h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🇨🇲 <span>Cameroon</span> Companies Dashboard</h1>
+      <div class="header-meta">
+        Cameroon Construction &amp; Real Estate Companies &nbsp;·&nbsp; Generated 3/16/2026, 5:19:45 PM
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stats cards ─────────────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-label">Total Companies</div>
+    <div class="stat-value">39</div>
+    <div class="stat-sub">found &amp; processed</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">On Facebook</div>
+    <div class="stat-value">39</div>
+    <div class="stat-sub">100% of total</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-label">Total Followers</div>
+    <div class="stat-value">866.3K</div>
+    <div class="stat-sub">across 31 tracked pages</div>
+  </div>
+  <div class="stat-card yellow">
+    <div class="stat-label">Verified Pages</div>
+    <div class="stat-value">32</div>
+    <div class="stat-sub">with verification badge</div>
+  </div>
+  <div class="stat-card pink">
+    <div class="stat-label">No Facebook</div>
+    <div class="stat-value">0</div>
+    <div class="stat-sub">companies without a page</div>
+  </div>
+</div>
+
+<!-- ── Top companies ───────────────────────────────────────────────────── -->
+
+<div class="top-bar">
+  <h3>🏆 Top companies by followers</h3>
+  <div class="top-list">
+    
+    <div class="top-item">
+      🥇 Discussions
+      &nbsp;<strong>246,000</strong> followers
+    </div>
+    <div class="top-item">
+      🥈 Discussions
+      &nbsp;<strong>112,000</strong> followers
+    </div>
+    <div class="top-item">
+      🥉 Discussions
+      &nbsp;<strong>76,000</strong> followers
+    </div>
+  </div>
+</div>
+
+<!-- ── Controls ────────────────────────────────────────────────────────── -->
+<div class="controls">
+  <input class="search-box" id="searchInput" type="text" placeholder="Search by name, category, phone, email, address..."/>
+  <button class="filter-btn active" onclick="setFilter('all',this)">All (39)</button>
+  <button class="filter-btn" onclick="setFilter('facebook',this)">Facebook only (39)</button>
+  <button class="filter-btn" onclick="setFilter('nofacebook',this)">No Facebook (0)</button>
+  <span class="count-label" id="countLabel">39 companies shown</span>
+</div>
+
+<!-- ── Table ────────────────────────────────────────────────────────────── -->
+<div class="table-wrap">
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)" data-col="0">#<span class="sort-icon"></span></th>
+        <th onclick="sortTable(1)" data-col="1">Company<span class="sort-icon"></span></th>
+        <th onclick="sortTable(2)" data-col="2">Facebook<span class="sort-icon"></span></th>
+        <th onclick="sortTable(3)" data-col="3">Followers<span class="sort-icon"></span></th>
+        <th onclick="sortTable(4)" data-col="4">Likes<span class="sort-icon"></span></th>
+        <th onclick="sortTable(5)" data-col="5">Rating<span class="sort-icon"></span></th>
+        <th onclick="sortTable(6)" data-col="6">Category<span class="sort-icon"></span></th>
+        <th data-col="7">Contact Info</th>
+        <th data-col="8">About</th>
+        <th data-col="9">Website</th>
+        <th onclick="sortTable(10)" data-col="10">Scraped<span class="sort-icon"></span></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="empty" id="emptyState" style="display:none">
+    <span class="emoji">🔍</span>
+    No companies match your search.
+  </div>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────
+const DATA = [{"name":"Accueil - ECO CONSTRUCTION SARL :: est une entreprise ...","websiteUrl":"https://ecoconstructionbtp.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/promedia","facebookPageName":"Pro Media Production","followers":6,"facebookPhone":"61788469","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"infos@ecoconstructionbtp.com, carrieres@ecoconstructionbtp.com","phones":"20743220, 20180424, 20210827, 23769408","source":"google_serpapi","scrapedAt":"2026-03-16T16:03:10.272Z"},{"name":"11 Best Construction companies in Cameroon - Project House","websiteUrl":"https://project-house.net/construction-companies-in-cameroon/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/Project-House-Consulting-Services-501149433756811","facebookPageName":"Discussions","followers":71000,"facebookPhone":"61788477","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"info@project-house.net","phones":"33756811, 20221117, 20230714, 62891585, +23765047802, 23332410, 69984985, 20111951, +23769899072, 23765006","source":"google_serpapi","scrapedAt":"2026-03-16T16:03:21.737Z"},{"name":"Why Truvok is the Leading Construction Company in Douala","websiteUrl":"https://truvok.com/why-truvok-is-the-leading-construction-company-in-douala/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/truvok","facebookPageName":"Discussions","followers":37000,"facebookPhone":"61788481","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@truvok.com","phones":"20250201, 20250422, 61804697, +23767474444","source":"google_serpapi","scrapedAt":"2026-03-16T16:03:39.940Z"},{"name":"construire la maison de vos rêves","websiteUrl":"https://ecoconstructioncameroon.com/fr/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/EcoCamLtd","facebookPageName":"Discussions","followers":207,"facebookPhone":"61788498","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"20170722, 20250403","source":"google_serpapi","scrapedAt":"2026-03-16T16:04:16.060Z"},{"name":"Diamond Realty","websiteUrl":"https://www.diamondrealty.estate/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/diamondrealtycameroon","facebookPageName":"Discussions","followers":568,"facebookPhone":"61788525","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"31025645, 34189508, 66698214, 67033765, 66700899, 66701428, 31534452, +23769572337, +23768285900","source":"google_serpapi","scrapedAt":"2026-03-16T16:05:20.894Z"},{"name":"Real estate","websiteUrl":"https://groupesohaing.com/our-business/real-estate/","hasFacebook":true,"facebookUrl":"https://www.facebook.com","facebookPageName":"Discussions","followers":"","facebookPhone":"61788534","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@groupesohaing.com","phones":"33420053, 31536000","source":"google_serpapi","scrapedAt":"2026-03-16T16:05:40.493Z"},{"name":"Home - ECO CONSTRUCTION CAMEROON","websiteUrl":"https://ecoconstructioncameroon.com/en/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/EcoCamLtd","facebookPageName":"Eco Construction Cameroon","followers":207,"facebookPhone":"61788540","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"20170722, 20250403","source":"google_serpapi","scrapedAt":"2026-03-16T16:05:56.729Z"},{"name":"KARCH REAL ESTATE","websiteUrl":"https://realestate.karchltd.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/karchltd","facebookPageName":"Discussions","followers":35,"facebookPhone":"61788544","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":"2026-03-16T16:06:08.110Z"},{"name":"Genie Capital: Welcome","websiteUrl":"https://geniecapital.co/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/GenieCapitalLtd","facebookPageName":"FacebookFacebook","followers":"","facebookPhone":"61788555","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"info@geniecapital.com","phones":"","source":"google_serpapi","scrapedAt":"2026-03-16T16:06:31.795Z"},{"name":"Renov Building - Construction, Rénovation, BTP, Plomberie ...","websiteUrl":"https://www.renovbuilding.cm/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/renovbuilding","facebookPageName":"Discussions","followers":867,"facebookPhone":"61788569","facebookEmail":"contact@renovbuilding.cm","facebookAddress":"","facebookWebsite":"","emails":"contact@renovbuilding.cm","phones":"+23767072620","source":"google_serpapi","scrapedAt":"2026-03-16T16:07:03.632Z"},{"name":"Promotion immobilière","websiteUrl":"https://groupe-kedibuild.com/promotion-immobiliere/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/Groupekedibuild","facebookPageName":"Discussions","followers":871,"facebookPhone":"61788597","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@groupe-kedibuild.com","phones":"25703981, 25721601, 25726000, 61893762, 61935481, 61893758, 33416504, 20250206","source":"google_serpapi","scrapedAt":"2026-03-16T16:08:08.344Z"},{"name":"Rental Square : Agence Immobilier Douala Cameroun","websiteUrl":"https://rentalsquare237.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com","facebookPageName":"Discussions","followers":"","facebookPhone":"61788616","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"rentalsquare.net@gmail.com","phones":"20210407, 20250915, 27061571, 30198988, 20251001","source":"google_serpapi","scrapedAt":"2026-03-16T16:08:52.011Z"},{"name":"Entreprise BTP Construction Rénovation Génie Civil ...","websiteUrl":"https://www.renovbuilding.cm/services","hasFacebook":true,"facebookUrl":"https://www.facebook.com/renovbuilding","facebookPageName":"Discussions","followers":867,"facebookPhone":"61788630","facebookEmail":"contact@renovbuilding.cm","facebookAddress":"","facebookWebsite":"","emails":"contact@renovbuilding.cm","phones":"+23767072620","source":"google_serpapi","scrapedAt":"2026-03-16T16:09:24.976Z"},{"name":"BIGC-BTP – Bureau d'Ingenieurs de Genie Civil","websiteUrl":"https://bigcbtp.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/share/18bwZTfB9S","facebookPageName":"Discussions","followers":3000,"facebookPhone":"61788637","facebookEmail":"bigcbtpsarl@yahoo.com","facebookAddress":"","facebookWebsite":"","emails":"bigcbtpsarl@yahoo.com","phones":"+23767807094, +23769679475, 67807094, 69679475, 20250221, 67108864, 20251001","source":"google_serpapi","scrapedAt":"2026-03-16T16:09:41.943Z"},{"name":"Approved Real Estate Developer in Cameroon","websiteUrl":"https://cfbholding.com/cfb-holding-ltd-now-an-approved-real-estate-developer-in-cameroon/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/people/CFB-Holding-Ltd/61555691876999","facebookPageName":"Discussions","followers":14,"facebookPhone":"61788647","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"john@doe.com","phones":"20250314, 20251209, 36267898, 61555691, 23782715","source":"google_serpapi","scrapedAt":"2026-03-16T16:10:05.044Z"},{"name":"Cameroon Investment Properties – Buy-to-Let & Commercial","websiteUrl":"https://veles-club.com/projects/cameroon","hasFacebook":true,"facebookUrl":"https://www.facebook.com/VelesClub.int","facebookPageName":"Discussions","followers":76000,"facebookPhone":"61788665","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"info@veles-club.com","phones":"20250808, 20250809","source":"google_serpapi","scrapedAt":"2026-03-16T16:10:48.193Z"},{"name":"Agences immobilières | Walazouo","websiteUrl":"https://cm.walazouo.com/fr/agencies?ShortBy=asc&View=list","hasFacebook":true,"facebookUrl":"https://www.facebook.com/A2MImmobilierCameroun","facebookPageName":"Discussions","followers":11000,"facebookPhone":"61788682","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"immobiliera2m@gmail.com, contact@abbasimmob.cm, logementsducam@yahoo.fr, contact@agiicam.com, ntcodecsarl@gmail.com, droneimmobilier03@gmail.com, info@walazouo.com","phones":"36972200, 35472200, 68213800, 67868700, 28841200, 36716600, 35331800, 62984110, 63155890, 65878210, 32100950, 63815800, 27134700, 62350500, 25440440, 39656000, 63051300, 22448510, 67597720, 30170000, 33236200, 32260160, 39338900, 31199450, 33814880, 66830200, 67679580, 36730840, 26322430, 22465600, 63332680, 20283200, 26295800, 69958230, 38085000, 69401040, 26054200, 68136400, 65084010, 24779700, 39428800, 68704590, 33021800, 38596300, 64937500, 23974600, 38892800, 31628200, 69959900, 34943000, 69331390, 34859500, 22764900, 34591700, 22570600, 24312300, 22931600, 69679630, 60605400, 36340000, 28004500, 69749280, 38639900, 23453200, 27282800, 69993060, 27199300, 36388600, 69470680, 35902000, 32155400, 32222300, 38438900, 35330600, 27770800, 39849900, 65989400, 69012200, 20543200, 26936800, 29068000, 33292100, 32880200, 25961600, 69039900, 25338400, 24790300, 21534800, 61945100, 30955400, 35194900, 35508100, 26751400, 66786400, 66667000, 37919300, 27401000, 34151500, 22340000, 21863500, 28137400, 27913000, 64215000, 34751700, 25734800, 21964000, 62437500, 34857300, 30051400, 39014600, 61427600, 63898900, 68009000, 23040000, 31646200, 33915700, 37053700, 29464100, 64780000, 62818750, 31126100, 66744900, 23248200, 66712100, 69409300, 69190000, 26866200, 61685300, 20229200, 29018900, 68520000, 26310800, 32139500, 24013500, 27318800, 64712900, 24418300, 39191900","source":"google_serpapi","scrapedAt":"2026-03-16T16:11:26.142Z"},{"name":"House Rental & Property Sales in Cameroon","websiteUrl":"https://amigoconsultingcm.com/house","hasFacebook":true,"facebookUrl":"https://www.facebook.com/amigo%20consulting","facebookPageName":"Discussions","followers":"","facebookPhone":"61788687","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"amigoconsultingcm@gmail.com, teams-cameroon@amigoconsultingcm.com","phones":"60518883","source":"google_serpapi","scrapedAt":"2026-03-16T16:11:40.209Z"},{"name":"Houses to let","websiteUrl":"https://geniecapital.co/p/houses-to-let","hasFacebook":true,"facebookUrl":"https://www.facebook.com/GenieCapitalLtd","facebookPageName":"Discussions","followers":"","facebookPhone":"61788691","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"info@geniecapital.com","phones":"","source":"google_serpapi","scrapedAt":"2026-03-16T16:11:48.743Z"},{"name":"Residential Building Contractors in Cameroon","websiteUrl":"https://truvok.com/residential-building-contractors-in-cameroon-your-ultimate-guide/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/truvok","facebookPageName":"Discussions","followers":37000,"facebookPhone":"61788702","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@truvok.com","phones":"20240823, 61804697, +23767474444, 30203630","source":"google_serpapi","scrapedAt":"2026-03-16T16:12:14.576Z"},{"name":"100 entreprises de construction à proximité - StarOfService","websiteUrl":"https://www.starofservice.cm/service-de-construction/near-me","hasFacebook":true,"facebookUrl":"https://www.facebook.com/Starofservice","facebookPageName":"Discussions","followers":49000,"facebookPhone":"61788709","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"exemple@email.com","phones":"26783251, 26233582, 37950312, 22123456, 21185834, 25171951, 60051255, 25175884, 24841070, 38139397, 68126844, 28154755, 36149961, 37321367, 32128233, 68107038, 68112072, 60081139, 34161134, 62113024, 66661390, 38149124, 29145904, 26671591, 34821582, 29471582, 39931686, 38011630, 38551671, 61251687, 60438913, 63768952, 27599813, 20190222, 25967912, 32178157, 20210113, 20240919, 63010395, 31293923, 23534751, 20211017, 62551309, 69574741, 39020161, 27854910, 66204747","source":"google_serpapi","scrapedAt":"2026-03-16T16:12:30.376Z"},{"name":"Toutes les villes - adpmrealestate","websiteUrl":"https://adpmrealestate.com/fr/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/ADPMCameroun","facebookPageName":"Discussions","followers":26000,"facebookPhone":"61788717","facebookEmail":"info@adpm-investiraucameroun.com","facebookAddress":"","facebookWebsite":"","emails":"Cameroun@adpmrealestate.com","phones":"0023769352952, 20251123, 65356495","source":"google_serpapi","scrapedAt":"2026-03-16T16:12:50.460Z"},{"name":"Agencies - 237immobilier.com","websiteUrl":"https://237immobilier.com/agencies/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/inspirythemes","facebookPageName":"Discussions","followers":13000,"facebookPhone":"61788726","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"hello@digi-tech.com, hello@yoursite.com, hello@digit-tech.com","phones":"37987884, 37791035, +23767193709, 37719370, 32759845","source":"google_serpapi","scrapedAt":"2026-03-16T16:13:05.793Z"},{"name":"100 spécialistes de l'immobilier à proximité - StarOfService","websiteUrl":"https://www.starofservice.cm/service-immobilier/near-me","hasFacebook":true,"facebookUrl":"https://www.facebook.com/Starofservice","facebookPageName":"Discussions","followers":49000,"facebookPhone":"61788730","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"exemple@email.com","phones":"26783251, 26233582, 37950312, 22123456, 21185834, 25171951, 60051255, 25175884, 24841070, 38139397, 68126844, 28154755, 36149961, 37321367, 32128233, 68107038, 68112072, 60081139, 34161134, 62113024, 66661390, 38149124, 29145904, 26671591, 34821582, 29471582, 39931686, 38011630, 38551671, 61251687, 20241008, 20240822, 60509588, 37159661, 69357355, 37962189, 36644903, 29277330, 29522744, 26327128, 24442439, 28035364, 21159565, 28569284, 67188252","source":"google_serpapi","scrapedAt":"2026-03-16T16:13:20.276Z"},{"name":"EverAfrica | Entreprise de construction partenaire de vos projets","websiteUrl":"https://ever-africa.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/everafrica.company","facebookPageName":"Discussions","followers":1000,"facebookPhone":"61788746","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@ever-africa.com","phones":"20200904, 20240905, 25577289, 68734985, 68708615, 68722817, 68709794, 68722819, 68709941, 68572016, 68572015, 68859932, 69260342, 68708643, 68708656, 68708613, 68708640, 68708649, 68708654, 68710975, 68710972, 68794745, 68709001, 68734904, 68709868, 68709830, 68709623, 68709534, 68708999, 68709871, 68709834, 68734907, 68734911, 68709883, 68709837, 68709002, 68709887, 68709839, 68734918, 68709004, 68734924, 68711746, 68709842, 68709005, 68709893, 68709845, 68734932, 68709007, 68734941, 68709895, 68709847, 68709008, 68709899, 68709850, 68734977, 68710958, 68713632, 68713681, 68794778, 68734980, 68709781, 68723024, 68723037, 68723039, 68709792, 61421473, 68712407, 60284164, 60267254, 20250206","source":"google_serpapi","scrapedAt":"2026-03-16T16:13:56.509Z"},{"name":"BERIA GROUP| for sustainable construction | Cameroon","websiteUrl":"https://en.beriagroup.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/BERIA-GROUP-Sarl-111942243520356","facebookPageName":"Discussions","followers":844,"facebookPhone":"61788757","facebookEmail":"info@beriagroup.com","facebookAddress":"","facebookWebsite":"","emails":"info@beriagroup.com","phones":"25453524, 20549363, 29072959, 22112212, 22642265, 20132014, 20202022, 20742079, 20802089, 21532154, 28833819, 20322033, 21162117, 21902193, 26102611, 31599558, 69827996, 35067666, 32691835, 65688374, 31297995, 34864378, 25908938, 31330748, 27879999, 39968175, 39916890, 20200613, 66471986, 32613137, 27154543, 35850533, 29178430, 64626048, 28994754, 64196490","source":"duckduckgo","scrapedAt":"2026-03-16T16:14:21.890Z"},{"name":"Accueil - CIS2847 | Entreprise de BTP leader à Douala, Cameroun","websiteUrl":"https://cis2847.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/tonPageFacebook","facebookPageName":"Discussions","followers":"","facebookPhone":"61788761","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@cis2847.com","phones":"27272710","source":"duckduckgo","scrapedAt":"2026-03-16T16:14:31.693Z"},{"name":"List Of Construction companies in Douala - rentechdigital.com","websiteUrl":"https://rentechdigital.com/smartscraper/business-report-details/cameroon/littoral/list-of-construction-companies-in-douala","hasFacebook":true,"facebookUrl":"https://www.facebook.com/RentechDigital","facebookPageName":"Rentech Digital","followers":36000,"facebookPhone":"61788771","facebookEmail":"sales@rentechdigital.com","facebookAddress":"","facebookWebsite":"","emails":"team@rentechdigital.com, communication@besix.com, cameroun@actemium.com, international@magil.com, contact@truvok.com, infos@lessaah.com, direction@cambuild-btp.com, mek@biomekart.com, contact@africaresine.com, serviceclient@briccameroun.com","phones":"66691545, 20251015, 20102026, 33428670, 20230921","source":"duckduckgo","scrapedAt":"2026-03-16T16:14:52.174Z"},{"name":"Accueil | Agence Immobilière Continent","websiteUrl":"https://agenceimmobilierecontinent.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/AgenceImmobiliereContinent","facebookPageName":"Discussions","followers":170,"facebookPhone":"61788785","facebookEmail":"foalem@yahoo.com","facebookAddress":"","facebookWebsite":"","emails":"foalem@yahoo.com","phones":"20100101, 61006363, 20140801, 20230802","source":"duckduckgo","scrapedAt":"2026-03-16T16:15:27.726Z"},{"name":"Codecis - Agence immobilière cameroun, Yaounde, Douala","websiteUrl":"https://codecis.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/codecis","facebookPageName":"Discussions","followers":21000,"facebookPhone":"61788793","facebookEmail":"info@codecis.com","facebookAddress":"","facebookWebsite":"","emails":"medianetmandjan@gmail.com, info@codecis.com","phones":"+23767519520, 20250619, 20250804, 20260303, 23027110, 22996021, 23006863, 69838820, 20240521, 31536000, 20251215, 25686540","source":"duckduckgo","scrapedAt":"2026-03-16T16:15:43.677Z"},{"name":"Logecam | Logements du Cameroun","websiteUrl":"https://www.logementsducameroun.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com","facebookPageName":"Discussions","followers":"","facebookPhone":"61788805","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"logementsducam@yahoo.fr","phones":"23769993, 33439807","source":"duckduckgo","scrapedAt":"2026-03-16T16:16:15.142Z"},{"name":"Cameroon Homes: Discover Your Dream Home - africa-housing.com","websiteUrl":"https://africa-housing.com/locations/cameroon/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/jobomax","facebookPageName":"Discussions","followers":25000,"facebookPhone":"61788820","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"info@africa-housing.com","phones":"20250329, 20260211, 69390997, 62663570, 20388505, 20142026, 30000000","source":"duckduckgo","scrapedAt":"2026-03-16T16:16:39.576Z"},{"name":"Crown Homes Holdings - Redefining Real Estate In Africa","websiteUrl":"https://crownhomesholdings.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/crownhomesholdings","facebookPageName":"Discussions","followers":27000,"facebookPhone":"61788826","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"Next-furniture@300x.png, Next-furniture@300x-300x169.png, Next-furniture@300x-768x432.png, Next-furniture@300x-496x279.png","phones":"20230209, 23880029","source":"duckduckgo","scrapedAt":"2026-03-16T16:16:57.727Z"},{"name":"Home - Royal Property Group","websiteUrl":"https://royalpropertygroup.org/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/royalpropertygroupcm","facebookPageName":"Discussions","followers":181,"facebookPhone":"61788830","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"info@royalpropertygroup.org","phones":"20200810, 20240611, 32257558, 62301706, 64889270, 64889288, +23767487490, 21099272","source":"duckduckgo","scrapedAt":"2026-03-16T16:17:11.460Z"},{"name":"Housing for expats in Cameroon: Find, rent or buy property","websiteUrl":"https://www.expat.com/en/housing/africa/cameroon/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/expat.blog","facebookPageName":"Discussions","followers":112000,"facebookPhone":"61788833","facebookEmail":"jobs@expat.com","facebookAddress":"","facebookWebsite":"","emails":"contact@expat.com","phones":"20169404, 69802154, 65002695, 65002678, 65002686","source":"duckduckgo","scrapedAt":"2026-03-16T16:17:20.674Z"},{"name":"Low Cost Housing in Cameroon | Social Housing | Karmod","websiteUrl":"https://www.karmod.eu/blog/low-cost-housing-cameroon/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/KarmodGlobal","facebookPageName":"Discussions","followers":246000,"facebookPhone":"61788837","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"info@karmod.com","phones":"20230720, 20281129, 28932211, 39052429, 29289322, 32112928","source":"duckduckgo","scrapedAt":"2026-03-16T16:17:28.906Z"},{"name":"Codecis : Real Estate Agency Cameroon, Yaounde, Douala","websiteUrl":"https://codecis.com/en/who-are-we/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/codecis","facebookPageName":"Discussions","followers":21000,"facebookPhone":"61788857","facebookEmail":"info@codecis.com","facebookAddress":"","facebookWebsite":"","emails":"medianetmandjan@gmail.com, info@codecis.com, codecis@yahoo.fr","phones":"+23767519520, 20250409, 20260303, 69838820, 23456789, 69002274, 22068466, 27825100, 20240521, 31536000, 20251215, 25686540","source":"duckduckgo","scrapedAt":"2026-03-16T16:18:12.293Z"},{"name":"MET-BTP - Construisons avec assurance","websiteUrl":"https://met-btp.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com","facebookPageName":"Discussions","followers":"","facebookPhone":"61788875","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@met-btp.com","phones":"33333333, 26132684, 35369855, 35372589, 35482681, 38757763, 30464871, 65989654, 20787675, 24427351, 31247139","source":"duckduckgo","scrapedAt":"2026-03-16T16:18:55.843Z"},{"name":"Entreprises de bâtiments et travaux publics (BTP) à Yaoundé et au Cameroun","websiteUrl":"https://nexpages.com/cameroun/batiment-travaux-publics","hasFacebook":true,"facebookUrl":"https://www.facebook.com/Nexpages-138810286203269","facebookPageName":"Discussions","followers":485,"facebookPhone":"61788885","facebookEmail":"info@nexpages.com","facebookAddress":"","facebookWebsite":"","emails":"","phones":"+23722223367, +23723340348, +23722221046, +23723339332, +23724385909, +23723342939, +23765153790, +23723337331","source":"duckduckgo","scrapedAt":"2026-03-16T16:19:21.694Z"}];
+
+let currentFilter = "all";
+let currentSort   = { col: -1, dir: 1 };
+let searchTerm    = "";
+
+// ── Render ──────────────────────────────────────────────────────────────
+function renderTable() {
+  let rows = DATA.slice();
+
+  // Filter
+  if (currentFilter === "facebook")   rows = rows.filter((r) => r.hasFacebook);
+  if (currentFilter === "nofacebook") rows = rows.filter((r) => !r.hasFacebook);
+
+  // Search
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    rows = rows.filter((r) =>
+      Object.values(r).some((v) => String(v).toLowerCase().includes(q))
+    );
+  }
+
+  // Sort
+  if (currentSort.col >= 0) {
+    rows.sort((a, b) => {
+      const va = getSortVal(a, currentSort.col);
+      const vb = getSortVal(b, currentSort.col);
+      if (va === vb) return 0;
+      if (va === "" || va === null) return 1;
+      if (vb === "" || vb === null) return -1;
+      return (va > vb ? 1 : -1) * currentSort.dir;
+    });
+  }
+
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  rows.forEach((c, i) => {
+    const tr = document.createElement("tr");
+    if (!c.hasFacebook) tr.classList.add("no-fb");
+
+    // Followers/likes formatted
+    const followersHtml = c.followers !== ""
+      ? '<span class="followers-value">' + Number(c.followers).toLocaleString() + '</span>'
+      : '<span style="color:#4a5568">—</span>';
+
+    const likesHtml = c.likes !== ""
+      ? '<span class="likes-value">' + Number(c.likes).toLocaleString() + '</span>'
+      : '<span style="color:#4a5568">—</span>';
+
+    // Rating stars
+    let ratingHtml = '<span style="color:#4a5568">—</span>';
+    if (c.rating !== "") {
+      const stars = Math.round(c.rating);
+      ratingHtml = '<span class="rating-stars">' + "★".repeat(stars) + "☆".repeat(5 - stars) + '</span>'
+        + '<br><span class="rating-num">' + c.rating + '/5'
+        + (c.ratingCount ? " (" + Number(c.ratingCount).toLocaleString() + ")" : "") + '</span>';
+    }
+
+    // Contacts
+    const contacts = [];
+    if (c.facebookPhone) contacts.push('<span class="chip">📞 ' + esc(c.facebookPhone) + '</span>');
+    if (c.facebookEmail) contacts.push('<span class="chip">✉️ ' + esc(c.facebookEmail) + '</span>');
+    if (c.phones)        c.phones.split(",").forEach((p) => { if (p.trim()) contacts.push('<span class="chip">' + esc(p.trim()) + '</span>'); });
+    if (c.emails)        c.emails.split(",").forEach((e) => { if (e.trim()) contacts.push('<span class="chip">' + esc(e.trim()) + '</span>'); });
+    if (c.facebookAddress) contacts.push('<span class="chip">📍 ' + esc(c.facebookAddress.slice(0,60)) + '</span>');
+
+    // Facebook cell
+    const fbHtml = c.hasFacebook
+      ? '<a class="fb-badge" href="' + esc(c.facebookUrl) + '" target="_blank">f ' + esc((c.facebookPageName || "Facebook").slice(0, 22)) + '</a>'
+        + (c.isVerified ? '<span class="verified-icon" title="Verified">✔</span>' : '')
+      : '<span class="no-fb-badge">No page</span>';
+
+    // Scraped date (short)
+    const dateShort = c.scrapedAt ? c.scrapedAt.slice(0, 10) : "";
+
+    tr.innerHTML =
+      '<td class="nowrap" style="color:#4a5568;font-size:0.75rem">' + (i + 1) + '</td>' +
+      '<td><div class="company-name">' + esc(c.name) + '</div>'
+        + (c.source ? '<div class="company-source">via ' + esc(c.source) + '</div>' : '') + '</td>' +
+      '<td class="nowrap">' + fbHtml + '</td>' +
+      '<td class="nowrap">' + followersHtml + '</td>' +
+      '<td class="nowrap">' + likesHtml + '</td>' +
+      '<td>' + ratingHtml + '</td>' +
+      '<td style="font-size:0.78rem;color:#a0aec0">' + esc(c.category) + '</td>' +
+      '<td>' + (contacts.length > 0 ? contacts.join("") : '<span style="color:#4a5568">—</span>') + '</td>' +
+      '<td><div class="about-text" title="' + esc(c.facebookAbout) + '">' + esc((c.facebookAbout || "").slice(0, 80)) + (c.facebookAbout && c.facebookAbout.length > 80 ? "..." : "") + '</div></td>' +
+      '<td>' + (c.websiteUrl || c.facebookWebsite
+          ? '<a class="link-ext" href="' + esc(c.facebookWebsite || c.websiteUrl) + '" target="_blank">'
+            + esc((c.facebookWebsite || c.websiteUrl).replace(/https?://(www.)?/, "").slice(0, 30)) + '</a>'
+          : '<span style="color:#4a5568">—</span>') + '</td>' +
+      '<td class="nowrap" style="font-size:0.75rem;color:#4a5568">' + dateShort + '</td>';
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("countLabel").textContent = rows.length + " companies shown";
+  document.getElementById("emptyState").style.display = rows.length === 0 ? "block" : "none";
+  document.getElementById("mainTable").style.display  = rows.length === 0 ? "none"  : "table";
+}
+
+function getSortVal(row, col) {
+  switch (col) {
+    case 0:  return 0;
+    case 1:  return (row.name || "").toLowerCase();
+    case 2:  return row.hasFacebook ? 0 : 1;
+    case 3:  return row.followers !== "" ? Number(row.followers) : -1;
+    case 4:  return row.likes     !== "" ? Number(row.likes)     : -1;
+    case 5:  return row.rating    !== "" ? Number(row.rating)    : -1;
+    case 6:  return (row.category || "").toLowerCase();
+    case 10: return row.scrapedAt || "";
+    default: return "";
+  }
+}
+
+// ── Sort ────────────────────────────────────────────────────────────────
+function sortTable(col) {
+  document.querySelectorAll("thead th").forEach((th) => th.classList.remove("sorted-asc", "sorted-desc"));
+  if (currentSort.col === col) {
+    currentSort.dir *= -1;
+  } else {
+    currentSort = { col, dir: -1 }; // default descending for numbers
+  }
+  const th = document.querySelector("thead th[data-col='" + col + "']");
+  th.classList.add(currentSort.dir === 1 ? "sorted-asc" : "sorted-desc");
+  renderTable();
+}
+
+// ── Filter buttons ───────────────────────────────────────────────────────
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTable();
+}
+
+// ── Search ───────────────────────────────────────────────────────────────
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  searchTerm = e.target.value.trim();
+  renderTable();
+});
+
+// ── HTML escape helper ───────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+renderTable();
+</script>
+</body>
+</html>

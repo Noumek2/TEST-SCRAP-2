@@ -1,7 +1,12 @@
 /**
  * detect.js
- * Uses a real Puppeteer browser with your saved Facebook session
- * to scrape company Facebook pages as a logged-in user.
+ * For each company found by search.js:
+ *  1. Checks if the company has a Facebook page (via DuckDuckGo search)
+ *  2. If yes, opens the Facebook page with your saved session and collects:
+ *       - Page name
+ *       - Phone number
+ *       - Address
+ *       - Facebook URL
  */
 
 const puppeteer = require("puppeteer");
@@ -16,369 +21,253 @@ async function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-const DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
+// ── Load saved Facebook session ────────────────────────────────────────────
+function loadSession() {
+  if (!fs.existsSync(SESSION_FILE)) {
+    console.log("\n  No fb_session.json found.");
+    console.log("  Run: node setup.js  to log in to Facebook first.\n");
+    process.exit(1);
+  }
+  const session = JSON.parse(fs.readFileSync(SESSION_FILE, "utf8"));
+  console.log("  Facebook session loaded (saved " + session.savedAt + ")");
+  return session;
+}
 
-// ── Regex patterns ─────────────────────────────────────────────────────────
-const PATTERNS = {
-  email:    /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g,
-  phone:    /(?:\+237|00237)?[\s\-.]?(?:6|2|3)\d{1}[\s\-.]?\d{2}[\s\-.]?\d{2}[\s\-.]?\d{2}/g,
-  facebook: /https?:\/\/(?:www\.)?facebook\.com\/[A-Za-z0-9.\-_/?=]+/gi,
-};
+// ── Find Facebook page via DuckDuckGo ──────────────────────────────────────
+async function findFacebookPage(companyName) {
+  try {
+    const query = companyName + " site:facebook.com";
+    const res   = await axios.get(
+      "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(query),
+      {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        timeout: 12000,
+      }
+    );
 
-// ── Parse shorthand numbers e.g. "1.2K", "3M" ─────────────────────────────
+    const $    = cheerio.load(res.data);
+    let   found = null;
+
+    $(".result__title a").each((_, el) => {
+      let href = $(el).attr("href") || "";
+      if (href.includes("uddg=")) {
+        try { href = decodeURIComponent(new URL("https:" + href).searchParams.get("uddg") || ""); } catch {}
+      }
+
+      // Accept only real page URLs, not login/share/video pages
+      if (
+        href.includes("facebook.com") &&
+        !href.includes("/login") &&
+        !href.includes("/sharer") &&
+        !href.includes("/video") &&
+        !href.includes("/photo") &&
+        !href.includes("profile.php") &&
+        !found
+      ) {
+        // Normalize: keep only the page path
+        try {
+          const u = new URL(href);
+          found = "https://www.facebook.com" + u.pathname.replace(/\/$/, "");
+        } catch {}
+      }
+    });
+
+    return found;
+  } catch {
+    return null;
+  }
+}
+
+// ── Parse numbers like "1.2K" or "3M" into integers ───────────────────────
 function parseCount(str) {
   if (!str) return null;
-  const clean = str.replace(/,/g, "").replace(/\s/g, "").trim();
+  const clean = str.replace(/,/g, "").trim();
   if (/k/i.test(clean)) return Math.round(parseFloat(clean) * 1_000);
   if (/m/i.test(clean)) return Math.round(parseFloat(clean) * 1_000_000);
   const n = parseInt(clean.replace(/[^0-9]/g, ""), 10);
   return isNaN(n) ? null : n;
 }
 
-// ── Facebook URL utilities ─────────────────────────────────────────────────
-function normalizeFacebookUrl(url) {
-  try {
-    const u = new URL(url);
-    return "https://www.facebook.com" + u.pathname.replace(/\/$/, "");
-  } catch { return url; }
-}
-
-function isScrapableFacebookUrl(url) {
-  if (!url || !url.includes("facebook.com")) return false;
-  const blocklist = [
-    "/sharer", "/share?", "/plugins/", "/tr?", "/l.php",
-    "/login", "/dialog/", "/photo", "/video",
-    "/events", "/groups", "/marketplace", "/watch", "/stories", "/reel",
-    "profile.php",
-  ];
-  return !blocklist.some((b) => url.includes(b));
-}
-
-// ── Load saved Puppeteer session ───────────────────────────────────────────
-function loadSession() {
-  if (!fs.existsSync(SESSION_FILE)) {
-    console.warn("\n  [session] No fb_session.json found.");
-    console.warn("  [session] Run: node check_session.js  to set up your session first.\n");
-    return null;
-  }
-  try {
-    const session = JSON.parse(fs.readFileSync(SESSION_FILE, "utf8"));
-    console.log("  [session] Session loaded (saved at " + session.savedAt + ")");
-    return session;
-  } catch (err) {
-    console.warn("  [session] Could not read fb_session.json: " + err.message);
-    return null;
-  }
-}
-
-// ── Launch Puppeteer browser ───────────────────────────────────────────────
-async function launchBrowser() {
-  const browser = await puppeteer.launch({
-    headless: "new",   // Invisible browser — runs in background
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-blink-features=AutomationControlled",
-      "--disable-infobars",
-      "--window-size=1366,768",
-    ],
-    ignoreDefaultArgs: ["--enable-automation"],
-  });
-  return browser;
-}
-
-// ── Apply session to a Puppeteer page ─────────────────────────────────────
-async function applySession(page, session) {
-  await page.setUserAgent(session.userAgent || DESKTOP_UA);
-
-  // Hide bot signals
-  await page.evaluateOnNewDocument(() => {
-    Object.defineProperty(navigator, "webdriver", { get: () => undefined });
-    window.chrome = { runtime: {} };
-  });
-
-  // Inject saved cookies
-  if (session.cookies && session.cookies.length > 0) {
-    for (const cookie of session.cookies) {
-      try {
-        await page.setCookie(cookie);
-      } catch {}
-    }
-    console.log("  [session] Injected " + session.cookies.length + " cookies");
-  }
-}
-
-// ── Scrape a Facebook page using Puppeteer ─────────────────────────────────
-async function scrapeFacebookWithPuppeteer(fbUrl, page) {
+// ── Scrape Facebook page details ───────────────────────────────────────────
+async function scrapeFacebookPage(fbUrl, page) {
   const info = {
-    facebookPageName: null, followers: null,
-    category: null, facebookPhone: null,
-    facebookEmail: null, facebookAddress: null,
+    facebookUrl:      fbUrl,
+    facebookName:     null,
+    facebookFollowers: null,
+    facebookPhone:    null,
+    facebookAddress:  null,
   };
 
   try {
-    await page.goto(fbUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await sleep(2000); // Let dynamic content load
+    // Go to the main page first
+    await page.goto(fbUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
+    await sleep(2000);
 
-    const html = await page.content();
-    const $    = cheerio.load(html);
-    const text = $.text();
+    let html = await page.content();
+    let $    = cheerio.load(html);
+    let text = $.text();
 
     // ── Page name ──────────────────────────────────────────────
-    info.facebookPageName =
+    info.facebookName =
       await page.$eval("h1", (el) => el.innerText.trim()).catch(() => null) ||
-      $("title").text().replace(/ [|\-–] Facebook.*/, "").trim() || null;
+      $("title").text().replace(/ [|\-–] Facebook.*/, "").replace("Facebook", "").trim() ||
+      null;
 
-    // ── Verified ───────────────────────────────────────────────
-    info.isVerified =
-      html.includes("VerifiedBadge") ||
-      html.includes("verified_badge") ||
-      await page.$('[aria-label*="erified"]').then((el) => !!el).catch(() => false);
-
-    // ── Followers — try to find the element directly ───────────
-    const followerSelectors = [
-      'a[href*="followers"] span',
-      'a[href*="followers"]',
-      '[data-testid*="follower"]',
+    // ── Followers — scan the main page text ───────────────────
+    // Facebook shows "X followers" or "X abonnés" near the top
+    const followerPatterns = [
+      /([0-9][0-9,\.]*\s*[KkMm]?)\s+followers/i,
+      /([0-9][0-9,\.]*\s*[KkMm]?)\s+abonnés/i,
+      /([0-9][0-9,\.]*\s*[KkMm]?)\s+personnes? suivent/i,
     ];
-    for (const sel of followerSelectors) {
-      if (info.followers) break;
-      const txt = await page.$eval(sel, (el) => el.innerText).catch(() => null);
-      if (txt) {
-        const m = txt.match(/([0-9][0-9,\.]*\s*[KkMm]?)/);
-        if (m) info.followers = parseCount(m[1]);
+    for (const pattern of followerPatterns) {
+      const m = text.match(pattern);
+      if (m) { info.facebookFollowers = parseCount(m[1]); break; }
+    }
+
+    // Also check the og:description meta tag — sometimes has "X followers"
+    if (!info.facebookFollowers) {
+      const ogDesc = $('meta[property="og:description"]').attr("content") || "";
+      for (const pattern of followerPatterns) {
+        const m = ogDesc.match(pattern);
+        if (m) { info.facebookFollowers = parseCount(m[1]); break; }
       }
     }
 
-    // ── Followers — regex fallback on page text ────────────────
-    if (!info.followers) {
-      const patterns = [
-        /([0-9][0-9,\.]*\s*[KkMm]?)\s+followers/gi,
-        /([0-9][0-9,\.]*\s*[KkMm]?)\s+abonnés/gi,
-        /"follower_count"\s*:\s*([0-9]+)/gi,
-        /followerCount["'\s:]+([0-9]+)/gi,
-      ];
-      for (const p of patterns) {
-        const matches = [...(text + html).matchAll(p)];
-        if (matches.length > 0) { info.followers = parseCount(matches[0][1]); break; }
+    // ── Now visit the About page for phone and address ─────────
+    const aboutUrl = fbUrl.replace(/\/$/, "") + "/about";
+    await page.goto(aboutUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
+    await sleep(2000);
+
+    html = await page.content();
+    $    = cheerio.load(html);
+    text = $.text();
+
+    // ── Followers fallback from About page ────────────────────
+    if (!info.facebookFollowers) {
+      for (const pattern of followerPatterns) {
+        const m = text.match(pattern);
+        if (m) { info.facebookFollowers = parseCount(m[1]); break; }
       }
     }
 
-
-    // Also try visiting the About tab
-    if (!info.facebookAbout) {
-      try {
-// ── Phone from About page ──────────────────────────────
-        if (!info.facebookPhone) {
-          const phones = $a.text().match(PATTERNS.phone);
-          if (phones) info.facebookPhone = phones[0].replace(/[\s\-.]/g, "").trim();
-        }
-
-        // ── Email from About page ──────────────────────────────
-        if (!info.facebookEmail) {
-          const emails = aboutHtml.match(PATTERNS.email) || [];
-          const clean = emails.filter((e) =>
-            !e.includes("sentry") && !e.includes("example") && !e.includes("facebook.com")
-          );
-          if (clean.length > 0) info.facebookEmail = clean[0];
-        }
-
-        // ── Address from About page ────────────────────────────
-        if (!info.facebookAddress) {
-          const cities = ["Douala", "Yaoundé", "Yaounde", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
-          $a("div, span, td").each((_, el) => {
-            if ($a(el).children().length > 0) return;
-            const t = $a(el).text().trim();
-            if (!info.facebookAddress && t.length > 5 && t.length < 200 && cities.some((c) => t.includes(c))) {
-              info.facebookAddress = t;
-            }
-          });
-        }
-        // ── Rating ─────────────────────────────────────────────
-        if (!info.rating) {
-          const aboutText = $a.text();
-          const m = aboutText.match(/([1-5]\.[0-9])\s*(?:out of 5|\/\s*5)/i);
-          if (m) info.rating = parseFloat(m[1]);
-          const mc = aboutText.match(/([0-9][0-9,]*)\s*(?:ratings?|reviews?|avis)/i);
-          if (mc) info.ratingCount = parseCount(mc[1]);
-        }
-
-      } catch {}
+    // ── Phone — Cameroon format (+237 or 6xx/2xx/3xx) ─────────
+    const phoneMatch = text.match(
+      /(\+237[\s\-.]?[0-9]{2}[\s\-.]?[0-9]{2}[\s\-.]?[0-9]{2}[\s\-.]?[0-9]{2}|(?:6|2|3)[0-9]{8})/
+    );
+    if (phoneMatch) {
+      info.facebookPhone = phoneMatch[0].replace(/[\s\-.]/g, "").trim();
     }
 
-    // ── Phone / Email fallback from main page ──────────────────
-    if (!info.facebookPhone) {
-      const phones = text.match(PATTERNS.phone);
-      if (phones) info.facebookPhone = phones[0].replace(/[\s\-.]/g, "").trim();
-    }
-    if (!info.facebookEmail) {
-      const emails = html.match(PATTERNS.email) || [];
-      const clean = emails.filter((e) =>
-        !e.includes("sentry") && !e.includes("example") && !e.includes("facebook.com")
-      );
-      if (clean.length > 0) info.facebookEmail = clean[0];
-    }
+    // ── Address — look for Cameroon city names ─────────────────
+    const cities = ["Douala", "Yaoundé", "Yaounde", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
+    $("div, span").each((_, el) => {
+      // Only look at leaf elements (no children) to avoid huge blocks
+      if ($(el).children().length > 0) return;
+      const t = $(el).text().trim();
+      if (!info.facebookAddress && t.length > 5 && t.length < 150) {
+        if (cities.some((city) => t.includes(city))) {
+          info.facebookAddress = t;
+        }
+      }
+    });
 
   } catch (err) {
-    console.log("    [fb] Puppeteer error on " + fbUrl + ": " + err.message);
+    console.log("    Could not scrape " + fbUrl + ": " + err.message);
   }
 
   return info;
 }
 
-// ── Scrape company website (plain axios) ───────────────────────────────────
-async function scrapeWebsite(siteUrl) {
-  const result = { emails: [], phones: [], facebookUrls: [] };
-  try {
-    const res = await axios.get(siteUrl, {
-      headers: { "User-Agent": DESKTOP_UA, "Accept-Language": "en-US,en;q=0.9" },
-      timeout: 12000, maxRedirects: 5,
-    });
-    const html = res.data;
-    const $    = cheerio.load(html);
+// ── Process all companies ──────────────────────────────────────────────────
+async function detectAll(companies) {
+  const session = loadSession();
+  const results = [];
 
-    $("a[href]").each((_, el) => {
-      const href = $(el).attr("href") || "";
-      if (href.includes("facebook.com") && isScrapableFacebookUrl(href)) {
-        result.facebookUrls.push(normalizeFacebookUrl(href));
-      }
-    });
+  console.log("--- STEP 2: Detecting Facebook pages ---\n");
 
-    const fbInHtml = html.match(PATTERNS.facebook) || [];
-    fbInHtml.forEach((u) => {
-      if (isScrapableFacebookUrl(u)) result.facebookUrls.push(normalizeFacebookUrl(u));
-    });
+  // Launch one browser for all companies
+  const browser = await puppeteer.launch({
+    headless: "new",
+    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-blink-features=AutomationControlled"],
+    ignoreDefaultArgs: ["--enable-automation"],
+  });
 
-    result.emails = [...new Set(
-      (html.match(PATTERNS.email) || []).filter((e) =>
-        !e.includes("example") && !e.includes("sentry") && !e.includes("@2x")
-      )
-    )];
-    result.phones = [...new Set(
-      ($.text().match(PATTERNS.phone) || []).map((p) => p.replace(/[\s\-.]/g, "").trim())
-    )];
-    result.facebookUrls = [...new Set(result.facebookUrls)];
-  } catch (err) {
-    console.log("    [website] " + siteUrl + " -> " + err.message);
-  }
-  return result;
-}
+  const page = await browser.newPage();
 
-// ── Detect single company ──────────────────────────────────────────────────
-async function detectCompany(company, page, delayMs) {
-  delayMs = delayMs || 2500;
-
-  const enriched = {
-    name: company.name,
-    websiteUrl: company.url,
-    snippet: company.snippet || "",
-    source: company.source || "search",
-    emails: [], phones: [],
-    hasFacebook: false, 
-    facebookUrl: null,
-    facebookPageName: null, 
-    followers: null,
-    facebookPhone: null,
-    facebookEmail: null,
-    facebookAddress: null,
-    scrapedAt: new Date().toISOString(),
-  };
-
-  console.log("  Detecting: " + company.name);
-
-  // Step 1 — Scrape company website
-  if (company.url && company.url.startsWith("http")) {
-    const siteData = await scrapeWebsite(company.url);
-    enriched.emails = siteData.emails;
-    enriched.phones = siteData.phones;
-    if (siteData.facebookUrls.length > 0) {
-      enriched.facebookUrl = siteData.facebookUrls[0];
-      enriched.hasFacebook = true;
-      console.log("    Facebook found on website: " + enriched.facebookUrl);
-    }
+  // Apply your Facebook session
+  await page.setUserAgent(
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+  );
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+  });
+  for (const cookie of session.cookies || []) {
+    try { await page.setCookie(cookie); } catch {}
   }
 
-  // Step 2 — DuckDuckGo fallback
-  if (!enriched.hasFacebook) {
-    await sleep(1000);
-    const fbFromDdg = await ddgFacebookSearch(company.name);
-    if (fbFromDdg) {
-      enriched.facebookUrl = fbFromDdg;
-      enriched.hasFacebook = true;
-      console.log("    Facebook found via DuckDuckGo: " + enriched.facebookUrl);
+  // Block images to load faster
+  await page.setRequestInterception(true);
+  page.on("request", (req) => {
+    if (["image", "font", "media"].includes(req.resourceType())) req.abort();
+    else req.continue();
+  });
+
+  console.log("  Browser ready. Processing " + companies.length + " companies...\n");
+
+  for (let i = 0; i < companies.length; i++) {
+    const company = companies[i];
+    console.log("  [" + (i + 1) + "/" + companies.length + "] " + company.name);
+
+    const result = {
+      companyName:       company.name,
+      websiteUrl:        company.url,
+      source:            company.source,
+      hasFacebook:       false,
+      facebookUrl:       "",
+      facebookName:      "",
+      facebookFollowers: "",
+      facebookPhone:     "",
+      facebookAddress:   "",
+      scrapedAt:         new Date().toISOString().slice(0, 10),
+    };
+
+    // Step A — find Facebook page URL
+    const fbUrl = await findFacebookPage(company.name);
+
+    if (fbUrl) {
+      console.log("    Facebook found: " + fbUrl);
+      result.hasFacebook = true;
+
+      // Step B — scrape the Facebook page
+      const info = await scrapeFacebookPage(fbUrl, page);
+      result.facebookUrl       = info.facebookUrl       || fbUrl;
+      result.facebookName      = info.facebookName      || "";
+      result.facebookFollowers = info.facebookFollowers != null ? info.facebookFollowers : "";
+      result.facebookPhone     = info.facebookPhone     || "";
+      result.facebookAddress   = info.facebookAddress   || "";
+
+      console.log("    Name     : " + (result.facebookName      || "not found"));
+      console.log("    Followers: " + (result.facebookFollowers !== "" ? result.facebookFollowers.toLocaleString() : "not found"));
+      console.log("    Phone    : " + (result.facebookPhone     || "not found"));
+      console.log("    Address  : " + (result.facebookAddress   || "not found"));
+
     } else {
       console.log("    No Facebook page found");
     }
+
+    results.push(result);
+    await sleep(2000);
   }
 
-  // Step 3 — Scrape Facebook page with Puppeteer
-  if (enriched.hasFacebook && enriched.facebookUrl && isScrapableFacebookUrl(enriched.facebookUrl)) {
-    console.log("    Scraping Facebook page...");
-    const fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
-    Object.assign(enriched, fbInfo);
-
-    const found = [];
-    if (fbInfo.followers)        found.push("followers: " + fbInfo.followers.toLocaleString());
-    if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
-    console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
-  }
-
-  await sleep(delayMs);
-  return enriched;
-}
-
-// ── Detect all ─────────────────────────────────────────────────────────────
-async function detectAll(companies, options) {
-  options = options || {};
-  const facebookOnly = options.facebookOnly || false;
-  const delayMs      = options.delayMs || 2500;
-  const results      = [];
-
-  // Load session
-  const session = loadSession();
-  if (!session) {
-    console.error("No session found. Run: node check_session.js");
-    process.exit(1);
-  }
-
-  // Launch one browser for all companies
-  console.log("\n  Launching browser...");
-  const browser = await launchBrowser();
-  const page    = await browser.newPage();
-  await applySession(page, session);
-
-  // Block images/fonts to speed up loading
-  await page.setRequestInterception(true);
-  page.on("request", (req) => {
-    const type = req.resourceType();
-    if (["image", "font", "media"].includes(type)) {
-      req.abort();
-    } else {
-      req.continue();
-    }
-  });
-
-  console.log("  Browser ready.");
-  console.log("  Starting detection on " + companies.length + " companies...\n");
-
-  try {
-    for (let i = 0; i < companies.length; i++) {
-      console.log("[" + (i + 1) + "/" + companies.length + "]");
-      const enriched = await detectCompany(companies[i], page, delayMs);
-      if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
-    }
-  } finally {
-    await browser.close();
-    console.log("  Browser closed.");
-  }
+  await browser.close();
 
   const withFb = results.filter((r) => r.hasFacebook).length;
-  console.log("\nDetection complete.");
-  console.log("  Total    : " + results.length);
-  console.log("  Facebook : " + withFb);
-  console.log("  No FB    : " + (results.length - withFb) + "\n");
+  console.log("\n  Total companies : " + results.length);
+  console.log("  With Facebook   : " + withFb);
+  console.log("  Without Facebook: " + (results.length - withFb) + "\n");
 
   return results;
 }
 
-module.exports = { detectAll, detectCompany };
+module.exports = { detectAll };
