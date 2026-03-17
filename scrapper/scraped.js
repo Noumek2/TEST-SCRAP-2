@@ -10,6 +10,7 @@ const fs = require("fs");
 const path = require("path");
 
 const DOME_DIR = path.join(__dirname, "dome");
+const SCRAPED_FILE = path.join(DOME_DIR, "scraped.json");
 const SCRAPED_FB_FILE = path.join(DOME_DIR, "scraped_facebook.json");
 const SCRAPED_NOFB_FILE = path.join(DOME_DIR, "scraped_no_facebook.json");
 
@@ -46,6 +47,23 @@ function loadScrapedKeys() {
   return new Set([...fb, ...nofb]);
 }
 
+function saveCombinedScraped(fbList, noFbList) {
+  const combined = [];
+  const seen = new Set();
+
+  const pushUnique = (entry, hasFacebook) => {
+    const key = makeScrapedKey(entry);
+    if (seen.has(key)) return;
+    seen.add(key);
+    combined.push({ name: entry.name, url: entry.url, hasFacebook });
+  };
+
+  fbList.forEach((e) => pushUnique(e, true));
+  noFbList.forEach((e) => pushUnique(e, false));
+
+  saveJson(SCRAPED_FILE, combined);
+}
+
 function filterNew(companies) {
   const seen = loadScrapedKeys();
   return companies.filter((c) => !seen.has(makeScrapedKey(c)));
@@ -77,6 +95,7 @@ function markScraped(companies) {
 
   saveJson(SCRAPED_FB_FILE, fbList);
   saveJson(SCRAPED_NOFB_FILE, noFbList);
+  saveCombinedScraped(fbList, noFbList);
 }
 
 module.exports = { filterNew, markScraped, makeScrapedKey };
