@@ -1,16 +1,7 @@
 /**
- * search.js
- * Searches for construction and real estate companies in Cameroon using:
- *
- *  1. Google  — via SerpApi (free 100 searches/month) OR direct scraping with Puppeteer
- *  2. Bing    — direct scraping (much more lenient than Google)
- *  3. DuckDuckGo — HTML endpoint (no bot protection)
- *  4. Directory sites — africacompanies.com, kompass.com, annuaire.cm, yellowpages.cm
- *
- * CONFIG in config.json (optional):
- *   { "serpApiKey": "YOUR_KEY" }   <- Get free key at https://serpapi.com (100 searches/month free)
- *
- * If no SerpApi key is set, Google is scraped directly using Puppeteer (slower but free).
+ * test_search.js
+ * Diagnoses why search returns 0 results.
+ * Run: node test_search.js
  */
 
 const axios     = require("axios");
@@ -85,133 +76,151 @@ async function searchGoogleSerpApi(query, apiKey) {
   } catch (err) {
     console.log("    [Google/SerpApi] Error: " + err.message);
   }
+
   return results;
 }
 
-// ── 1B. Google via Puppeteer (no API key needed) ───────────────────────────
-// Uses a real headless Chrome — Google cannot distinguish it from a real user
-async function searchGooglePuppeteer(queries) {
-  const results = [];
+async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function testDuckDuckGo() {
+  console.log("\n=== TEST 1: DuckDuckGo ===");
+  try {
+    const res = await axios.get(
+      "https://html.duckduckgo.com/html/?q=construction+company+Cameroon",
+      {
+        headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+        timeout: 15000,
+      }
+    );
+
+    console.log("HTTP Status:", res.status);
+    console.log("Response size:", res.data.length, "bytes");
+
+    const $ = cheerio.load(res.data);
+    const results = [];
+
+    $(".result").each((_, el) => {
+      const title = $(el).find(".result__title a").text().trim();
+      let   href  = $(el).find(".result__title a").attr("href") || "";
+      if (href.includes("uddg=")) {
+        try { href = decodeURIComponent(new URL("https:" + href).searchParams.get("uddg") || ""); } catch {}
+      }
+      if (title) results.push({ title, href });
+    });
+
+    console.log("Results found with .result selector:", results.length);
+
+    // Try alternative selectors if 0
+    if (results.length === 0) {
+      console.log("\nTrying alternative selectors...");
+      const allLinks = [];
+      $("a[href]").each((_, el) => {
+        const t = $(el).text().trim();
+        const h = $(el).attr("href") || "";
+        if (t.length > 10 && h.startsWith("http") && !h.includes("duckduckgo")) {
+          allLinks.push(t.slice(0, 60));
+        }
+      });
+      console.log("Links found with generic a[href]:", allLinks.length);
+      if (allLinks.length > 0) console.log("First 3:", allLinks.slice(0, 3));
+
+      // Save HTML for inspection
+      fs.writeFileSync("ddg_response.html", res.data, "utf8");
+      console.log("Saved raw HTML to ddg_response.html — open it to inspect");
+    } else {
+      console.log("First 3 results:");
+      results.slice(0, 3).forEach((r, i) => console.log("  " + (i+1) + ". " + r.title));
+    }
+  } catch (err) {
+    console.log("ERROR:", err.message);
+    if (err.response) console.log("Status:", err.response.status);
+  }
+}
+
+async function testGoogle() {
+  console.log("\n=== TEST 2: Google via Puppeteer ===");
   let browser;
-
-  console.log("    [Google/Puppeteer] Launching browser for Google search...");
-
   try {
     browser = await puppeteer.launch({
       headless: "new",
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-blink-features=AutomationControlled",
-        "--disable-infobars",
-        "--lang=en-US",
-      ],
-      ignoreDefaultArgs: ["--enable-automation"],
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
-    await page.setUserAgent(randomUA());
-    await page.evaluateOnNewDocument(() => {
-      Object.defineProperty(navigator, "webdriver", { get: () => undefined });
-    });
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36");
 
-    // Block images and fonts to speed up
-    await page.setRequestInterception(true);
-    page.on("request", (req) => {
-      if (["image", "font", "media", "stylesheet"].includes(req.resourceType())) {
-        req.abort();
+    await page.goto("https://www.google.com/search?q=construction+company+Cameroon&num=10", {
+      waitUntil: "domcontentloaded",
+      timeout: 20000,
+    });
+    await sleep(2000);
+
+    const html = await page.content();
+    console.log("Page size:", html.length, "bytes");
+
+    // Check if we hit a CAPTCHA
+    if (html.includes("unusual traffic") || html.includes("captcha") || html.includes("CAPTCHA")) {
+      console.log("CAPTCHA detected! Google is blocking us.");
+      fs.writeFileSync("google_response.html", html, "utf8");
+      console.log("Saved to google_response.html");
+    } else {
+      const $ = cheerio.load(html);
+      const h3s = $("h3");
+      console.log("h3 tags found:", h3s.length);
+
+      const links = [];
+      $("h3").each((_, el) => {
+        const title = $(el).text().trim();
+        const href  = $(el).closest("a").attr("href") || $(el).parent("a").attr("href") || "";
+        if (title && href && href.startsWith("http")) links.push(title.slice(0, 60));
+      });
+      console.log("Valid result links:", links.length);
+      if (links.length > 0) {
+        console.log("First 3:");
+        links.slice(0, 3).forEach((l, i) => console.log("  " + (i+1) + ". " + l));
       } else {
-        req.continue();
-      }
-    });
-
-    for (const query of queries) {
-      try {
-        const googleUrl = "https://www.google.com/search?q=" + encodeURIComponent(query) + "&num=10&hl=en&gl=cm";
-        await page.goto(googleUrl, { waitUntil: "domcontentloaded", timeout: 20000 });
-        await sleep(1500 + Math.random() * 1000);
-
-        const html = await page.content();
-        const $    = cheerio.load(html);
-        let found  = 0;
-
-        // Extract results — Google uses div.g or [data-hveid] containers
-        $("div.g, [data-sokoban-container], [jscontroller] h3").each((_, el) => {
-          const container = $(el).closest("div.g, [data-hveid]").length
-            ? $(el).closest("div.g, [data-hveid]")
-            : $(el).parent();
-
-          const titleEl   = $(el).is("h3") ? $(el) : $(el).find("h3").first();
-          const linkEl    = container.find("a[href]").first();
-          const snippetEl = container.find('[data-sncf], .VwiC3b, span.aCOpRe, div[style*="-webkit-line-clamp"]').first();
-
-          const name    = titleEl.text().trim();
-          let   href    = linkEl.attr("href") || "";
-          const snippet = snippetEl.text().trim();
-
-          // Clean Google redirect URLs
-          if (href.startsWith("/url?q=")) {
-            try { href = new URL("https://google.com" + href).searchParams.get("q") || href; } catch {}
-          }
-
-          if (name && href && href.startsWith("http") &&
-              !href.includes("google.com") && !href.includes("youtube.com")) {
-            results.push({ name, url: href, snippet, source: "google" });
-            found++;
-          }
-        });
-
-        console.log("    [Google/Puppeteer] \"" + query + "\" -> " + found + " results");
-        await sleep(2000 + Math.random() * 1500); // Human-like delay between searches
-
-      } catch (err) {
-        console.log("    [Google/Puppeteer] Failed for \"" + query + "\": " + err.message);
+        fs.writeFileSync("google_response.html", html, "utf8");
+        console.log("Saved to google_response.html for inspection");
       }
     }
-
   } catch (err) {
-    console.log("    [Google/Puppeteer] Browser error: " + err.message);
+    console.log("ERROR:", err.message);
   } finally {
     if (browser) await browser.close();
   }
-
-  return results;
 }
 
-// ── 2. Bing search (much more lenient than Google) ─────────────────────────
-async function searchBing(query) {
-  const results = [];
-  const url = "https://www.bing.com/search?q=" + encodeURIComponent(query) + "&count=10&mkt=en-CM";
-
+async function testBing() {
+  console.log("\n=== TEST 3: Bing (bonus check) ===");
   try {
-    const res = await axios.get(url, {
-      headers: {
-        ...buildHeaders("https://www.bing.com/"),
-        "Accept-Language": "en-US,en;q=0.9",
-      },
-      timeout: 15000,
-    });
-
-    const $ = cheerio.load(res.data);
-
-    // Bing result structure: li.b_algo contains h2 > a and p.b_lineclamp
-    $("li.b_algo").each((_, el) => {
-      const titleEl   = $(el).find("h2 a").first();
-      const snippetEl = $(el).find("p.b_lineclamp, .b_caption p, p").first();
-
-      const name    = titleEl.text().trim();
-      const href    = titleEl.attr("href") || "";
-      const snippet = snippetEl.text().trim();
-
-      if (name && href && href.startsWith("http") &&
-          !href.includes("bing.com") && !href.includes("microsoft.com")) {
-        results.push({ name, url: href, snippet, source: "bing" });
+    const res = await axios.get(
+      "https://www.bing.com/search?q=construction+company+Cameroon&count=10",
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+        timeout: 15000,
       }
+    );
+
+    console.log("HTTP Status:", res.status);
+    const $ = cheerio.load(res.data);
+    const results = [];
+
+    $("li.b_algo").each((_, el) => {
+      const title = $(el).find("h2 a").first().text().trim();
+      const href  = $(el).find("h2 a").first().attr("href") || "";
+      if (title && href.startsWith("http")) results.push(title.slice(0, 60));
     });
 
-    console.log("    [Bing] \"" + query + "\" -> " + results.length + " results");
+    console.log("Bing results found:", results.length);
+    if (results.length > 0) {
+      console.log("First 3:");
+      results.slice(0, 3).forEach((r, i) => console.log("  " + (i+1) + ". " + r));
+    }
   } catch (err) {
-    console.log("    [Bing] Error for \"" + query + "\": " + err.message);
+    console.log("ERROR:", err.message);
   }
 
   return results;
