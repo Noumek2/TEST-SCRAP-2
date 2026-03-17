@@ -70,6 +70,39 @@ async function main() {
       facebookOnly: true,
     });
 
+    // Optional: upload results to Supabase
+    // Requires: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and a table/column to exist
+    const { supabase } = require("./supabaseClient");
+
+    async function saveToSupabase(companies) {
+      console.log("\n📤 Attempting to save to Supabase...");
+      console.log("   Table:", tableName);
+      console.log("   Column:", columnName);
+      console.log("   Companies to save:", companies.length);
+
+      const payload = {
+        scrapedAt: new Date().toISOString(),
+        total: companies.length,
+        withFacebook: companies.filter((c) => c.hasFacebook).length,
+        companies,
+      };
+
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert([{ [columnName]: payload }]);
+
+      if (error) {
+        console.error("❌ Supabase insert failed:", error.message || error);
+        if (error.details) console.error("   Details:", error.details);
+        if (error.hint) console.error("   Hint:", error.hint);
+      } else {
+        console.log("✅ Supabase insert succeeded!");
+        console.log("   Rows inserted:", data?.length ?? "?");
+      }
+    }
+
+    await saveToSupabase(enriched);
+
     // Print summary table to console
     printSummary(enriched);
 

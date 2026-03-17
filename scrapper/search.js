@@ -190,37 +190,29 @@ async function testGoogle() {
   }
 }
 
-async function testBing() {
-  console.log("\n=== TEST 3: Bing (bonus check) ===");
+async function searchBing(query) {
+  const results = [];
   try {
-    const res = await axios.get(
-      "https://www.bing.com/search?q=construction+company+Cameroon&count=10",
-      {
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-          "Accept-Language": "en-US,en;q=0.9",
-        },
-        timeout: 15000,
-      }
-    );
+    const url = "https://www.bing.com/search?q=" + encodeURIComponent(query) + "&count=10";
+    const res = await axios.get(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+      },
+      timeout: 15000,
+    });
 
-    console.log("HTTP Status:", res.status);
     const $ = cheerio.load(res.data);
-    const results = [];
 
     $("li.b_algo").each((_, el) => {
       const title = $(el).find("h2 a").first().text().trim();
       const href  = $(el).find("h2 a").first().attr("href") || "";
-      if (title && href.startsWith("http")) results.push(title.slice(0, 60));
+      if (title && href.startsWith("http")) results.push({ name: title, url: href, snippet: "", source: "bing" });
     });
 
-    console.log("Bing results found:", results.length);
-    if (results.length > 0) {
-      console.log("First 3:");
-      results.slice(0, 3).forEach((r, i) => console.log("  " + (i+1) + ". " + r));
-    }
+    console.log("    [Bing] \"" + query + "\" -> " + results.length + " results");
   } catch (err) {
-    console.log("ERROR:", err.message);
+    console.log("    [Bing] Error: " + err.message);
   }
 
   return results;
