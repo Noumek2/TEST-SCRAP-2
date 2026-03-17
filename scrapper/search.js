@@ -151,15 +151,84 @@ async function testBing() {
   } catch (err) {
     console.log("ERROR:", err.message);
   }
+
+  return results;
 }
 
-async function run() {
-  console.log("Running search diagnostics...\n");
-  await testDuckDuckGo();
-  await testGoogle();
-  await testBing();
-  console.log("\n=== Done ===");
-  console.log("Share the output above so we can fix the exact issue.");
+
+// ── Deduplication ──────────────────────────────────────────────────────────
+function deduplicate(results) {
+  const seen = new Set();
+  return results.filter((r) => {
+    const key = (r.name || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 35);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
-run();
+// ── Main export ────────────────────────────────────────────────────────────
+async function searchCompanies(options) {
+  options = options || {};
+  const delayMs = options.delayMs || 2000;
+  let allResults = [];
+
+  console.log("\n🔍 Searching across Google + Bing ..\n");
+
+  // ── Google ──────────────────────────────────────────────────
+  if (CONFIG.serpApiKey) {
+    console.log("  [1/4] Google via SerpApi (API key found)...");
+    for (const q of SEARCH_QUERIES) {
+      allResults = allResults.concat(await searchGoogleSerpApi(q, CONFIG.serpApiKey));
+      await sleep(500); // SerpApi has generous rate limits
+    }
+  } else {
+    console.log("  [1/4] Google via Puppeteer (no API key — using headless browser)...");
+    console.log("        Tip: Add a free SerpApi key to config.json for faster Google results");
+    console.log("        Get one at https://serpapi.com (100 free searches/month)\n");
+    // Pass all queries at once — Puppeteer opens one browser for all
+    const googleResults = await searchGooglePuppeteer(SEARCH_QUERIES);
+    allResults = allResults.concat(googleResults);
+    console.log("    [Google/Puppeteer] Total: " + googleResults.length + " results\n");
+  }
+
+  // ── Bing ─────────────────────────────────────────────────────
+  console.log("  [2/4] Bing searches...");
+  for (const q of SEARCH_QUERIES) {
+    allResults = allResults.concat(await searchBing(q));
+    await sleep(delayMs + Math.random() * 800);
+  }
+
+  // ── DuckDuckGo ───────────────────────────────────────────────
+  console.log("\n  [3/4] DuckDuckGo searches...");
+  for (const q of SEARCH_QUERIES) {
+    allResults = allResults.concat(await searchDuckDuckGo(q));
+    await sleep(delayMs + Math.random() * 800);
+  }
+
+  // ── Directories ──────────────────────────────────────────────
+  console.log("\n  [4/4] Scraping business directories...");
+  allResults = allResults.concat(await scrapeAllDirectories());
+
+  // Deduplicate
+  const unique = deduplicate(allResults.filter((r) => r.name && r.name.length > 3));
+
+  // Remove companies we've already scraped in earlier runs
+  const { filterNew } = require("./scraped");
+  const filtered = filterNew(unique);
+
+  console.log("\n✅ Search complete. Total unique companies: " + unique.length);
+  console.log("✅ New companies (not seen before): " + filtered.length);
+
+  // Breakdown by source
+  const sources = {};
+  unique.forEach((r) => { sources[r.source] = (sources[r.source] || 0) + 1; });
+  console.log("\n  Results by source:");
+  Object.entries(sources).sort((a, b) => b[1] - a[1]).forEach(([s, c]) => {
+    console.log("    " + s.padEnd(20) + c);
+  });
+  console.log("");
+
+  return filtered;
+
+module.exports = { searchCompanies };

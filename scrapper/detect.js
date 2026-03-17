@@ -88,8 +88,115 @@ function parseCount(str) {
   return isNaN(n) ? null : n;
 }
 
-// ── Scrape Facebook page details ───────────────────────────────────────────
-async function scrapeFacebookPage(fbUrl, page) {
+// ── Extract the most recent year found in a string (e.g. from post timestamps)
+function extractYearFromString(str) {
+  if (!str || typeof str !== "string") return null;
+  const matches = [...str.matchAll(/\b(20\d{2})\b/g)];
+  const years = matches
+    .map((m) => parseInt(m[1], 10))
+    .filter((y) => !isNaN(y) && y >= 2020);
+  if (years.length === 0) return null;
+  return Math.max(...years);
+}
+
+function findLatestPostYear(html) {
+  if (!html) return null;
+  // Heuristic: look for years in the HTML (prefer newer values)
+  const yearFromHtml = extractYearFromString(html);
+  return yearFromHtml;
+}
+
+// ── Facebook URL utilities ─────────────────────────────────────────────────
+function normalizeFacebookUrl(url) {
+  try {
+    const u = new URL(url);
+    return "https://www.facebook.com" + u.pathname.replace(/\/$/, "");
+  } catch { return url; }
+}
+
+function isScrapableFacebookUrl(url) {
+  if (!url || !url.includes("facebook.com")) return false;
+  const blocklist = [
+    "/sharer", "/share?", "/plugins/", "/tr?", "/l.php",
+    "/login", "/dialog/", "/photo", "/video",
+    "/events", "/groups", "/marketplace", "/watch", "/stories", "/reel",
+    "profile.php",
+  ];
+  return !blocklist.some((b) => url.includes(b));
+}
+
+// ── Load saved Puppeteer session ───────────────────────────────────────────
+function loadSession() {
+  if (!fs.existsSync(SESSION_FILE)) {
+    console.warn("\n  [session] No fb_session.json found.");
+    console.warn("  [session] Run: node check_session.js  to set up your session first.\n");
+    return null;
+  }
+  try {
+    const session = JSON.parse(fs.readFileSync(SESSION_FILE, "utf8"));
+    console.log("  [session] Session loaded (saved at " + session.savedAt + ")");
+    return session;
+  } catch (err) {
+    console.warn("  [session] Could not read fb_session.json: " + err.message);
+    return null;
+  }
+}
+
+// ── Launch Puppeteer browser ───────────────────────────────────────────────
+const { getChromeExecutablePath } = require("./chrome-path");
+
+async function launchBrowser() {
+  const executablePath = getChromeExecutablePath();
+  const launchOpts = {
+    headless: "new",   // Invisible browser — runs in background
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-blink-features=AutomationControlled",
+      "--disable-infobars",
+      "--window-size=1366,768",
+    ],
+    ignoreDefaultArgs: ["--enable-automation"],
+  };
+
+  if (executablePath) {
+    launchOpts.executablePath = executablePath;
+  }
+
+  try {
+    const browser = await puppeteer.launch(launchOpts);
+    return browser;
+  } catch (err) {
+    console.error("Failed to launch browser: " + err.message);
+    console.error("  - Run: npm run puppeteer-install");
+    console.error("  - Or set PUPPETEER_EXECUTABLE_PATH / CHROME_PATH to a valid chrome.exe");
+    process.exit(1);
+  }
+}
+
+// ── Apply session to a Puppeteer page ─────────────────────────────────────
+async function applySession(page, session) {
+  await page.setUserAgent(session.userAgent || DESKTOP_UA);
+
+  // Hide bot signals
+  await page.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, "webdriver", { get: () => undefined });
+    window.chrome = { runtime: {} };
+  });
+
+  // Inject saved cookies
+  if (session.cookies && session.cookies.length > 0) {
+    for (const cookie of session.cookies) {
+      try {
+        await page.setCookie(cookie);
+      } catch {}
+    }
+    console.log("  [session] Injected " + session.cookies.length + " cookies");
+  }
+}
+
+// ── Scrape a Facebook page using Puppeteer ─────────────────────────────────
+async function scrapeFacebookWithPuppeteer(fbUrl, page) {
   const info = {
     facebookUrl:      fbUrl,
     facebookName:     null,
@@ -103,9 +210,9 @@ async function scrapeFacebookPage(fbUrl, page) {
     await page.goto(fbUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
     await sleep(2000);
 
-    let html = await page.content();
-    let $    = cheerio.load(html);
-    let text = $.text();
+    const html = await page.content();
+    const $    = cheerio.load(html);
+    const text = $.text();
 
     // ── Page name ──────────────────────────────────────────────
     info.facebookName =
@@ -134,43 +241,60 @@ async function scrapeFacebookPage(fbUrl, page) {
       }
     }
 
-    // ── Now visit the About page for phone and address ─────────
-    const aboutUrl = fbUrl.replace(/\/$/, "") + "/about";
-    await page.goto(aboutUrl, { waitUntil: "domcontentloaded", timeout: 25000 });
-    await sleep(2000);
 
-    html = await page.content();
-    $    = cheerio.load(html);
-    text = $.text();
-
-    // ── Followers fallback from About page ────────────────────
-    if (!info.facebookFollowers) {
-      for (const pattern of followerPatterns) {
-        const m = text.match(pattern);
-        if (m) { info.facebookFollowers = parseCount(m[1]); break; }
-      }
-    }
-
-    // ── Phone — Cameroon format (+237 or 6xx/2xx/3xx) ─────────
-    const phoneMatch = text.match(
-      /(\+237[\s\-.]?[0-9]{2}[\s\-.]?[0-9]{2}[\s\-.]?[0-9]{2}[\s\-.]?[0-9]{2}|(?:6|2|3)[0-9]{8})/
-    );
-    if (phoneMatch) {
-      info.facebookPhone = phoneMatch[0].replace(/[\s\-.]/g, "").trim();
-    }
-
-    // ── Address — look for Cameroon city names ─────────────────
-    const cities = ["Douala", "Yaoundé", "Yaounde", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
-    $("div, span").each((_, el) => {
-      // Only look at leaf elements (no children) to avoid huge blocks
-      if ($(el).children().length > 0) return;
-      const t = $(el).text().trim();
-      if (!info.facebookAddress && t.length > 5 && t.length < 150) {
-        if (cities.some((city) => t.includes(city))) {
-          info.facebookAddress = t;
+    // Also try visiting the About tab
+    if (!info.facebookAbout) {
+      try {
+// ── Phone from About page ──────────────────────────────
+        if (!info.facebookPhone) {
+          const phones = $a.text().match(PATTERNS.phone);
+          if (phones) info.facebookPhone = phones[0].replace(/[\s\-.]/g, "").trim();
         }
-      }
-    });
+
+        // ── Email from About page ──────────────────────────────
+        if (!info.facebookEmail) {
+          const emails = aboutHtml.match(PATTERNS.email) || [];
+          const clean = emails.filter((e) =>
+            !e.includes("sentry") && !e.includes("example") && !e.includes("facebook.com")
+          );
+          if (clean.length > 0) info.facebookEmail = clean[0];
+        }
+
+        // ── Address from About page ────────────────────────────
+        if (!info.facebookAddress) {
+          const cities = ["Douala", "Yaoundé", "Yaounde", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
+          $a("div, span, td").each((_, el) => {
+            if ($a(el).children().length > 0) return;
+            const t = $a(el).text().trim();
+            if (!info.facebookAddress && t.length > 5 && t.length < 200 && cities.some((c) => t.includes(c))) {
+              info.facebookAddress = t;
+            }
+          });
+        }
+        // ── Rating ─────────────────────────────────────────────
+        if (!info.rating) {
+          const aboutText = $a.text();
+          const m = aboutText.match(/([1-5]\.[0-9])\s*(?:out of 5|\/\s*5)/i);
+          if (m) info.rating = parseFloat(m[1]);
+          const mc = aboutText.match(/([0-9][0-9,]*)\s*(?:ratings?|reviews?|avis)/i);
+          if (mc) info.ratingCount = parseCount(mc[1]);
+        }
+
+      } catch {}
+    }
+
+    // ── Phone / Email fallback from main page ──────────────────
+    if (!info.facebookPhone) {
+      const phones = text.match(PATTERNS.phone);
+      if (phones) info.facebookPhone = phones[0].replace(/[\s\-.]/g, "").trim();
+    }
+    if (!info.facebookEmail) {
+      const emails = html.match(PATTERNS.email) || [];
+      const clean = emails.filter((e) =>
+        !e.includes("sentry") && !e.includes("example") && !e.includes("facebook.com")
+      );
+      if (clean.length > 0) info.facebookEmail = clean[0];
+    }
 
   } catch (err) {
     console.log("    Could not scrape " + fbUrl + ": " + err.message);

@@ -3,5 +3,11 @@
     "axios": "^1.13.6",
     "cheerio": "^1.2.0",
     "puppeteer": "^24.39.1"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "start:facebook-only": "node index.js --facebook-only",
+    "start:deep": "node index.js --pages 3",
+    "puppeteer-install": "node -e \"require('puppeteer/install')\""
   }
 }

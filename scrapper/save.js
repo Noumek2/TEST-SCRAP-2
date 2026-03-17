@@ -72,6 +72,19 @@ function toCsv(companies) {
   return [header, ...rows].join("\n");
 }
 
+function toCsvFiltered(companies, options = {}) {
+  const minFollowers = options.minFollowers || 100;
+  const minPostYear  = options.minPostYear  || 2026;
+
+  const filtered = companies.filter((c) => {
+    const followers = typeof c.followers === "number" ? c.followers : parseInt(c.followers, 10);
+    const year = c.lastPostYear || null;
+    return followers > minFollowers && year && year >= minPostYear;
+  });
+
+  return toCsv(filtered);
+}
+
 // ── XML helpers ────────────────────────────────────────────────────────────
 
 function escapeXml(str) {
@@ -177,8 +190,10 @@ function saveAll(companies, options = {}) {
 
   // ── Save CSV ──
   const csvPath = path.join(outputDir, base + ".csv");
-  fs.writeFileSync(csvPath, toCsv(toSave), "utf8");
-  console.log("\nCSV saved: " + csvPath + " (" + toSave.length + " rows)");
+  const csvString = toCsvFiltered(toSave, { minFollowers: 100, minPostYear: 2026 });
+  fs.writeFileSync(csvPath, csvString, "utf8");
+  const csvRowCount = csvString.split("\n").length - 1; // subtract header
+  console.log("\nCSV saved: " + csvPath + " (" + csvRowCount + " rows, filtered 2026+ & >100 followers)");
 
   // ── Save XML ──
   const xmlPath = path.join(outputDir, base + ".xml");
@@ -227,7 +242,13 @@ function printSummary(companies) {
   console.log(line);
   const withFb = companies.filter((c) => c.hasFacebook).length;
   const totalFollowers = companies.reduce((s, c) => s + (c.followers || 0), 0);
-  console.log("  Total: " + companies.length + " | With Facebook: " + withFb + " | Total followers tracked: " + totalFollowers.toLocaleString());
+  const filtered = companies.filter((c) => (c.followers || 0) > 100 && (c.lastPostYear || 0) >= 2026).length;
+  console.log(
+    "  Total: " + companies.length +
+      " | With Facebook: " + withFb +
+      " | Total followers tracked: " + totalFollowers.toLocaleString() +
+      " | Meets 2026+ posts & >100 followers: " + filtered
+  );
   console.log(line + "\n");
 }
 
