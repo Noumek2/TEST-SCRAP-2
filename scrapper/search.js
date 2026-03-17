@@ -43,6 +43,8 @@ const SEARCH_QUERIES = [
   "housing company Cameroon",
   "building contractor Cameroon",
   "real estate agent Yaounde Douala",
+  "societe de BTP Cameroun",
+  "BTP cameroun"
 ];
 
 const USER_AGENTS = [
@@ -217,82 +219,6 @@ async function searchBing(query) {
   return results;
 }
 
-// ── 3. DuckDuckGo ──────────────────────────────────────────────────────────
-async function searchDuckDuckGo(query) {
-  const results = [];
-  const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent(query) + "&kl=cm-fr";
-
-  try {
-    const res = await axios.get(url, { headers: buildHeaders("https://duckduckgo.com/"), timeout: 15000 });
-    const $   = cheerio.load(res.data);
-
-    $(".result").each((_, el) => {
-      const titleEl   = $(el).find(".result__title a, a.result__a").first();
-      const snippetEl = $(el).find(".result__snippet").first();
-
-      const name    = titleEl.text().trim();
-      let   href    = titleEl.attr("href") || "";
-      const snippet = snippetEl.text().trim();
-
-      if (href.includes("uddg=")) {
-        try { href = decodeURIComponent(new URL("https:" + href).searchParams.get("uddg") || ""); } catch {}
-      }
-
-      if (name && href && href.startsWith("http") && !href.includes("duckduckgo.com")) {
-        results.push({ name, url: href, snippet, source: "duckduckgo" });
-      }
-    });
-
-    console.log("    [DuckDuckGo] \"" + query + "\" -> " + results.length + " results");
-  } catch (err) {
-    console.log("    [DuckDuckGo] Error: " + err.message);
-  }
-
-  return results;
-}
-
-// ── 4. Directory scrapers ──────────────────────────────────────────────────
-async function scrapeDirectory(url, baseUrl, label) {
-  const results = [];
-  try {
-    const res = await axios.get(url, { headers: buildHeaders(baseUrl), timeout: 15000 });
-    const $   = cheerio.load(res.data);
-
-    $("h2 a, h3 a, .company-name a, .listing-name a, .business-name a, li a, .companyName a").each((_, el) => {
-      const name = $(el).text().trim();
-      let   href = $(el).attr("href") || "";
-      if (href && !href.startsWith("http")) href = baseUrl + href;
-      const snippet = $(el).closest("li, div, article").find("p, .description, .snippet").first().text().trim().slice(0, 150);
-      if (name && name.length > 3) results.push({ name, url: href || url, snippet, source: label });
-    });
-
-    console.log("    [" + label + "] " + url + " -> " + results.length + " entries");
-  } catch (err) {
-    console.log("    [" + label + "] " + url + ": " + err.message);
-  }
-  return results;
-}
-
-async function scrapeAllDirectories() {
-  let results = [];
-  const dirs = [
-    { url: "https://www.africacompanies.com/cameroon/construction/",  base: "https://www.africacompanies.com", label: "africacompanies" },
-    { url: "https://www.africacompanies.com/cameroon/real-estate/",   base: "https://www.africacompanies.com", label: "africacompanies" },
-    { url: "https://cm.kompass.com/a/construction-companies/cm001030/", base: "https://cm.kompass.com",        label: "kompass" },
-    { url: "https://cm.kompass.com/a/real-estate-companies/cm001070/",  base: "https://cm.kompass.com",        label: "kompass" },
-    { url: "http://www.annuaire.cm/construction",                      base: "http://www.annuaire.cm",         label: "annuaire.cm" },
-    { url: "http://www.annuaire.cm/immobilier",                        base: "http://www.annuaire.cm",         label: "annuaire.cm" },
-    { url: "https://www.yellowpages.cm/en/search?q=construction",      base: "https://www.yellowpages.cm",     label: "yellowpages.cm" },
-    { url: "https://www.yellowpages.cm/en/search?q=immobilier",        base: "https://www.yellowpages.cm",     label: "yellowpages.cm" },
-    { url: "https://www.yellowpages.cm/en/search?q=real+estate",       base: "https://www.yellowpages.cm",     label: "yellowpages.cm" },
-  ];
-
-  for (const d of dirs) {
-    results = results.concat(await scrapeDirectory(d.url, d.base, d.label));
-    await sleep(1500);
-  }
-  return results;
-}
 
 // ── Deduplication ──────────────────────────────────────────────────────────
 function deduplicate(results) {
@@ -311,7 +237,7 @@ async function searchCompanies(options) {
   const delayMs = options.delayMs || 2000;
   let allResults = [];
 
-  console.log("\n🔍 Searching across Google + Bing + DuckDuckGo + Directories...\n");
+  console.log("\n🔍 Searching across Google + Bing ..\n");
 
   // ── Google ──────────────────────────────────────────────────
   if (CONFIG.serpApiKey) {
@@ -368,6 +294,5 @@ async function searchCompanies(options) {
   console.log("");
 
   return filtered;
-}
 
 module.exports = { searchCompanies };

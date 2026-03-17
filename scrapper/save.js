@@ -18,12 +18,10 @@ const CSV_COLUMNS = [
   { key: "hasFacebook",      label: "Has Facebook" },
   { key: "facebookUrl",      label: "Facebook URL" },
   { key: "facebookPageName", label: "Facebook Page Name" },
-  { key: "isVerified",       label: "Verified Page" },
   { key: "followers",        label: "Followers" },
   { key: "facebookPhone",    label: "Phone (Facebook)" },
   { key: "facebookEmail",    label: "Email (Facebook)" },
   { key: "facebookAddress",  label: "Address (Facebook)" },
-  { key: "facebookWebsite",  label: "Website (Facebook)" },
   { key: "emails",           label: "Emails (Website)" },
   { key: "phones",           label: "Phones (Website)" },
   { key: "source",           label: "Found Via" },
@@ -125,11 +123,6 @@ ${phoneNodes}
       <facebookPageName>${escapeXml(c.facebookPageName)}</facebookPageName>
       <isVerified>${c.isVerified ? "true" : "false"}</isVerified>
       <followers>${c.followers !== null && c.followers !== undefined ? c.followers : ""}</followers>
-      <likes>${c.likes !== null && c.likes !== undefined ? c.likes : ""}</likes>
-      <rating>${c.rating !== null && c.rating !== undefined ? c.rating : ""}</rating>
-      <ratingCount>${c.ratingCount !== null && c.ratingCount !== undefined ? c.ratingCount : ""}</ratingCount>
-      <category>${escapeXml(c.category)}</category>
-      <about>${escapeXml(c.facebookAbout)}</about>
       <phone>${escapeXml(c.facebookPhone)}</phone>
       <email>${escapeXml(c.facebookEmail)}</email>
       <address>${escapeXml(c.facebookAddress)}</address>
@@ -230,8 +223,6 @@ function printSummary(companies) {
     "Company".padEnd(35) +
     "Facebook".padEnd(8) +
     "Followers".padEnd(12) +
-    "Likes".padEnd(10) +
-    "Rating".padEnd(8) +
     "Contacts"
   );
   console.log(dash);
@@ -240,14 +231,12 @@ function printSummary(companies) {
     const name     = (c.name || "Unknown").slice(0, 33).padEnd(35);
     const fb       = (c.hasFacebook ? "Yes" : "No").padEnd(8);
     const followers = (c.followers != null ? c.followers.toLocaleString() : "-").padEnd(12);
-    const likes    = (c.likes != null ? c.likes.toLocaleString() : "-").padEnd(10);
-    const rating   = (c.rating != null ? c.rating + "/5" : "-").padEnd(8);
     const contacts = [
       c.emails.length > 0 ? c.emails.length + " email(s)" : "",
       c.phones.length > 0 ? c.phones.length + " phone(s)" : "",
     ].filter(Boolean).join(", ") || "none";
 
-    console.log("  " + String(i + 1).padEnd(4) + name + fb + followers + likes + rating + contacts);
+    console.log("  " + String(i + 1).padEnd(4) + name + fb + followers + contacts);
   });
 
   console.log(line);
