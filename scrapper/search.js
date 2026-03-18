@@ -191,16 +191,9 @@ async function testGoogle() {
 }
 
 async function searchBing(query) {
-<<<<<<< HEAD
   const results = [];
   try {
     const url = "https://www.bing.com/search?q=" + encodeURIComponent(query) + "&count=10";
-=======
-  const url = "https://www.bing.com/search?q=" + encodeURIComponent(query) + "&count=10";
-  const results = [];
-
-  try {
->>>>>>> b3388b1d6500f441d2089be1fddf1d548e895b99
     const res = await axios.get(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -214,14 +207,11 @@ async function searchBing(query) {
     $("li.b_algo").each((_, el) => {
       const title = $(el).find("h2 a").first().text().trim();
       const href  = $(el).find("h2 a").first().attr("href") || "";
-<<<<<<< HEAD
       if (title && href.startsWith("http")) results.push({ name: title, url: href, snippet: "", source: "bing" });
-=======
       const snippet = $(el).find("p").first().text().trim();
       if (title && href.startsWith("http")) {
         results.push({ name: title, url: href, snippet, source: "bing" });
       }
->>>>>>> b3388b1d6500f441d2089be1fddf1d548e895b99
     });
 
     console.log("    [Bing] \"" + query + "\" -> " + results.length + " results");

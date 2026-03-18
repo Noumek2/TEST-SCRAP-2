@@ -112,22 +112,9 @@ async function main() {
       facebookOnly: true,
     });
 
-<<<<<<< HEAD
     // Save to Supabase (if configured) - both tables
     await saveToSupabase(enriched, "storage-scrap");        // All companies
     await saveToSupabase(enriched, "storage-fb-scrap");     // Facebook companies only
-=======
-    // Send email with the latest CSV (optional; requires config.emailTo + config.smtp)
-    if (config && config.emailTo) {
-      console.log("\nSending CSV by email to " + config.emailTo + "...");
-      try {
-        await sendCsv({ csvPath: allCsv, to: config.emailTo });
-        console.log("Email sent successfully.");
-      } catch (err) {
-        console.error("Failed to send email:", err.message || err);
-      }
-    }
->>>>>>> b3388b1d6500f441d2089be1fddf1d548e895b99
 
     // Print summary table to console
     printSummary(enriched);
