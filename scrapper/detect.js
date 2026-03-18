@@ -524,15 +524,8 @@ async function detectAll(companies, options) {
   try {
     for (let i = 0; i < companies.length; i++) {
       console.log("[" + (i + 1) + "/" + companies.length + "]");
-      try {
-        const enriched = await detectCompany(companies[i], page, delayMs);
-        if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
-      } catch (error) {
-        console.error("  ❌ Error processing company '" + companies[i].name + "': " + error.message);
-        // Add the company with minimal info if detection fails
-        const failedCompany = { ...companies[i], hasFacebook: false, error: error.message };
-        if (!facebookOnly) results.push(failedCompany);
-      }
+      const enriched = await detectCompany(companies[i], page, delayMs);
+      if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
     }
   } finally {
     if (browser) {

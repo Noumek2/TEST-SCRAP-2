@@ -192,6 +192,9 @@ function saveAll(companies, options = {}) {
   // ── Save CSV ──
   const csvPath = path.join(outputDir, base + ".csv");
   const csvString = toCsvFiltered(toSave, { minFollowers: 100, minPostYear: 2026 });
+
+  // Ensure old CSV (same base name) is removed so data is refreshed each run.
+  if (fs.existsSync(csvPath)) fs.unlinkSync(csvPath);
   fs.writeFileSync(csvPath, csvString, "utf8");
   const csvRowCount = csvString.split("\n").length - 1; // subtract header
   console.log("\nCSV saved: " + csvPath + " (" + csvRowCount + " rows, filtered 2026+ & >100 followers)");
@@ -199,6 +202,7 @@ function saveAll(companies, options = {}) {
   // ── Save XML ──
   const xmlPath = path.join(outputDir, base + ".xml");
   const xml = toXml(toSave, { generatedAt: new Date().toISOString(), totalFound: companies.length });
+  if (fs.existsSync(xmlPath)) fs.unlinkSync(xmlPath);
   fs.writeFileSync(xmlPath, xml, "utf8");
   console.log("XML saved: " + xmlPath + " (" + toSave.length + " records)");
 
