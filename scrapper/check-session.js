@@ -18,9 +18,15 @@ async function checkSession() {
   console.log("\n=== Facebook Session Setup ===\n");
 
   const executablePath = getChromeExecutablePath();
+
+  // Use a stable profile directory to avoid temp files being locked (first_party_sets.db, etc.)
+  const userDataDir = path.join(__dirname, "puppeteer_session");
+  if (!fs.existsSync(userDataDir)) fs.mkdirSync(userDataDir, { recursive: true });
+
   const launchOpts = {
     headless: false,          // Opens a real visible Chrome window
     defaultViewport: null,    // Full size window
+    userDataDir,
     args: [
       "--start-maximized",
       "--no-sandbox",

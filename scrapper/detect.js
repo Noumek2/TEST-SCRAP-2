@@ -94,8 +94,17 @@ const { getChromeExecutablePath } = require("./chrome-path");
 
 async function launchBrowser() {
   const executablePath = getChromeExecutablePath();
+
+  // Use a stable userDataDir (not a tmp folder) to avoid Puppeteer trying to delete locked files
+  // like first_party_sets.db when the process ends.
+  const userDataDir = path.join(__dirname, "puppeteer_profile");
+  if (!fs.existsSync(userDataDir)) {
+    fs.mkdirSync(userDataDir, { recursive: true });
+  }
+
   const launchOpts = {
     headless: "new",   // Invisible browser — runs in background
+    userDataDir,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
