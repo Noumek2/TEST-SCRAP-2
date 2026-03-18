@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cameroon Construction &amp; Real Estate Companies</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #1a1f35 0%, #16213e 50%, #0f3460 100%);
+      padding: 32px 40px 28px;
+      border-bottom: 1px solid #2d3748;
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header h1 { font-size: 1.7rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .header h1 span { color: #4299e1; }
+    .header-meta { font-size: 0.78rem; color: #718096; margin-top: 6px; }
+
+    /* ── Stats cards ─────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      padding: 28px 40px;
+      background: #0f1117;
+    }
+    .stat-card {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: #4299e1; }
+    .stat-card::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent, #4299e1);
+      border-radius: 12px 12px 0 0;
+    }
+    .stat-card.green  { --accent: #48bb78; }
+    .stat-card.purple { --accent: #9f7aea; }
+    .stat-card.yellow { --accent: #ecc94b; }
+    .stat-card.pink   { --accent: #f687b3; }
+    .stat-label { font-size: 0.72rem; color: #718096; text-transform: uppercase; letter-spacing: 0.8px; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: #fff; margin-top: 6px; line-height: 1; }
+    .stat-sub   { font-size: 0.75rem; color: #a0aec0; margin-top: 4px; }
+
+    /* ── Controls ────────────────────────────────────────── */
+    .controls {
+      padding: 0 40px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1; min-width: 240px;
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px 16px 10px 40px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+    }
+    .search-box:focus { border-color: #4299e1; }
+    .search-box::placeholder { color: #4a5568; }
+
+    .filter-btn {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px 18px;
+      color: #a0aec0;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #2b4c7e;
+      border-color: #4299e1;
+      color: #fff;
+    }
+
+    .count-label {
+      font-size: 0.8rem;
+      color: #718096;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ── Table wrapper ───────────────────────────────────── */
+    .table-wrap {
+      padding: 0 40px 40px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    thead th {
+      background: #1a202c;
+      color: #a0aec0;
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 2px solid #2d3748;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    thead th:hover { color: #e2e8f0; background: #2d3748; }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    thead th.sorted-asc .sort-icon::after  { content: " ▲"; opacity: 1; }
+    thead th.sorted-desc .sort-icon::after { content: " ▼"; opacity: 1; }
+
+    tbody tr {
+      border-bottom: 1px solid #1e2533;
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: #1a2035; }
+    tbody tr.no-fb  { opacity: 0.6; }
+
+    td {
+      padding: 12px 14px;
+      vertical-align: top;
+      max-width: 220px;
+    }
+    td.nowrap { white-space: nowrap; }
+
+    /* Company name cell */
+    .company-name { font-weight: 600; color: #e2e8f0; }
+    .company-source { font-size: 0.7rem; color: #4a5568; margin-top: 2px; }
+
+    /* Facebook badge */
+    .fb-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #1877f2;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .fb-badge:hover { background: #1464d8; }
+    .no-fb-badge {
+      font-size: 0.72rem; color: #4a5568;
+    }
+    .verified-icon { color: #4299e1; font-size: 0.75rem; margin-left: 4px; }
+
+    /* Follower count */
+    .followers-value { font-weight: 700; color: #48bb78; }
+    .likes-value     { font-weight: 700; color: #9f7aea; }
+
+    /* Rating stars */
+    .rating-stars { color: #ecc94b; font-size: 0.8rem; }
+    .rating-num   { color: #a0aec0; font-size: 0.75rem; }
+
+    /* Links */
+    a.link-ext {
+      color: #4299e1;
+      text-decoration: none;
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+    a.link-ext:hover { text-decoration: underline; }
+
+    /* Contact chips */
+    .chip {
+      display: inline-block;
+      background: #2d3748;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.72rem;
+      color: #a0aec0;
+      margin: 2px 2px 0 0;
+      word-break: break-all;
+    }
+
+    /* About text */
+    .about-text {
+      font-size: 0.78rem;
+      color: #718096;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: help;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #4a5568;
+    }
+    .empty .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+    /* Top companies bar */
+    .top-bar {
+      margin: 0 40px 20px;
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .top-bar h3 { font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+    .top-list { display: flex; gap: 12px; flex-wrap: wrap; }
+    .top-item {
+      background: #2d3748;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+    }
+    .top-item strong { color: #48bb78; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      .header, .stats, .controls, .table-wrap, .top-bar { padding-left: 16px; padding-right: 16px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .header h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🇨🇲 <span>Cameroon</span> Companies Dashboard</h1>
+      <div class="header-meta">
+        Cameroon Construction &amp; Real Estate Companies &nbsp;·&nbsp; Generated 18/03/2026 19:40:09
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stats cards ─────────────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-label">Total Companies</div>
+    <div class="stat-value">125</div>
+    <div class="stat-sub">found &amp; processed</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">On Facebook</div>
+    <div class="stat-value">0</div>
+    <div class="stat-sub">0% of total</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-label">Total Followers</div>
+    <div class="stat-value">0</div>
+    <div class="stat-sub">across 0 tracked pages</div>
+  </div>
+  <div class="stat-card yellow">
+    <div class="stat-label">Verified Pages</div>
+    <div class="stat-value">0</div>
+    <div class="stat-sub">with verification badge</div>
+  </div>
+  <div class="stat-card pink">
+    <div class="stat-label">No Facebook</div>
+    <div class="stat-value">125</div>
+    <div class="stat-sub">companies without a page</div>
+  </div>
+</div>
+
+<!-- ── Top companies ───────────────────────────────────────────────────── -->
+
+
+<!-- ── Controls ────────────────────────────────────────────────────────── -->
+<div class="controls">
+  <input class="search-box" id="searchInput" type="text" placeholder="Search by name, category, phone, email, address..."/>
+  <button class="filter-btn active" onclick="setFilter('all',this)">All (125)</button>
+  <button class="filter-btn" onclick="setFilter('facebook',this)">Facebook only (0)</button>
+  <button class="filter-btn" onclick="setFilter('nofacebook',this)">No Facebook (125)</button>
+  <span class="count-label" id="countLabel">125 companies shown</span>
+</div>
+
+<!-- ── Table ────────────────────────────────────────────────────────────── -->
+<div class="table-wrap">
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)" data-col="0">#<span class="sort-icon"></span></th>
+        <th onclick="sortTable(1)" data-col="1">Company<span class="sort-icon"></span></th>
+        <th onclick="sortTable(2)" data-col="2">Facebook<span class="sort-icon"></span></th>
+        <th onclick="sortTable(3)" data-col="3">Followers<span class="sort-icon"></span></th>
+        <th onclick="sortTable(4)" data-col="4">Likes<span class="sort-icon"></span></th>
+        <th onclick="sortTable(5)" data-col="5">Rating<span class="sort-icon"></span></th>
+        <th onclick="sortTable(6)" data-col="6">Category<span class="sort-icon"></span></th>
+        <th data-col="7">Contact Info</th>
+        <th data-col="8">About</th>
+        <th data-col="9">Website</th>
+        <th onclick="sortTable(10)" data-col="10">Scraped<span class="sort-icon"></span></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="empty" id="emptyState" style="display:none">
+    <span class="emoji">🔍</span>
+    No companies match your search.
+  </div>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────
+const DATA = [{"name":"Les 10 meilleures entreprises de travaux à Douala, Sanaga ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"SOCOCAM – The Steel Building Company","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Les 10 meilleures entreprises de construction à Yaoundé ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Accueil - ECO CONSTRUCTION CAMEROON","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"SECAF - Entreprise de construction et d'étanchéité","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Maligah | SeConstruire - Annuaire des entreprises du Cameroun","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Cameroon Real Estate Company Limited","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Search properties - mapiole.com","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Maisons, villas, duplex, triplex à vendre à Douala, Cameroun","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"(SOCIETE CAMEROUNAISE DE CONSTRUCTION ET DE ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Annuaire de la Sous-Traitance Industrielle CMR | BSTP-CMR","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Societé Immobilière du Cameroun | SIC","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Société d'Aménagement de Douala S.A","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"GEMAT - Entreprise de construction des bâtiments et travaux ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"property development Cameroon","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Cameroon Investment Properties – Buy-to-Let & Commercial","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Our Projects - SIC","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"List of Real estate developer in Cameroon","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"LM Platinum Estates, Agence Immobilière","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"AGIICAM - Agence Immobilière à Yaoundé et Douala ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Cameroon's housing developer signs deal with Portuguese ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"STARLINE CONSTRUCTION CAMEROON – Building Dreams","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"General Contracting -","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"27 agents immobiliers à proximité - StarOfService","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"Codecis - Agence immobilière cameroun, Yaounde, Douala","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":""},{"name":"2025中科院分区，大土木SCI期刊汇总来啦 Hey小伙伴们，中国科学院 …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Architecture、Building、Structure、Construction各自应该怎么翻译？","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Construction And Building Materials 期刊有哪些投稿经验？","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"construction management 和engineering management的区别? - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Les étapes (et la chronologie) de la préparation de votre projet","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Conseils pour faire construire sa maison","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"（中字）Construction Lines精确CAD建模Blender插件教程","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Le forum construction","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"real各种形式？ - 百度知道","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"true 和 real 有什么区别 - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"float 和 real 数据类型 的区别？？_百度知道","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"actual与real什么区别_百度知道","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"【买前必看】2025年最新AR眼镜对比测评：XREAL One、雷鸟air3 …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"如何具体区分genuine, authentic, true, real, actual? - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"2026年真我realme手机选购建议（典藏版）","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"一块绝妙 Pizza 的标准是什么？ - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"披萨制作成本低，为什么一个12寸的pizza要卖到72元！而且还有很多人 …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"为什么十二寸的pizza两个人可以吃完刚好，而六寸的pizza两份就饱 …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"最近看到有人说，List<Integer> 是卡车装钉子，编程界之耻，如何理 …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Microsoft – AI, Cloud, Productivity, Computing, Gaming & Apps","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Office 365 login","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Microsoft campus - Wikipedia","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Create your Microsoft account","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Microsoft account | Sign In or Create Your Account Today – Microsoft","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Microsoft Store | Xbox","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Sign in to your account","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Microsoft Headquarters 1 in Redmond, WA 98052 - (888) 7...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Microsoft Combines Workplace, Personal Copilot Teams in AI Push","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Microsoft considers legal action over $50 billion Amazon-OpenAI …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Définitions : promoteur - Dictionnaire de français Larousse","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"La liste des promoteurs immobiliers agréés en Côte d’Ivoire 2025","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Promoteurs immobiliers à Abidjan et en Côte d'Ivoire","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"promoteur - Définitions, synonymes, prononciation, exemples | Dico …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Promoteur immobilier agrée à Abidjan - IVOIRE SAPHIR","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Accueil - FOLOURGO CONSTRUCTION - Promoteur immobilier agrée …","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Définition du promoteur immobilier - Kaufman & Broad","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Promoteur immobilier : définition, rôle et missions de ce professionnel ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Promoteurs Immobiliers en Côte d'Ivoire 2026 : Guide Complet ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Promoteur : Définition simple et facile du dictionnaire","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Entreprise — Wikipédia","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Les 20 premières entreprises au Sénégal - Sénégal Online","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Qu'est-ce qu'une entreprise ? Définition, caractéristiques","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Résultats du Recensement Général des Entreprises (RGE)","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Qu'est-ce qu'une entreprise - vie-publique.fr","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"L'entreprise, c'est quoi? - economie.gouv.fr","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Qu'est ce qu'une entreprise : définition - Agicap","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"définition, rôles et enjeux - Entreprise","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Définitions : entreprise - Dictionnaire de français Larousse","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Définition entreprise - LE DICTIONNAIRE","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"谁能给我解释一下python中，@property装饰器的用途和意义？","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"attribute和property在英语里有什么区别? - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"property和estate的区别是什么呢? - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"OOP 中 property 和 attribute 有什么区别? - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"python之中特性（attribute）与属性（property）有什么区别？","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Property - Analytics Help - Google Help","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Set up Analytics for a website and/or app - Google Help","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Add a website property to Search Console - Search Console Help","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Agences de Voyage dans Bobo-Dioulasso, Hauts-Bassins - Cybo","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Agence Colina Burkina Faso | 20 97 26 22 | Bobo-Dioulasso","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Définitions : agence - Dictionnaire de français Larousse","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"SYA- Immobilier | Bobo Dioulasso - Facebook","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Définition agence / agencé - LE DICTIONNAIRE","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"agence — Wiktionnaire, le dictionnaire libre","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Définition de agence | Dictionnaire français","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"L'agence de Bobo-Dioulasso - Groupe Sodem","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Conseil Régional Hauts-Bassins - Accueil","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Agence Nationale pour l'enmploi (A.N.P.E. - AfricaBizInfo","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"University of Ljubljana - Exchange program","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"怎么看 Anthropic 刚发的《Building effective agents》这篇 ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Building And Environment 期刊建议投稿吗？你的经历如何 ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"pip安装requirements.txt出现failed building wheel for ？ - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"英語についてです。 建物という名詞は、なぜbuilding ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"python安装包时为什么会出现Failed building wheel for","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"cfa报名的building name指的是什么？ - 知乎","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"word 2007 无法插入页码，缺少文件building blocks.dotx ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":""},{"name":"Construction Company in Cameroon | Licensed Contractor - M&D Construction","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Mat And Co Construction Ltd","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"BERIA GROUP| for sustainable construction | Cameroon","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Accueil - CIS2847 | Entreprise de BTP leader à Douala, Cameroun","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Construction Companies in Cameroon | Companiesinae","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Construction of buildings in Douala, Littoral Region (Cameroon) - Cybo","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"List Of Construction companies in Douala - rentechdigital.com","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Laroche construction | Douala - Facebook","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Les entreprises de bâtiment et construction au Cameroun","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Accueil - Annico Build and Services","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Annuaire BTP Cameroun","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Nicam Cameroun : société de travaux publics (btp), construction et ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"ZAC BTP | Construction & Génie Civil au Cameroun","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"btp-Accueil - Groupe Nchouwat & Fils","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"CABTÉ - Compagnie de Construction","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Accueil EGCS Cameroun Entreprise Générale de Construction et de Service ...","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"BATI PLUS - Construction clé en main","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Real estate development in Cameroon | New construction projects","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Top Real Estate Developers in Cameroon | IPD","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"CACOCO BTP - Building the Future of Cameroon and Africa","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"SCI SENDAM - Providing you with the best real estate services in Cameroon","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"List Of Real estate developers in Cameroon - rentechdigital.com","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Top Property Developments in Cameroon, Africa | IPD","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"Top Real Estate Developers In Cameroon - ce.riaus.org.au","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""},{"name":"CFB Holding Ltd: Approved Real Estate Developer in Cameroon","websiteUrl":"","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":""}];
+
+let currentFilter = "all";
+let currentSort   = { col: -1, dir: 1 };
+let searchTerm    = "";
+
+// ── Render ──────────────────────────────────────────────────────────────
+function renderTable() {
+  let rows = DATA.slice();
+
+  // Filter
+  if (currentFilter === "facebook")   rows = rows.filter((r) => r.hasFacebook);
+  if (currentFilter === "nofacebook") rows = rows.filter((r) => !r.hasFacebook);
+
+  // Search
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    rows = rows.filter((r) =>
+      Object.values(r).some((v) => String(v).toLowerCase().includes(q))
+    );
+  }
+
+  // Sort
+  if (currentSort.col >= 0) {
+    rows.sort((a, b) => {
+      const va = getSortVal(a, currentSort.col);
+      const vb = getSortVal(b, currentSort.col);
+      if (va === vb) return 0;
+      if (va === "" || va === null) return 1;
+      if (vb === "" || vb === null) return -1;
+      return (va > vb ? 1 : -1) * currentSort.dir;
+    });
+  }
+
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  rows.forEach((c, i) => {
+    const tr = document.createElement("tr");
+    if (!c.hasFacebook) tr.classList.add("no-fb");
+
+    // Followers/likes formatted
+    const followersHtml = c.followers !== ""
+      ? '<span class="followers-value">' + Number(c.followers).toLocaleString() + '</span>'
+      : '<span style="color:#4a5568">—</span>';
+
+    const likesHtml = c.likes !== ""
+      ? '<span class="likes-value">' + Number(c.likes).toLocaleString() + '</span>'
+      : '<span style="color:#4a5568">—</span>';
+
+    // Rating stars
+    let ratingHtml = '<span style="color:#4a5568">—</span>';
+    if (c.rating !== "") {
+      const stars = Math.round(c.rating);
+      ratingHtml = '<span class="rating-stars">' + "★".repeat(stars) + "☆".repeat(5 - stars) + '</span>'
+        + '<br><span class="rating-num">' + c.rating + '/5'
+        + (c.ratingCount ? " (" + Number(c.ratingCount).toLocaleString() + ")" : "") + '</span>';
+    }
+
+    // Contacts
+    const contacts = [];
+    if (c.facebookPhone) contacts.push('<span class="chip">📞 ' + esc(c.facebookPhone) + '</span>');
+    if (c.facebookEmail) contacts.push('<span class="chip">✉️ ' + esc(c.facebookEmail) + '</span>');
+    if (c.phones)        c.phones.split(",").forEach((p) => { if (p.trim()) contacts.push('<span class="chip">' + esc(p.trim()) + '</span>'); });
+    if (c.emails)        c.emails.split(",").forEach((e) => { if (e.trim()) contacts.push('<span class="chip">' + esc(e.trim()) + '</span>'); });
+    if (c.facebookAddress) contacts.push('<span class="chip">📍 ' + esc(c.facebookAddress.slice(0,60)) + '</span>');
+
+    // Facebook cell
+    const fbHtml = c.hasFacebook
+      ? '<a class="fb-badge" href="' + esc(c.facebookUrl) + '" target="_blank">f ' + esc((c.facebookPageName || "Facebook").slice(0, 22)) + '</a>'
+        + (c.isVerified ? '<span class="verified-icon" title="Verified">✔</span>' : '')
+      : '<span class="no-fb-badge">No page</span>';
+
+    // Scraped date (short)
+    const dateShort = c.scrapedAt ? c.scrapedAt.slice(0, 10) : "";
+
+    tr.innerHTML =
+      '<td class="nowrap" style="color:#4a5568;font-size:0.75rem">' + (i + 1) + '</td>' +
+      '<td><div class="company-name">' + esc(c.name) + '</div>'
+        + (c.source ? '<div class="company-source">via ' + esc(c.source) + '</div>' : '') + '</td>' +
+      '<td class="nowrap">' + fbHtml + '</td>' +
+      '<td class="nowrap">' + followersHtml + '</td>' +
+      '<td class="nowrap">' + likesHtml + '</td>' +
+      '<td>' + ratingHtml + '</td>' +
+      '<td style="font-size:0.78rem;color:#a0aec0">' + esc(c.category) + '</td>' +
+      '<td>' + (contacts.length > 0 ? contacts.join("") : '<span style="color:#4a5568">—</span>') + '</td>' +
+      '<td><div class="about-text" title="' + esc(c.facebookAbout) + '">' + esc((c.facebookAbout || "").slice(0, 80)) + (c.facebookAbout && c.facebookAbout.length > 80 ? "..." : "") + '</div></td>' +
+      '<td>' + (c.websiteUrl || c.facebookWebsite
+          ? '<a class="link-ext" href="' + esc(c.facebookWebsite || c.websiteUrl) + '" target="_blank">'
+            + esc((c.facebookWebsite || c.websiteUrl).replace(/https?://(www.)?/, "").slice(0, 30)) + '</a>'
+          : '<span style="color:#4a5568">—</span>') + '</td>' +
+      '<td class="nowrap" style="font-size:0.75rem;color:#4a5568">' + dateShort + '</td>';
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("countLabel").textContent = rows.length + " companies shown";
+  document.getElementById("emptyState").style.display = rows.length === 0 ? "block" : "none";
+  document.getElementById("mainTable").style.display  = rows.length === 0 ? "none"  : "table";
+}
+
+function getSortVal(row, col) {
+  switch (col) {
+    case 0:  return 0;
+    case 1:  return (row.name || "").toLowerCase();
+    case 2:  return row.hasFacebook ? 0 : 1;
+    case 3:  return row.followers !== "" ? Number(row.followers) : -1;
+    case 4:  return row.likes     !== "" ? Number(row.likes)     : -1;
+    case 5:  return row.rating    !== "" ? Number(row.rating)    : -1;
+    case 6:  return (row.category || "").toLowerCase();
+    case 10: return row.scrapedAt || "";
+    default: return "";
+  }
+}
+
+// ── Sort ────────────────────────────────────────────────────────────────
+function sortTable(col) {
+  document.querySelectorAll("thead th").forEach((th) => th.classList.remove("sorted-asc", "sorted-desc"));
+  if (currentSort.col === col) {
+    currentSort.dir *= -1;
+  } else {
+    currentSort = { col, dir: -1 }; // default descending for numbers
+  }
+  const th = document.querySelector("thead th[data-col='" + col + "']");
+  th.classList.add(currentSort.dir === 1 ? "sorted-asc" : "sorted-desc");
+  renderTable();
+}
+
+// ── Filter buttons ───────────────────────────────────────────────────────
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTable();
+}
+
+// ── Search ───────────────────────────────────────────────────────────────
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  searchTerm = e.target.value.trim();
+  renderTable();
+});
+
+// ── HTML escape helper ───────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+renderTable();
+</script>
+</body>
+</html>

@@ -1,3 +1,13 @@
 {
-    "serpApiKey": "a884087a810fdeaf3724db0c97d1b7adb78701cc8d43704996f59a7c590f40fe"
+    "serpApiKey": "a884087a810fdeaf3724db0c97d1b7adb78701cc8d43704996f59a7c590f40fe",
+    "emailTo": "juniorsmil24@gmail.com",
+    "smtp": {
+        "host": "smtp.gmail.com",
+        "port": 587,
+        "secure": false,
+        "auth": {
+            "user": "juniorsmil24@gmail.com",
+            "pass": "wbhf fzwu dzqq bfgz"
+        }
+    }
 }

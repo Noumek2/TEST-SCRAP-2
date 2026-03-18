@@ -502,8 +502,13 @@ async function detectAll(companies, options) {
   try {
     for (let i = 0; i < companies.length; i++) {
       console.log("[" + (i + 1) + "/" + companies.length + "]");
-      const enriched = await detectCompany(companies[i], page, delayMs);
-      if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      try {
+        const enriched = await detectCompany(companies[i], page, delayMs);
+        if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      } catch (err) {
+        // Continue with next company even if one fails.
+        console.error("  [error] Failed to detect company #" + (i + 1) + ": " + (err.message || err));
+      }
     }
   } finally {
     await browser.close();
