@@ -102,8 +102,29 @@ async function launchBrowser() {
       "--disable-blink-features=AutomationControlled",
       "--disable-infobars",
       "--window-size=1366,768",
+      "--disable-background-timer-throttling",
+      "--disable-backgrounding-occluded-windows",
+      "--disable-renderer-backgrounding",
+      "--disable-features=TranslateUI",
+      "--disable-ipc-flooding-protection",
+      "--disable-dev-shm-usage",  // Prevent crashes on low-memory systems
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-component-extensions-with-background-pages",
+      "--disable-default-apps",
+      "--disable-sync",
+      "--metrics-recording-only",
+      "--no-crash-upload",
+      "--disable-logging",
+      "--disable-login-animations",
+      "--disable-notifications",
+      "--disable-permissions-api",
+      "--disable-session-crashed-bubble",
+      "--disable-infobars",
     ],
     ignoreDefaultArgs: ["--enable-automation"],
+    ignoreHTTPSErrors: true,
+    timeout: 60000,  // 60 second timeout
   };
 
   if (executablePath) {
@@ -117,6 +138,7 @@ async function launchBrowser() {
     console.error("Failed to launch browser: " + err.message);
     console.error("  - Run: npm run puppeteer-install");
     console.error("  - Or set PUPPETEER_EXECUTABLE_PATH / CHROME_PATH to a valid chrome.exe");
+    console.error("  - If you get EBUSY errors, try: taskkill /F /IM chrome.exe /T");
     process.exit(1);
   }
 }
@@ -493,12 +515,33 @@ async function detectAll(companies, options) {
   try {
     for (let i = 0; i < companies.length; i++) {
       console.log("[" + (i + 1) + "/" + companies.length + "]");
-      const enriched = await detectCompany(companies[i], page, delayMs);
-      if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      try {
+        const enriched = await detectCompany(companies[i], page, delayMs);
+        if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      } catch (error) {
+        console.error("  ❌ Error processing company '" + companies[i].name + "': " + error.message);
+        // Add the company with minimal info if detection fails
+        const failedCompany = { ...companies[i], hasFacebook: false, error: error.message };
+        if (!facebookOnly) results.push(failedCompany);
+      }
     }
   } finally {
-    await browser.close();
-    console.log("  Browser closed.");
+    if (browser) {
+      try {
+        // Give Puppeteer a moment to finish any pending work.
+        await new Promise((r) => setTimeout(r, 250));
+        await browser.close();
+        console.log("  Browser closed.");
+      } catch (closeError) {
+        console.error("  ❌ Error closing browser: " + closeError.message);
+        try {
+          browser.disconnect();
+          console.log("  Browser disconnected after close failure.");
+        } catch (disconnectError) {
+          console.error("  ❌ Error disconnecting browser: " + disconnectError.message);
+        }
+      }
+    }
   }
 
   const withFb = results.filter((r) => r.hasFacebook).length;

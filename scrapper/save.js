@@ -8,6 +8,7 @@
 const fs = require("fs");
 const { saveReport } = require("./report");
 const path = require("path");
+const { supabase } = require("./supabaseClient");
 
 // ── CSV helpers ────────────────────────────────────────────────────────────
 
@@ -252,4 +253,62 @@ function printSummary(companies) {
   console.log(line + "\n");
 }
 
-module.exports = { saveAll, printSummary, toCsv, toXml };
+/**
+ * Saves enriched company data to Supabase database.
+ */
+async function saveToSupabase(companies, tableName = null) {
+  const defaultTable = process.env.SUPABASE_TABLE || "storage-fb-scrap";
+  const targetTable = tableName || defaultTable;
+  const columnName = process.env.SUPABASE_COLUMN || "json_files";
+
+  if (!supabase) {
+    const hasUrl = !!process.env.SUPABASE_URL;
+    const hasKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+    console.log("\nSTEP 4 — Skipping Supabase save (not configured).");
+    console.log("  - SUPABASE_URL set? : " + hasUrl);
+    console.log("  - SUPABASE_SERVICE_ROLE_KEY set? : " + hasKey);
+    console.log("  (To enable, set these in a .env file or your shell environment.)");
+    console.log("  NOTE: You must use the SERVICE ROLE key (not the publishable key).");
+    return;
+  }
+
+  // Determine what data to save based on table
+  let dataToSave = companies;
+  let tableDescription = "all companies";
+
+  if (targetTable === "storage-fb-scrap" || targetTable.includes("fb")) {
+    // Filter to only companies with Facebook pages
+    dataToSave = companies.filter(company => company.hasFacebook);
+    tableDescription = "Facebook companies only";
+
+    if (dataToSave.length === 0) {
+      console.log(`\nSTEP 4 — Skipping ${targetTable} save (no companies with Facebook found).`);
+      return;
+    }
+  }
+
+  console.log(`\nSTEP 4 — Saving ${tableDescription} to ${targetTable}...`);
+
+  const payload = {
+    scrapedAt: new Date().toISOString(),
+    total: dataToSave.length,
+    withFacebook: dataToSave.filter((c) => c.hasFacebook).length,
+    companies: dataToSave,
+  };
+
+  const { data, error } = await supabase
+    .from(targetTable)
+    .insert([{ [columnName]: payload }]);
+
+  if (error) {
+    console.error(`  ❌ ${targetTable} insert failed:`, error.message);
+    if (error.details) console.error("     Details:", error.details);
+    if (error.hint) console.error("     Hint:", error.hint);
+    console.error("  Response:", data);
+  } else {
+    console.log(`  ✅ ${targetTable} insert succeeded!`);
+    console.log(`     Saved ${dataToSave.length} ${tableDescription}`);
+  }
+}
+
+module.exports = { saveAll, printSummary, toCsv, toXml, saveToSupabase };

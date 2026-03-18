@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cameroon Construction &amp; Real Estate Companies</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #1a1f35 0%, #16213e 50%, #0f3460 100%);
+      padding: 32px 40px 28px;
+      border-bottom: 1px solid #2d3748;
+    }
+    .header-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header h1 { font-size: 1.7rem; font-weight: 700; color: #fff; letter-spacing: -0.3px; }
+    .header h1 span { color: #4299e1; }
+    .header-meta { font-size: 0.78rem; color: #718096; margin-top: 6px; }
+
+    /* ── Stats cards ─────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      padding: 28px 40px;
+      background: #0f1117;
+    }
+    .stat-card {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 18px 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: #4299e1; }
+    .stat-card::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--accent, #4299e1);
+      border-radius: 12px 12px 0 0;
+    }
+    .stat-card.green  { --accent: #48bb78; }
+    .stat-card.purple { --accent: #9f7aea; }
+    .stat-card.yellow { --accent: #ecc94b; }
+    .stat-card.pink   { --accent: #f687b3; }
+    .stat-label { font-size: 0.72rem; color: #718096; text-transform: uppercase; letter-spacing: 0.8px; }
+    .stat-value { font-size: 2rem; font-weight: 800; color: #fff; margin-top: 6px; line-height: 1; }
+    .stat-sub   { font-size: 0.75rem; color: #a0aec0; margin-top: 4px; }
+
+    /* ── Controls ────────────────────────────────────────── */
+    .controls {
+      padding: 0 40px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1; min-width: 240px;
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px 16px 10px 40px;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 12px center;
+    }
+    .search-box:focus { border-color: #4299e1; }
+    .search-box::placeholder { color: #4a5568; }
+
+    .filter-btn {
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 8px;
+      padding: 10px 18px;
+      color: #a0aec0;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: #2b4c7e;
+      border-color: #4299e1;
+      color: #fff;
+    }
+
+    .count-label {
+      font-size: 0.8rem;
+      color: #718096;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+
+    /* ── Table wrapper ───────────────────────────────────── */
+    .table-wrap {
+      padding: 0 40px 40px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+    }
+    thead th {
+      background: #1a202c;
+      color: #a0aec0;
+      font-weight: 600;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 2px solid #2d3748;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    thead th:hover { color: #e2e8f0; background: #2d3748; }
+    thead th .sort-icon { margin-left: 4px; opacity: 0.4; }
+    thead th.sorted-asc .sort-icon::after  { content: " ▲"; opacity: 1; }
+    thead th.sorted-desc .sort-icon::after { content: " ▼"; opacity: 1; }
+
+    tbody tr {
+      border-bottom: 1px solid #1e2533;
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: #1a2035; }
+    tbody tr.no-fb  { opacity: 0.6; }
+
+    td {
+      padding: 12px 14px;
+      vertical-align: top;
+      max-width: 220px;
+    }
+    td.nowrap { white-space: nowrap; }
+
+    /* Company name cell */
+    .company-name { font-weight: 600; color: #e2e8f0; }
+    .company-source { font-size: 0.7rem; color: #4a5568; margin-top: 2px; }
+
+    /* Facebook badge */
+    .fb-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #1877f2;
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .fb-badge:hover { background: #1464d8; }
+    .no-fb-badge {
+      font-size: 0.72rem; color: #4a5568;
+    }
+    .verified-icon { color: #4299e1; font-size: 0.75rem; margin-left: 4px; }
+
+    /* Follower count */
+    .followers-value { font-weight: 700; color: #48bb78; }
+    .likes-value     { font-weight: 700; color: #9f7aea; }
+
+    /* Rating stars */
+    .rating-stars { color: #ecc94b; font-size: 0.8rem; }
+    .rating-num   { color: #a0aec0; font-size: 0.75rem; }
+
+    /* Links */
+    a.link-ext {
+      color: #4299e1;
+      text-decoration: none;
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+    a.link-ext:hover { text-decoration: underline; }
+
+    /* Contact chips */
+    .chip {
+      display: inline-block;
+      background: #2d3748;
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.72rem;
+      color: #a0aec0;
+      margin: 2px 2px 0 0;
+      word-break: break-all;
+    }
+
+    /* About text */
+    .about-text {
+      font-size: 0.78rem;
+      color: #718096;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: help;
+    }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #4a5568;
+    }
+    .empty .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+
+    /* Top companies bar */
+    .top-bar {
+      margin: 0 40px 20px;
+      background: #1a202c;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .top-bar h3 { font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; }
+    .top-list { display: flex; gap: 12px; flex-wrap: wrap; }
+    .top-item {
+      background: #2d3748;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+    }
+    .top-item strong { color: #48bb78; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0f1117; }
+    ::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 3px; }
+
+    @media (max-width: 768px) {
+      .header, .stats, .controls, .table-wrap, .top-bar { padding-left: 16px; padding-right: 16px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .header h1 { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────── -->
+<div class="header">
+  <div class="header-top">
+    <div>
+      <h1>🇨🇲 <span>Cameroon</span> Companies Dashboard</h1>
+      <div class="header-meta">
+        Cameroon Construction &amp; Real Estate Companies &nbsp;·&nbsp; Generated 3/18/2026, 3:59:47 PM
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Stats cards ─────────────────────────────────────────────────────── -->
+<div class="stats">
+  <div class="stat-card">
+    <div class="stat-label">Total Companies</div>
+    <div class="stat-value">97</div>
+    <div class="stat-sub">found &amp; processed</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-label">On Facebook</div>
+    <div class="stat-value">3</div>
+    <div class="stat-sub">3% of total</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-label">Total Followers</div>
+    <div class="stat-value">36.8K</div>
+    <div class="stat-sub">across 2 tracked pages</div>
+  </div>
+  <div class="stat-card yellow">
+    <div class="stat-label">Verified Pages</div>
+    <div class="stat-value">2</div>
+    <div class="stat-sub">with verification badge</div>
+  </div>
+  <div class="stat-card pink">
+    <div class="stat-label">No Facebook</div>
+    <div class="stat-value">94</div>
+    <div class="stat-sub">companies without a page</div>
+  </div>
+</div>
+
+<!-- ── Top companies ───────────────────────────────────────────────────── -->
+
+<div class="top-bar">
+  <h3>🏆 Top companies by followers</h3>
+  <div class="top-list">
+    
+    <div class="top-item">
+      🥇 Rentech Digital
+      &nbsp;<strong>36,000</strong> followers
+    </div>
+    <div class="top-item">
+      🥈 BERIA GROUP Sarl
+      &nbsp;<strong>844</strong> followers
+    </div>
+  </div>
+</div>
+
+<!-- ── Controls ────────────────────────────────────────────────────────── -->
+<div class="controls">
+  <input class="search-box" id="searchInput" type="text" placeholder="Search by name, category, phone, email, address..."/>
+  <button class="filter-btn active" onclick="setFilter('all',this)">All (97)</button>
+  <button class="filter-btn" onclick="setFilter('facebook',this)">Facebook only (3)</button>
+  <button class="filter-btn" onclick="setFilter('nofacebook',this)">No Facebook (94)</button>
+  <span class="count-label" id="countLabel">97 companies shown</span>
+</div>
+
+<!-- ── Table ────────────────────────────────────────────────────────────── -->
+<div class="table-wrap">
+  <table id="mainTable">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)" data-col="0">#<span class="sort-icon"></span></th>
+        <th onclick="sortTable(1)" data-col="1">Company<span class="sort-icon"></span></th>
+        <th onclick="sortTable(2)" data-col="2">Facebook<span class="sort-icon"></span></th>
+        <th onclick="sortTable(3)" data-col="3">Followers<span class="sort-icon"></span></th>
+        <th onclick="sortTable(4)" data-col="4">Likes<span class="sort-icon"></span></th>
+        <th onclick="sortTable(5)" data-col="5">Rating<span class="sort-icon"></span></th>
+        <th onclick="sortTable(6)" data-col="6">Category<span class="sort-icon"></span></th>
+        <th data-col="7">Contact Info</th>
+        <th data-col="8">About</th>
+        <th data-col="9">Website</th>
+        <th onclick="sortTable(10)" data-col="10">Scraped<span class="sort-icon"></span></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div class="empty" id="emptyState" style="display:none">
+    <span class="emoji">🔍</span>
+    No companies match your search.
+  </div>
+</div>
+
+<script>
+// ── Data ────────────────────────────────────────────────────────────────
+const DATA = [{"name":"AGIICAM - Agence Immobilière à Yaoundé et Douala ...","websiteUrl":"https://www.agiicam.com/?srsltid=AfmBOorboWXpNuz-7jf2zl4Q5aaoP2BanaTKoDKYBlXfeVgbkaxnkvzp","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":"2026-03-18T14:48:23.711Z"},{"name":"LM Platinum Estates, Agence Immobilière","websiteUrl":"https://lmplatinumestates.cm/?srsltid=AfmBOoojYzcLV78WXE21oYnSe2VIPffWQlLo8Fftw8zR7dDfgqpCE3AL","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"google_serpapi","scrapedAt":"2026-03-18T14:48:29.701Z"},{"name":"2025中科院分区，大土木SCI期刊汇总来啦 Hey小伙伴们，中国科学院 …","websiteUrl":"https://www.bing.com/ck/a?!&&p=106115eba8e9485b50da5de9bcb7ce507ea36cd0864f910f46084969a9c835f3JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3Bpbi8xODg4MjI4MTQzMjU4NjU4Nzg0&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"22814325","source":"bing","scrapedAt":"2026-03-18T14:48:34.882Z"},{"name":"Architecture、Building、Structure、Construction各自应该怎么翻译？","websiteUrl":"https://www.bing.com/ck/a?!&&p=ff2de7f6fbaece293f460a0d10b02653f61c47db7ee82ae38e0a27ac45a83b41JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzIwODY5Nzc4&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"20869778","source":"bing","scrapedAt":"2026-03-18T14:48:39.616Z"},{"name":"Construction And Building Materials 期刊有哪些投稿经验？","websiteUrl":"https://www.bing.com/ck/a?!&&p=40f223d2744ad31746e4903449846ec9259a4b17e71b9e3f85fb7a872d9606daJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzY1MjM3NTI5NQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"65237529","source":"bing","scrapedAt":"2026-03-18T14:48:43.716Z"},{"name":"construction management 和engineering management的区别? - 知乎","websiteUrl":"https://www.bing.com/ck/a?!&&p=c770fea5bde3c24d65230368e46ddfa1192e3d93b896b130ba181b446cb5bf9bJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzY0Njc1Njg3&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"64675687","source":"bing","scrapedAt":"2026-03-18T14:48:47.817Z"},{"name":"Les étapes (et la chronologie) de la préparation de votre projet","websiteUrl":"https://www.bing.com/ck/a?!&&p=e0a7a7a304827f9afa058cbd4bfbe8ddd5943bb02777b8f710059bdb7483c12bJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuZm9ydW1jb25zdHJ1aXJlLmNvbS9ndWlkZXMvZ3VpZGUtY2hyb25vbG9naWUtcHJvamV0LWNvbnN0cnVjdGlvbi8&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:48:52.067Z"},{"name":"Conseils pour faire construire sa maison","websiteUrl":"https://www.bing.com/ck/a?!&&p=4b63ab8159cc0a7ffda2aeb1850bf97393632482e952b901ee6af9faa4809693JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuZm9ydW1jb25zdHJ1aXJlLmNvbS9ndWlkZXMv&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:48:56.166Z"},{"name":"（中字）Construction Lines精确CAD建模Blender插件教程","websiteUrl":"https://www.bing.com/ck/a?!&&p=d8736a379e05914714bbd08500a1eb583343e785169dac2b6ee595162e4c1633JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3p2aWRlby8xNzExNzAyNTgyOTYyMDQ5MDI0&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"25829620","source":"bing","scrapedAt":"2026-03-18T14:49:00.267Z"},{"name":"Le forum construction","websiteUrl":"https://www.bing.com/ck/a?!&&p=4a1ff614aa286b5163063a8ab71e6fa8ce6dc163a8951c986461e6352e304e52JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=10db94a8-addd-6d3b-351e-8388ac816ce3&u=a1aHR0cHM6Ly93d3cuZm9ydW1jb25zdHJ1aXJlLmNvbS9jb25zdHJ1aXJlLw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:04.349Z"},{"name":"Realtor.com® | Homes for Sale, Apartments & Houses for Rent","websiteUrl":"https://www.bing.com/ck/a?!&&p=6f2516334825449d5d005475d1becc9bd00b02ef7881f7b3e88a297c3a056428JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vP21zb2NraWQ9MzZkYzA4YzkxNjg5NmEyMjFjZmMxZmU5MTdiZTZiZWE&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:08.451Z"},{"name":"Homes for Sale, Real Estate & Property Listings | Realtor.com®","websiteUrl":"https://www.bing.com/ck/a?!&&p=36ba3415a7eebeec2921367ccd9e540c39167ea78c0594c48df49c93c749271cJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWZvcnNhbGU_bXNvY2tpZD0zNmRjMDhjOTE2ODk2YTIyMWNmYzFmZTkxN2JlNmJlYQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:12.549Z"},{"name":"Charlotte, NC homes for sale & real estate - realtor.com","websiteUrl":"https://www.bing.com/ck/a?!&&p=0b281e169f7bea6bb6c1bdb558d64ba335d157b6915ffcea191247a06c7f12e9JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9DaGFybG90dGVfTkM_bXNvY2tpZD0zNmRjMDhjOTE2ODk2YTIyMWNmYzFmZTkxN2JlNmJlYQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:17.867Z"},{"name":"Johns Creek, GA homes for sale & real estate - realtor.com","websiteUrl":"https://www.bing.com/ck/a?!&&p=813a58c870908d114a451f814485b4ff0b5cbdaccbca4552da0620ea926ee1fcJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9Kb2hucy1DcmVla19HQT9tc29ja2lkPTM2ZGMwOGM5MTY4OTZhMjIxY2ZjMWZlOTE3YmU2YmVh&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:22.517Z"},{"name":"Inver Grove Heights, MN homes for sale & real estate","websiteUrl":"https://www.bing.com/ck/a?!&&p=a9a8249777ea805e1b02615d9a746506280564efc01ada257c50c28ddc4d59dcJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9JbnZlci1Hcm92ZS1IZWlnaHRzX01OP21zb2NraWQ9MzZkYzA4YzkxNjg5NmEyMjFjZmMxZmU5MTdiZTZiZWE&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:27.117Z"},{"name":"California homes for sale & real estate - Realtor.com®","websiteUrl":"https://www.bing.com/ck/a?!&&p=9392da06db0373f7040d7cade543fc1a20dba7676e3a9f404aeae7ae391d20eaJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9DYWxpZm9ybmlhP21zb2NraWQ9MzZkYzA4YzkxNjg5NmEyMjFjZmMxZmU5MTdiZTZiZWE&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:31.216Z"},{"name":"Augusta, GA homes for sale & real estate - realtor.com","websiteUrl":"https://www.bing.com/ck/a?!&&p=91f7d3b0def4e9da34bae52a75c97e7c3ea1eaae02f181b261a44fc51ceebeccJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9BdWd1c3RhX0dBP21zb2NraWQ9MzZkYzA4YzkxNjg5NmEyMjFjZmMxZmU5MTdiZTZiZWE&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:35.317Z"},{"name":"Boynton Beach, FL homes for sale & real estate - realtor.com","websiteUrl":"https://www.bing.com/ck/a?!&&p=3633da03c45108edfb8e6bc9bb7bf59fcca25f127783a6d8264403914527e229JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9Cb3ludG9uLUJlYWNoX0ZMP21zb2NraWQ9MzZkYzA4YzkxNjg5NmEyMjFjZmMxZmU5MTdiZTZiZWE&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:39.433Z"},{"name":"Princeton, NJ homes for sale & real estate - realtor.com","websiteUrl":"https://www.bing.com/ck/a?!&&p=858bdbc2d5434e95a6d20520c59df662272fdb9376d6ec4ad055f1d8be9d3d48JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9QcmluY2V0b25fTko_bXNvY2tpZD0zNmRjMDhjOTE2ODk2YTIyMWNmYzFmZTkxN2JlNmJlYQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:43.517Z"},{"name":"Longview, TX homes for sale & real estate - realtor.com","websiteUrl":"https://www.bing.com/ck/a?!&&p=5a0d8a021619ddaaec4c84261194fa043eee52d5e13a9b860b2972dc55ab4429JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=36dc08c9-1689-6a22-1cfc-1fe917be6bea&u=a1aHR0cHM6Ly93d3cucmVhbHRvci5jb20vcmVhbGVzdGF0ZWFuZGhvbWVzLXNlYXJjaC9Mb25ndmlld19UWD9tc29ja2lkPTM2ZGMwOGM5MTY4OTZhMjIxY2ZjMWZlOTE3YmU2YmVh&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:47.666Z"},{"name":"A MOTHERS MEASURE -ANNABEL APARA ANGEL UNIGWE VICTORY …","websiteUrl":"https://www.bing.com/ck/a?!&&p=ea0ec263b475b4ea1c3095edba344502a3d08e7295a831b12e56d6fd5abf19c0JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj1zc2FQbFJNWC1Qcw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:49:51.783Z"},{"name":"New on Uche Nancy Tv A mother's Measure. Rush to YouTube now | Movie …","websiteUrl":"https://www.bing.com/ck/a?!&&p=a45399b8d0dcbdc52051c77854508d2da5f5c1d16f0a9eb43e3ca1063dd0481eJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cuZmFjZWJvb2suY29tL3JlZWwvMzEwOTE5NzE1OTQ3MDQ2Mi8&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"31091971","source":"bing","scrapedAt":"2026-03-18T14:49:55.933Z"},{"name":"Instagram","websiteUrl":"https://www.bing.com/ck/a?!&&p=6ef8b48d27fe7dd1ce77cba7d0cf22cbcbb5f381ec5a26cec0be9d734fd85c3bJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cuaW5zdGFncmFtLmNvbS9wL0RWNmVFOUpqYXNWLw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:00.083Z"},{"name":"what you watched my new movie titled A MOTHER'S MEASURE","websiteUrl":"https://www.bing.com/ck/a?!&&p=176c6e42cd6e66768a9705b8369aad97e911f8bb0b302e391c494781376f163fJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cudGlrdG9rLmNvbS9AdWNoZW5hbmN5dHZfL3ZpZGVvLzc2MTc4NjM0MjAwMzcxMjMzNDk&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"61786342, 37123349","source":"bing","scrapedAt":"2026-03-18T14:50:05.083Z"},{"name":"A MOTHER'S MEASURE FULL MOVIE REVIEW - YouTube","websiteUrl":"https://www.bing.com/ck/a?!&&p=d1994c6afe6bb2b01441aa9cb90657fdc4d1ef0ccc74910bf98c41dbc75c2ba5JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj02aU9kRl9ZVWpiNA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:09.367Z"},{"name":"A MOTHER'S MEASURE: Annabel Apara FIGHTS Angel Unigwe Over …","websiteUrl":"https://www.bing.com/ck/a?!&&p=00a5e5eb94ee456c57c082ed78e0e5339c9a297ab8bec48a5153e182765df9dbJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj1YaDMyUExzdkFfbw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:13.850Z"},{"name":"New Movie 'A Mother's Measure' Coming Soon! | TikTok","websiteUrl":"https://www.bing.com/ck/a?!&&p=f1e1c8bdb9f9666d88ecd1f4af2bb66d46af7020cef91cd5d080e65e1c0c8a8aJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cudGlrdG9rLmNvbS9AZG96enlub2xseS92aWRlby83NjE2MDAzNjc4MDA4MzY0MzEw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"61600367","source":"bing","scrapedAt":"2026-03-18T14:50:19.650Z"},{"name":"A MOTHER’S MEASURE ; ANGEL UNIGWE, MICHAEL VICTORY, …","websiteUrl":"https://www.bing.com/ck/a?!&&p=589b12c84777580720b52535b597fc9a6f42f788365166ed155c65d69470b432JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj1OYlJQVkxNeWV3VQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:29.249Z"},{"name":"A MOTHER'S MEASURE | #trending #movie #nollywood","websiteUrl":"https://www.bing.com/ck/a?!&&p=f879fb2a880c8ac68d5f85a8027b6d7b69045c0a7b2ff1391cb2fca560f10e3fJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vd2F0Y2g_dj1lNDhGRHBJLThfTQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:33.917Z"},{"name":"A mother’s measure #fyp#movie#love#sister#viral | TikTok","websiteUrl":"https://www.bing.com/ck/a?!&&p=46678941f5ebbc94315ba951711bcfcaea10e7a4313ddc0e57523663968b91ddJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=200e2ad9-ea1b-64ef-11e3-3df9ebd8654c&u=a1aHR0cHM6Ly93d3cudGlrdG9rLmNvbS9AdW5la3d1b2pvLnR2L3ZpZGVvLzc2MTc1MzQ4MzQ5OTAyMzg5OTY&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"61753483","source":"bing","scrapedAt":"2026-03-18T14:50:38.050Z"},{"name":"MAIS QUELLE EST CETTE SOCIETE PRIVEE","websiteUrl":"https://www.bing.com/ck/a?!&&p=9ae21803d1158b50b6e1280dc1e6521a63b42ef460b6272f1e65ad01b1635214JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vbWFpcy1xdWVsbGUtZXN0LWNldHRlLXNvY2lldGUtcHJpdmVlLWZkNTU4NTMyMA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:42.267Z"},{"name":"Depuis mon alsace,","websiteUrl":"https://www.bing.com/ck/a?!&&p=40ce43d9576e7b3ae302c947bb02443a3a0ba7fc50e5661c26f39aa6e3c20342JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vZGVwdWlzLW1vbi1hbHNhY2UtZmQzMTQ0OTE1&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:46.399Z"},{"name":"Savez-vous que","websiteUrl":"https://www.bing.com/ck/a?!&&p=a287dc089ac6433b2bd272fa139c0f7af0c44e30eb0046e527093adb167df6b6JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vc2F2ZXotdm91cy1xdWUtZmQxMjM1MzAx&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:50.533Z"},{"name":"Souverain pontife","websiteUrl":"https://www.bing.com/ck/a?!&&p=26797e7176072465dcb34580557b6a492a893c1d6c4e52fc9e54d219bf9158f7JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vc291dmVyYWluLXBvbnRpZmUtZmQ1NjkwMjQ1&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:54.700Z"},{"name":"L’assassin de Philippe","websiteUrl":"https://www.bing.com/ck/a?!&&p=0ed8e6816f5702e0ec6cdc3de619cda4e847bfb1fea9aec99e7ec4b780dec2f6JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vbC1hc3Nhc3Npbi1kZS1waGlsaXBwZS1mZDU3MDkxNjY&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:50:58.866Z"},{"name":"Et on recommence!!","websiteUrl":"https://www.bing.com/ck/a?!&&p=1a5977f34e7745916ac1c6d72609b2031aa676cb4abed4642684fedaa2b3176eJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vZXQtb24tcmVjb21tZW5jZS1mZDk3OTU2MQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:03.116Z"},{"name":"A la question","websiteUrl":"https://www.bing.com/ck/a?!&&p=5ed02adc6fbfb0702c800dfb956d92ac918b39c9ed92fb1d109c17c60c442cd2JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vYS1sYS1xdWVzdGlvbi1mZDU2MTQzNjg&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:07.299Z"},{"name":"Un monde meilleur","websiteUrl":"https://www.bing.com/ck/a?!&&p=f7e9da887bc49f9ac7b38138afb1f99753c14935a9ec5a3fd626b0918ca03bc1JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vdW4tbW9uZGUtbWVpbGxldXItZmQ1NzAxNzQy&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:11.618Z"},{"name":"AGRESSION ( Quoi faire ? )","websiteUrl":"https://www.bing.com/ck/a?!&&p=40e608e3c2cd683ab451c8efa798cb8f977697962112edf72b4add9a978646f7JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vYWdyZXNzaW9uLXF1b2ktZmFpcmUtZmQ1NjczNDM4&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:15.767Z"},{"name":"COVID et socialisation","websiteUrl":"https://www.bing.com/ck/a?!&&p=167909fac1b92f80f4e313ec80d76d95a6c3558f64ca5980b5e3f8f49441ab4bJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=0e266636-56a5-6f18-37a7-711657396ef9&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vY292aWQtZXQtc29jaWFsaXNhdGlvbi1mZDU2MjEwOTY&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:19.884Z"},{"name":"Google","websiteUrl":"https://www.bing.com/ck/a?!&&p=b39ba4f1790a88ea752245a0f9916c7abe47102190fcd94d9a9c93fec428917fJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=09f685e4-ca18-6824-3eab-92c4cb4269d9&u=a1aHR0cHM6Ly93d3cuZ29vZ2xlLmRlLw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:23.949Z"},{"name":"Home [search.google]","websiteUrl":"https://www.bing.com/ck/a?!&&p=1a55e5f62f373b152964390e264329c7366d90e2670f272ade80b0672f4053e6JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=09f685e4-ca18-6824-3eab-92c4cb4269d9&u=a1aHR0cHM6Ly9zZWFyY2guZ29vZ2xlL2ludGwvZGUtREUv&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:28.083Z"},{"name":"‎Google‑App – App Store","websiteUrl":"https://www.bing.com/ck/a?!&&p=4d905f0b33871883d87eacfe59252a0cdca0cc7ce9f457207b2049930114e934JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=09f685e4-ca18-6824-3eab-92c4cb4269d9&u=a1aHR0cHM6Ly9hcHBzLmFwcGxlLmNvbS9kZS9hcHAvZ29vZ2xlL2lkMjg0ODE1OTQy&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"28481594","source":"bing","scrapedAt":"2026-03-18T14:51:32.250Z"},{"name":"Google Konto","websiteUrl":"https://www.bing.com/ck/a?!&&p=1196482d556d37c4e7e62f97db7f63e74136ef57f1019646dc82450db677d4fcJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=09f685e4-ca18-6824-3eab-92c4cb4269d9&u=a1aHR0cHM6Ly93d3cuZ29vZ2xlLmNvbS9pbnRsL2RlL2FjY291bnQvYWJvdXQv&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:36.400Z"},{"name":"Google - dw.com","websiteUrl":"https://www.bing.com/ck/a?!&&p=58b62d8618dfbc5ac7e168391a357717a78e8e1871492cff25168ac77ed59d81JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=09f685e4-ca18-6824-3eab-92c4cb4269d9&u=a1aHR0cHM6Ly93d3cuZHcuY29tL2RlL2dvb2dsZS90LTE3Mjg4MDEx&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:40.550Z"},{"name":"MonEntreprise.bj - Créez votre entreprise au Bénin","websiteUrl":"https://www.bing.com/ck/a?!&&p=ff2fbe1365d9d6f4ff13b53316642b4cfed47d5bb5d5eee3bb482b2331d54da9JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly9tb25lbnRyZXByaXNlLmJqLw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:44.800Z"},{"name":"ENTREPRISE in English - Cambridge Dictionary","websiteUrl":"https://www.bing.com/ck/a?!&&p=2ca2be617dc0f926ff063f77e0c5c4aca14709aff78997fde0bb7739a3f3b180JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly9kaWN0aW9uYXJ5LmNhbWJyaWRnZS5vcmcvZGljdGlvbmFyeS9mcmVuY2gtZW5nbGlzaC9lbnRyZXByaXNl&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:49.100Z"},{"name":"MSME Loan Programme | LSETF | Lagos State Employment Trust Fund","websiteUrl":"https://www.bing.com/ck/a?!&&p=b755d5d3c4e9122717c545ad874f32615d3d2cf5e608643fa83b461ef457a792JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly9sc2V0Zi5uZy9jb250ZW50L21zbWUtbG9hbi1wcm9ncmFtbWU&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:53.400Z"},{"name":"English translation of 'l’entreprise' - Collins Online Dictionary","websiteUrl":"https://www.bing.com/ck/a?!&&p=f7d6fb63f079c442ca27445e924571cd4581991af6c8e8058419ce6c017453c3JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly93d3cuY29sbGluc2RpY3Rpb25hcnkuY29tL2RpY3Rpb25hcnkvZnJlbmNoLWVuZ2xpc2gvZW50cmVwcmlzZQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:51:57.967Z"},{"name":"Entreprise meaning in English - DictZone","websiteUrl":"https://www.bing.com/ck/a?!&&p=6e745c25cfbb2cba365561f6dedfbf93c4b720fdcb80180767ea25f4c4ddc68eJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly9kaWN0em9uZS5jb20vZnJlbmNoLWVuZ2xpc2gtZGljdGlvbmFyeS9lbnRyZXByaXNl&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:04.117Z"},{"name":"entreprise - Wiktionary, the free dictionary","websiteUrl":"https://www.bing.com/ck/a?!&&p=f77916b0ed55a671064f7ed9c7be7251c9cc1859a88a0aae92681cd4f358ddfdJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly9lbi53aWt0aW9uYXJ5Lm9yZy93aWtpL2VudHJlcHJpc2U&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:08.600Z"},{"name":"entreprise - English translation – Linguee","websiteUrl":"https://www.bing.com/ck/a?!&&p=c4489d75938171eb12d54a8afa4fa10e2309cb50f955c20f726d7aca9d62db08JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly93d3cubGluZ3VlZS5jb20vZnJlbmNoLWVuZ2xpc2gvdHJhbnNsYXRpb24vZW50cmVwcmlzZS5odG1s&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:13.067Z"},{"name":"ENTREPRISE - Translation in English - bab.la","websiteUrl":"https://www.bing.com/ck/a?!&&p=b42571d2d0346293fb841eecd0a6a0e35d28f0b04b1511bb037383b105fc9c37JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly9lbi5iYWIubGEvZGljdGlvbmFyeS9mcmVuY2gtZW5nbGlzaC9lbnRyZXByaXNl&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:17.683Z"},{"name":"ENTREPRISE - Translation from French into English | PONS","websiteUrl":"https://www.bing.com/ck/a?!&&p=36342f2edaa182258ad67e5bc4bbf99dcc70163a1d2ffae9509c021f3ac693b9JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly9lbi5wb25zLmNvbS90cmFuc2xhdGUvZnJlbmNoLWVuZ2xpc2gvZW50cmVwcmlzZQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:22.301Z"},{"name":"entreprise: meaning, synonyms - WordSense","websiteUrl":"https://www.bing.com/ck/a?!&&p=ea4439a88f71a5ec6aea55a604ceef42a432afa3b7d3924a11fd1d04232f2de4JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3818fcb6-f1de-6475-3450-eb96f08465e4&u=a1aHR0cHM6Ly93d3cud29yZHNlbnNlLmV1L2VudHJlcHJpc2Uv&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:26.833Z"},{"name":"谁能给我解释一下python中，@property装饰器的用途和意义？","websiteUrl":"https://www.bing.com/ck/a?!&&p=c64dfaa4ad603bedd1ab6503f35a4e4caf7cc7f2d1fa4a6d4bdd8100285bab8cJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzQzMDg0ODMxNw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"30848317","source":"bing","scrapedAt":"2026-03-18T14:52:31.283Z"},{"name":"attribute和property在英语里有什么区别? - 知乎","websiteUrl":"https://www.bing.com/ck/a?!&&p=10c2714830df04fed42efdf974b9322cdb9deab270af45f7b6fae6c9e25d90dcJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzMwMTExOTUwP3NvcnQ9Y3JlYXRlZA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"30111950","source":"bing","scrapedAt":"2026-03-18T14:52:35.767Z"},{"name":"property和estate的区别是什么呢? - 知乎","websiteUrl":"https://www.bing.com/ck/a?!&&p=dc989c60100241d940e5ad00ae6948c70d77ca0196a3827f6f92790aa6a64ee0JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzQ3Mjc5NjY4Mw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:40.200Z"},{"name":"OOP 中 property 和 attribute 有什么区别? - 知乎","websiteUrl":"https://www.bing.com/ck/a?!&&p=22b1b810575e8d00cb8cbb726ed24a0430ab43c60593fff79d8f357583f58589JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzI4OTQ5MzEw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"28949310","source":"bing","scrapedAt":"2026-03-18T14:52:44.699Z"},{"name":"python之中特性（attribute）与属性（property）有什么区别？","websiteUrl":"https://www.bing.com/ck/a?!&&p=d56a738c7ec85a709a1a266068e1bcd916de247f115914af7f62d4c57103a775JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzQwMDE1MTcy&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:49.132Z"},{"name":"Property - Analytics Help - Google Help","websiteUrl":"https://www.bing.com/ck/a?!&&p=6e0e951a325bae7a0c1f09c15cab3540a07c250ce94c8971cabe657593d3f32aJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly9zdXBwb3J0Lmdvb2dsZS5jb20vYW5hbHl0aWNzL2Fuc3dlci85MzU1NjY2P2hsPWVu&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:53.583Z"},{"name":"Set up Analytics for a website and/or app - Google Help","websiteUrl":"https://www.bing.com/ck/a?!&&p=346359cd08bbc7dba62ad6e4f08263099aca0790477aed6640156616053b449bJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly9zdXBwb3J0Lmdvb2dsZS5jb20vYW5hbHl0aWNzL2Fuc3dlci85MzA0MTUzP2hsPWVu&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:52:58.034Z"},{"name":"Add a website property to Search Console - Search Console Help","websiteUrl":"https://www.bing.com/ck/a?!&&p=0f4fe049dbfcbc8a3f663ff7c9c3f0c38f70bcc83d45bdd180a8984dab03a12bJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3c6cc4b2-903d-611c-2fb6-d392918b6058&u=a1aHR0cHM6Ly9zdXBwb3J0Lmdvb2dsZS5jb20vd2VibWFzdGVycy9hbnN3ZXIvMzQ1OTI_aGw9ZW4&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:02.483Z"},{"name":"Personāla atlases kompānija - Agence","websiteUrl":"https://www.bing.com/ck/a?!&&p=3f8dfea908a036d00557a2af0e592741cabf1de4d254bac7398c3730112a3dadJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly9hZ2VuY2UubHYv&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:06.916Z"},{"name":"Aktuālās AGENCE SIA vakances. Darbs AGENCE SIA | VisiDarbi.lv","websiteUrl":"https://www.bing.com/ck/a?!&&p=00bf6308b10ce8bb41468030d12bd213d3dd9e3a0a6a9293a9b34c04d4a76e26JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly93d3cudmlzaWRhcmJpLmx2L3V6bmVtdW1zL2FnZW5jZS1zaWE&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:11.350Z"},{"name":"Agence, SIA, 42103096874 - par uzņēmumu - Lursoft","websiteUrl":"https://www.bing.com/ck/a?!&&p=293c3a301bdf98b5aa03ffa6cfdd08340dccb7b1d90fa95ff7937e50593fd22bJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly9jb21wYW55Lmx1cnNvZnQubHYvYWdlbmNlLzQyMTAzMDk2ODc0&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"21030968","source":"bing","scrapedAt":"2026-03-18T14:53:16.150Z"},{"name":"Vakances - Agence","websiteUrl":"https://www.bing.com/ck/a?!&&p=275b12d585fa842493d40f0cf798f26a4c36a4cbfc7def8f1d5238ecc3ad9018JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly9hZ2VuY2UubHYvdmFrYW5jZXMv&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:20.600Z"},{"name":"Agence, SIA darba sludinājumi - CVMarket.lv","websiteUrl":"https://www.bing.com/ck/a?!&&p=c8238bfee247d228c386ae1828db38f1ec81325007f783130362187916c53a05JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly93d3cuY3ZtYXJrZXQubHYvYWdlbmNlLXNpYS11em5lbXVtYS1kYXJiYS1waWVkYXZhanVtaS0xMjU5NDI&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:25.050Z"},{"name":"Visas Vakances un Darba Sludinājumi | VisiDarbi.lv","websiteUrl":"https://www.bing.com/ck/a?!&&p=933d9cc030d76ddf8f7d96da0d8b9fdf6c5d1b296b9aace6b8289b78538d9efaJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly93d3cudmlzaWRhcmJpLmx2L2RhcmJhLXNsdWRpbmFqdW1p&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:29.550Z"},{"name":"Komanda, misija, vīzija un vērtības - Agence","websiteUrl":"https://www.bing.com/ck/a?!&&p=833be8ab8deb3cd7180b9f5c8db9d2c7007b9db5d2ffe3eb201f93be3a4cfef4JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly9hZ2VuY2UubHYvamF1bnVtaS8&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:34.084Z"},{"name":"Jaunākās vakances un darba sludinājumi | CV Market","websiteUrl":"https://www.bing.com/ck/a?!&&p=2fec26d5e660e8999c951120a5f5cabb14663561a837f4690176d4e4a3c38663JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly93d3cuY3ZtYXJrZXQubHYvZGFyYmEtcGllZGF2YWp1bWktamF1bmll&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:38.634Z"},{"name":"Agence, SIA, 42103096874 - company data - Lursoft","websiteUrl":"https://www.bing.com/ck/a?!&&p=325d66ba24a78bad37267cfd23f1a76cacd0c460322b9d43b9aa4f74bee59b4eJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly9jb21wYW55Lmx1cnNvZnQubHYvZW4vYWdlbmNlLzQyMTAzMDk2ODc0&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"21030968","source":"bing","scrapedAt":"2026-03-18T14:53:43.150Z"},{"name":"Vakance - Personāla attiecību vadītājs/-a, Rīga, Rīgas rajons, SIA ...","websiteUrl":"https://www.bing.com/ck/a?!&&p=2ef2d92eb09e42d37dee40b2c019864d7e95da6793ec99c318bf26635310aeecJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=3f4b01b1-4ca2-6a39-2130-16914d146b6c&u=a1aHR0cHM6Ly9jdi5sdi9sdi92YWNhbmN5LzkyMDU2OA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:47.583Z"},{"name":"Housing - UN-Habitat","websiteUrl":"https://www.bing.com/ck/a?!&&p=6f31bd12157dd614b4839aee579d1305d668b4b417af45078ca9d88e97824a5fJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly91bmhhYml0YXQub3JnL3RvcGljL2hvdXNpbmc&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:52.049Z"},{"name":"Egypt Housing Profile - UN-Habitat","websiteUrl":"https://www.bing.com/ck/a?!&&p=5ed0dfefa73e32a758102919ea278f298cda8c81db145e2aa4ad951f23edf701JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly91bmhhYml0YXQub3JnL2VneXB0LWhvdXNpbmctcHJvZmlsZQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:53:56.466Z"},{"name":"housing在电子产品中是什么意思_百度知道","websiteUrl":"https://www.bing.com/ck/a?!&&p=256457e12bfc303300ed564b366858e94696f130af6267eb2d08bd95c4cdd19aJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly96aGlkYW8uYmFpZHUuY29tL3F1ZXN0aW9uLzExMTk0MjY5MTA1MzcwNjMxNzkuaHRtbA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"26910537","source":"bing","scrapedAt":"2026-03-18T14:54:00.465Z"},{"name":"Annual Report 2024 | UN-Habitat","websiteUrl":"https://www.bing.com/ck/a?!&&p=1a925eeb1396edb8977297d45db46312bc85717e71bfe2e09dee5f3eba5b16a8JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly91bmhhYml0YXQub3JnL2FubnVhbC1yZXBvcnQtMjAyNA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:54:16.233Z"},{"name":"WUF13 | WUF","websiteUrl":"https://www.bing.com/ck/a?!&&p=472ae7fa8c9b1adcfb7c1c23a11accd9c4905cfbc8d7379db72fb7daefc62666JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly93dWYudW5oYWJpdGF0Lm9yZy93dWYxMw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:54:32.549Z"},{"name":"We have a global housing mismatch, not a housing shortage","websiteUrl":"https://www.bing.com/ck/a?!&&p=32e8b193711d431acfc106ed241e0979a6ad42e9715bc26aff5d1461156ac5c2JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzA3L3dlLWRvbi10LWhhdmUtYS1nbG9iYWwtaG91c2luZy1zaG9ydGFnZS13ZS1oYXZlLWEtZ2xvYmFsLWhvdXNpbmctbWlzbWF0Y2gtbGV0LXVzLWV4cGxhaW4v&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:54:48.550Z"},{"name":"shell ,housing ,casing 区别_百度知道","websiteUrl":"https://www.bing.com/ck/a?!&&p=e3c36d200eddb3b466e09dc9cd2d3b367b25ff194381fde120a40c5be5ef5d68JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly96aGlkYW8uYmFpZHUuY29tL3F1ZXN0aW9uLzE5NDY2NjQ3MDU5MTAxODE1ODguaHRtbA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"66647059","source":"bing","scrapedAt":"2026-03-18T14:55:05.016Z"},{"name":"Housing Programmes in the Arab Region","websiteUrl":"https://www.bing.com/ck/a?!&&p=343ff1c3c47ddbd30f8cce75152a8ab3baa6fc1ddaae0cc44c8f49586de41992JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly91bmhhYml0YXQub3JnL3NpdGVzL2RlZmF1bHQvZmlsZXMvMjAyNC8xMi8zLl9hZ2VuZGFfaXRlbV81X2hvdXNpbmdfcG9ydGZvbGlvX2FyYWJfcmVnaW9uXy1fZmluYWxfY29weS5wZGY&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:55:21.650Z"},{"name":"EGYPT HOUSING STRATEGY - UN-Habitat","websiteUrl":"https://www.bing.com/ck/a?!&&p=7a6864228006fa545a22a0b655f9efc2f893c04903060777c6666131c342e353JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly91bmhhYml0YXQub3JnL3NpdGVzL2RlZmF1bHQvZmlsZXMvMjAyMC8wOS9lZ3lwdF9ob3VzaW5nX3N0cmF0ZWd5LnBkZg&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:55:37.982Z"},{"name":"Jordan - Housing and Slum Upgrading | UN-Habitat","websiteUrl":"https://www.bing.com/ck/a?!&&p=883d652529e6711948498b340189ba81ab5afab37118031e1a2ee4762ee660f5JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=30f70634-d19a-6b69-0bf6-1114d02c6aa2&u=a1aHR0cHM6Ly91bmhhYml0YXQub3JnL2pvcmRhbi1ob3VzaW5nLWFuZC1zbHVtLXVwZ3JhZGluZw&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:55:54.532Z"},{"name":"怎么看 Anthropic 刚发的《Building effective agents》这篇文章？","websiteUrl":"https://www.bing.com/ck/a?!&&p=4ef5732574f40d1c4975efe022cfd23e13527680431a61489155ccc7dd5b1377JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=155e55ae-6a59-61b5-1796-428e6bef60bd&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzczNzA1NDkyNjU&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"37054926","source":"bing","scrapedAt":"2026-03-18T14:56:10.970Z"},{"name":"C++ 友元函数的问题，为什么已经声明了友元，但是还是提示Building …","websiteUrl":"https://www.bing.com/ck/a?!&&p=42921fa7d7d603d4c27ddc2c08126cc7c30da2b2b081c98488b5702a33bcd52aJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=155e55ae-6a59-61b5-1796-428e6bef60bd&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzQ0NzIyMzUwMQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"bing","scrapedAt":"2026-03-18T14:56:27.165Z"},{"name":"pip安装requirements.txt出现failed building wheel for ？ - 知乎","websiteUrl":"https://www.bing.com/ck/a?!&&p=039e2d3b54e4beab973471e4a92b4afa50bf8bdea4cdbd4294a05e2a4e8c2991JmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=155e55ae-6a59-61b5-1796-428e6bef60bd&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzYxMjc1MDc3OQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"61275077","source":"bing","scrapedAt":"2026-03-18T14:56:44.517Z"},{"name":"python安装包时为什么会出现Failed building wheel for","websiteUrl":"https://www.bing.com/ck/a?!&&p=ad0e12bc9ce99595910156152ac6765b5d3db340ea93a737d2bb2d44eb14732cJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=155e55ae-6a59-61b5-1796-428e6bef60bd&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzI5MTYyNTcwMA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"29162570","source":"bing","scrapedAt":"2026-03-18T14:57:00.934Z"},{"name":"Building And Environment 期刊建议投稿吗？你的经历如何？","websiteUrl":"https://www.bing.com/ck/a?!&&p=4d7bf9ab8be207f0abfa1b49fbd322d49a3a24a11d1702734a11302daa8ca85eJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=155e55ae-6a59-61b5-1796-428e6bef60bd&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzY1MjM4NjEwMz93cml0ZQ&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"65238610","source":"bing","scrapedAt":"2026-03-18T14:57:17.282Z"},{"name":"如何评价游戏《装机模拟器2 - PC Building Simulator 2》？","websiteUrl":"https://www.bing.com/ck/a?!&&p=ea48bdf626299e80c1205a3401eda7dc9c86ce22c5f43813edcfd080afe5b8ecJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=155e55ae-6a59-61b5-1796-428e6bef60bd&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzU2MDkzNjU4NA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"60936584","source":"bing","scrapedAt":"2026-03-18T14:57:33.384Z"},{"name":"Jacques Tits 的 building theory 在几何上有哪些应用？","websiteUrl":"https://www.bing.com/ck/a?!&&p=bc293459e8ff008db78fddac37f2e6e279c35e36ae10f0784e7e27898fcc3b3aJmltdHM9MTc3Mzc5MjAwMA&ptn=3&ver=2&hsh=4&fclid=155e55ae-6a59-61b5-1796-428e6bef60bd&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzI3MDY4MzE0NA&ntb=1","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"27068314","source":"bing","scrapedAt":"2026-03-18T14:57:49.384Z"},{"name":"Accueil - CIS2847 | Entreprise de BTP leader à Douala, Cameroun","websiteUrl":"https://cis2847.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/tonPageFacebook","facebookPageName":"Facebook","followers":"","facebookPhone":"61861010","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"contact@cis2847.com","phones":"27272710","source":"duckduckgo","scrapedAt":"2026-03-18T14:58:05.699Z"},{"name":"Construction of buildings in Douala, Littoral Region (Cameroon) - Cybo","websiteUrl":"https://www.cybo.com/CM/douala/construction-of-buildings/","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":"2026-03-18T14:58:18.748Z"},{"name":"PAMS Construction | Douala - Facebook","websiteUrl":"https://www.facebook.com/pams.construction/","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"","source":"duckduckgo","scrapedAt":"2026-03-18T14:58:35.065Z"},{"name":"BERIA GROUP Sarl | pour une construction durable | Douala-Cameroun","websiteUrl":"https://www.beriagroup.com/","hasFacebook":true,"facebookUrl":"https://www.facebook.com/BERIA-GROUP-Sarl-111942243520356","facebookPageName":"BERIA GROUP Sarl","followers":844,"facebookPhone":"61861028","facebookEmail":"info@beriagroup.com","facebookAddress":"","facebookWebsite":"","emails":"info@beriagroup.com","phones":"25453524, 20549363, 29072959, 22112212, 22642265, 20132014, 20202022, 20742079, 20802089, 21532154, 28833819, 20322033, 21162117, 21902193, 26102611, 37858592, 69827996, 35067666, 32691835, 65688374, 31297995, 39929367, 34864378, 25908938, 31330748, 27879999, 39968175, 39916890, 20200613, 66471986, 32613137, 27154543, 35850533, 29178430, 64626048, 28994754, 39329420","source":"duckduckgo","scrapedAt":"2026-03-18T14:58:52.383Z"},{"name":"List Of Construction companies in Douala - rentechdigital.com","websiteUrl":"https://rentechdigital.com/smartscraper/business-report-details/cameroon/littoral/list-of-construction-companies-in-douala","hasFacebook":true,"facebookUrl":"https://www.facebook.com/RentechDigital","facebookPageName":"Rentech Digital","followers":36000,"facebookPhone":"61861032","facebookEmail":"sales@rentechdigital.com","facebookAddress":"","facebookWebsite":"","emails":"team@rentechdigital.com, communication@besix.com, cameroun@actemium.com, international@magil.com, contact@truvok.com, infos@lessaah.com, direction@cambuild-btp.com, mek@biomekart.com, contact@africaresine.com, serviceclient@briccameroun.com","phones":"66691545, 20251015, 20102026, 33428670, 20230921","source":"duckduckgo","scrapedAt":"2026-03-18T14:59:01.851Z"},{"name":"koutchoumi.com - Studios, appartements, maisons, terrains et locaux ...","websiteUrl":"https://koutchoumi.com/","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"20092025","source":"duckduckgo","scrapedAt":"2026-03-18T14:59:13.000Z"},{"name":"Agences immobilières : Cameroun","websiteUrl":"https://www.immodere.com/annuaire-agences-immobilieres.php?Pays=Cameroun&debut=0","hasFacebook":false,"facebookUrl":"","facebookPageName":"","followers":"","facebookPhone":"","facebookEmail":"","facebookAddress":"","facebookWebsite":"","emails":"","phones":"28592859, 37776308, 37330246, 37943692, 37334345, 21270513, 37333749, 37777721, 37742697, 37330111, 37334333, 22068466, 22221873","source":"duckduckgo","scrapedAt":"2026-03-18T14:59:30.618Z"}];
+
+let currentFilter = "all";
+let currentSort   = { col: -1, dir: 1 };
+let searchTerm    = "";
+
+// ── Render ──────────────────────────────────────────────────────────────
+function renderTable() {
+  let rows = DATA.slice();
+
+  // Filter
+  if (currentFilter === "facebook")   rows = rows.filter((r) => r.hasFacebook);
+  if (currentFilter === "nofacebook") rows = rows.filter((r) => !r.hasFacebook);
+
+  // Search
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    rows = rows.filter((r) =>
+      Object.values(r).some((v) => String(v).toLowerCase().includes(q))
+    );
+  }
+
+  // Sort
+  if (currentSort.col >= 0) {
+    rows.sort((a, b) => {
+      const va = getSortVal(a, currentSort.col);
+      const vb = getSortVal(b, currentSort.col);
+      if (va === vb) return 0;
+      if (va === "" || va === null) return 1;
+      if (vb === "" || vb === null) return -1;
+      return (va > vb ? 1 : -1) * currentSort.dir;
+    });
+  }
+
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  rows.forEach((c, i) => {
+    const tr = document.createElement("tr");
+    if (!c.hasFacebook) tr.classList.add("no-fb");
+
+    // Followers/likes formatted
+    const followersHtml = c.followers !== ""
+      ? '<span class="followers-value">' + Number(c.followers).toLocaleString() + '</span>'
+      : '<span style="color:#4a5568">—</span>';
+
+    const likesHtml = c.likes !== ""
+      ? '<span class="likes-value">' + Number(c.likes).toLocaleString() + '</span>'
+      : '<span style="color:#4a5568">—</span>';
+
+    // Rating stars
+    let ratingHtml = '<span style="color:#4a5568">—</span>';
+    if (c.rating !== "") {
+      const stars = Math.round(c.rating);
+      ratingHtml = '<span class="rating-stars">' + "★".repeat(stars) + "☆".repeat(5 - stars) + '</span>'
+        + '<br><span class="rating-num">' + c.rating + '/5'
+        + (c.ratingCount ? " (" + Number(c.ratingCount).toLocaleString() + ")" : "") + '</span>';
+    }
+
+    // Contacts
+    const contacts = [];
+    if (c.facebookPhone) contacts.push('<span class="chip">📞 ' + esc(c.facebookPhone) + '</span>');
+    if (c.facebookEmail) contacts.push('<span class="chip">✉️ ' + esc(c.facebookEmail) + '</span>');
+    if (c.phones)        c.phones.split(",").forEach((p) => { if (p.trim()) contacts.push('<span class="chip">' + esc(p.trim()) + '</span>'); });
+    if (c.emails)        c.emails.split(",").forEach((e) => { if (e.trim()) contacts.push('<span class="chip">' + esc(e.trim()) + '</span>'); });
+    if (c.facebookAddress) contacts.push('<span class="chip">📍 ' + esc(c.facebookAddress.slice(0,60)) + '</span>');
+
+    // Facebook cell
+    const fbHtml = c.hasFacebook
+      ? '<a class="fb-badge" href="' + esc(c.facebookUrl) + '" target="_blank">f ' + esc((c.facebookPageName || "Facebook").slice(0, 22)) + '</a>'
+        + (c.isVerified ? '<span class="verified-icon" title="Verified">✔</span>' : '')
+      : '<span class="no-fb-badge">No page</span>';
+
+    // Scraped date (short)
+    const dateShort = c.scrapedAt ? c.scrapedAt.slice(0, 10) : "";
+
+    tr.innerHTML =
+      '<td class="nowrap" style="color:#4a5568;font-size:0.75rem">' + (i + 1) + '</td>' +
+      '<td><div class="company-name">' + esc(c.name) + '</div>'
+        + (c.source ? '<div class="company-source">via ' + esc(c.source) + '</div>' : '') + '</td>' +
+      '<td class="nowrap">' + fbHtml + '</td>' +
+      '<td class="nowrap">' + followersHtml + '</td>' +
+      '<td class="nowrap">' + likesHtml + '</td>' +
+      '<td>' + ratingHtml + '</td>' +
+      '<td style="font-size:0.78rem;color:#a0aec0">' + esc(c.category) + '</td>' +
+      '<td>' + (contacts.length > 0 ? contacts.join("") : '<span style="color:#4a5568">—</span>') + '</td>' +
+      '<td><div class="about-text" title="' + esc(c.facebookAbout) + '">' + esc((c.facebookAbout || "").slice(0, 80)) + (c.facebookAbout && c.facebookAbout.length > 80 ? "..." : "") + '</div></td>' +
+      '<td>' + (c.websiteUrl || c.facebookWebsite
+          ? '<a class="link-ext" href="' + esc(c.facebookWebsite || c.websiteUrl) + '" target="_blank">'
+            + esc((c.facebookWebsite || c.websiteUrl).replace(/https?://(www.)?/, "").slice(0, 30)) + '</a>'
+          : '<span style="color:#4a5568">—</span>') + '</td>' +
+      '<td class="nowrap" style="font-size:0.75rem;color:#4a5568">' + dateShort + '</td>';
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("countLabel").textContent = rows.length + " companies shown";
+  document.getElementById("emptyState").style.display = rows.length === 0 ? "block" : "none";
+  document.getElementById("mainTable").style.display  = rows.length === 0 ? "none"  : "table";
+}
+
+function getSortVal(row, col) {
+  switch (col) {
+    case 0:  return 0;
+    case 1:  return (row.name || "").toLowerCase();
+    case 2:  return row.hasFacebook ? 0 : 1;
+    case 3:  return row.followers !== "" ? Number(row.followers) : -1;
+    case 4:  return row.likes     !== "" ? Number(row.likes)     : -1;
+    case 5:  return row.rating    !== "" ? Number(row.rating)    : -1;
+    case 6:  return (row.category || "").toLowerCase();
+    case 10: return row.scrapedAt || "";
+    default: return "";
+  }
+}
+
+// ── Sort ────────────────────────────────────────────────────────────────
+function sortTable(col) {
+  document.querySelectorAll("thead th").forEach((th) => th.classList.remove("sorted-asc", "sorted-desc"));
+  if (currentSort.col === col) {
+    currentSort.dir *= -1;
+  } else {
+    currentSort = { col, dir: -1 }; // default descending for numbers
+  }
+  const th = document.querySelector("thead th[data-col='" + col + "']");
+  th.classList.add(currentSort.dir === 1 ? "sorted-asc" : "sorted-desc");
+  renderTable();
+}
+
+// ── Filter buttons ───────────────────────────────────────────────────────
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTable();
+}
+
+// ── Search ───────────────────────────────────────────────────────────────
+document.getElementById("searchInput").addEventListener("input", (e) => {
+  searchTerm = e.target.value.trim();
+  renderTable();
+});
+
+// ── HTML escape helper ───────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+renderTable();
+</script>
+</body>
+</html>
