@@ -3,11 +3,16 @@
 
   <!-- Generated: 2026-03-17T16:22:20.115Z -->
   <!-- Total found: 79 | With Facebook: 32 -->
+  <!-- Generated: 2026-03-18T14:59:47.416Z -->
+  <!-- Total found: 97 | With Facebook: 3 -->
 
   <summary>
     <generatedAt>2026-03-17T16:22:20.115Z</generatedAt>
     <totalCompanies>32</totalCompanies>
     <companiesWithFacebook>32</companiesWithFacebook>
+    <generatedAt>2026-03-18T14:59:47.416Z</generatedAt>
+    <totalCompanies>3</totalCompanies>
+    <companiesWithFacebook>3</companiesWithFacebook>
     <companiesWithoutFacebook>0</companiesWithoutFacebook>
     <country>Cameroon</country>
     <sectors>
@@ -128,6 +133,7 @@
       <isVerified>false</isVerified>
       <followers></followers>
       <phone>66666666</phone>
+      <phone>61861010</phone>
       <email></email>
       <address></address>
       <website></website>
@@ -136,6 +142,8 @@
     <meta>
       <source>google_serpapi</source>
       <scrapedAt>2026-03-17T15:30:12.329Z</scrapedAt>
+      <source>duckduckgo</source>
+      <scrapedAt>2026-03-18T14:58:05.699Z</scrapedAt>
     </meta>
   </company>
 
@@ -517,25 +525,74 @@
     <name>Centriq Real Estate: Promoteur Immobilier Fiable au Cameroun</name>
     <websiteUrl>https://centriqrealestate.com/</websiteUrl>
     <snippet>Centriq Real Estate SA est une société spécialisée dans la construction et la promotion immobilière au Cameroun, ainsi que dans la gestion d&apos;investissements ...</snippet>
+  <company index="2">
+    <name>BERIA GROUP Sarl | pour une construction durable | Douala-Cameroun</name>
+    <websiteUrl>https://www.beriagroup.com/</websiteUrl>
+    <snippet>BERIA GROUP est une société à responsabilité limitée basée à Douala, Cameroun qui dispose d&apos;une expertise dans les domaines du bâtiment et travaux publics, de l&apos;énergie et de la domotique, de l&apos;import-export et d&apos;une équipe d&apos;ingénieurs qualifiés et bien expérimentés sur tout le territoire national.</snippet>
     <contacts>
       <email>sales@centriqrealestate.com</email>
       <phone>20250530</phone>
       <phone>20250707</phone>
+      <email>info@beriagroup.com</email>
+      <phone>25453524</phone>
+      <phone>20549363</phone>
+      <phone>29072959</phone>
+      <phone>22112212</phone>
+      <phone>22642265</phone>
+      <phone>20132014</phone>
+      <phone>20202022</phone>
+      <phone>20742079</phone>
+      <phone>20802089</phone>
+      <phone>21532154</phone>
+      <phone>28833819</phone>
+      <phone>20322033</phone>
+      <phone>21162117</phone>
+      <phone>21902193</phone>
+      <phone>26102611</phone>
+      <phone>37858592</phone>
+      <phone>69827996</phone>
+      <phone>35067666</phone>
+      <phone>32691835</phone>
+      <phone>65688374</phone>
+      <phone>31297995</phone>
+      <phone>39929367</phone>
+      <phone>34864378</phone>
+      <phone>25908938</phone>
+      <phone>31330748</phone>
+      <phone>27879999</phone>
+      <phone>39968175</phone>
+      <phone>39916890</phone>
+      <phone>20200613</phone>
+      <phone>66471986</phone>
+      <phone>32613137</phone>
+      <phone>27154543</phone>
+      <phone>35850533</phone>
+      <phone>29178430</phone>
+      <phone>64626048</phone>
+      <phone>28994754</phone>
+      <phone>39329420</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
       <facebookUrl>https://www.facebook.com/share/1JX8L5SJ4w</facebookUrl>
       <facebookPageName>Centriq</facebookPageName>
+      <facebookUrl>https://www.facebook.com/BERIA-GROUP-Sarl-111942243520356</facebookUrl>
+      <facebookPageName>BERIA GROUP Sarl</facebookPageName>
       <isVerified>true</isVerified>
       <followers>38000</followers>
       <phone>61825073</phone>
       <email>commercial@centriqreinvest.com</email>
+      <followers>844</followers>
+      <phone>61861028</phone>
+      <email>info@beriagroup.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
       <scrapedAt>2026-03-17T15:43:38.257Z</scrapedAt>
+      <source>duckduckgo</source>
+      <scrapedAt>2026-03-18T14:58:52.383Z</scrapedAt>
     </meta>
   </company>
 
@@ -668,6 +725,10 @@
     <name>Entreprise BTP Construction Rénovation Génie Civil ...</name>
     <websiteUrl>https://www.renovbuilding.cm/services</websiteUrl>
     <snippet>Renov Building, entreprise leader du secteur BTP au Cameroun spécialisée en construction durable, rénovation complète, travaux de génie civil, ...</snippet>
+  <company index="3">
+    <name>List Of Construction companies in Douala - rentechdigital.com</name>
+    <websiteUrl>https://rentechdigital.com/smartscraper/business-report-details/cameroon/littoral/list-of-construction-companies-in-douala</websiteUrl>
+    <snippet>There are 187 Construction companies in Douala as of October 15, 2025; which is an 5.06% increase from 2023. Of these locations, 183 Construction companies which is 97.86% of all Construction companies in Douala are single-owner operations, while the remaining 4 which is 2.14% are part of larger brands. Average age of Construction companies in Douala is 2 years and 10 months.</snippet>
     <contacts>
       <email>contact@renovbuilding.cm</email>
       <phone>+23767072620</phone>
@@ -680,6 +741,9 @@
       <followers>867</followers>
       <phone>61825235</phone>
       <email></email>
+      <followers>36000</followers>
+      <phone>61861032</phone>
+      <email>sales@rentechdigital.com</email>
       <address></address>
       <website></website>
     </facebook>
@@ -1060,6 +1124,8 @@
     <meta>
       <source>google_serpapi</source>
       <scrapedAt>2026-03-17T16:00:03.484Z</scrapedAt>
+      <source>duckduckgo</source>
+      <scrapedAt>2026-03-18T14:59:01.851Z</scrapedAt>
     </meta>
   </company>
 
