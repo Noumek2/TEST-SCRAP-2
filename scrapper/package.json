@@ -1,4 +1,7 @@
 {
+  "name": "cameroon-scraper",
+  "version": "1.0.0",
+  "private": true,
   "dependencies": {
     "@supabase/supabase-js": "^2.99.2",
     "@vercel/blob": "^2.3.1",
