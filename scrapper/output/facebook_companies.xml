@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cameroonCompanies>
 
-  <!-- Generated: 2026-03-17T16:22:20.115Z -->
-  <!-- Total found: 79 | With Facebook: 32 -->
-  <!-- Generated: 2026-03-18T14:59:47.416Z -->
-  <!-- Total found: 97 | With Facebook: 3 -->
+  <!-- Generated: 2026-03-19T09:24:37.201Z -->
+  <!-- Total found: 178 | With Facebook: 30 -->
 
   <summary>
-    <generatedAt>2026-03-17T16:22:20.115Z</generatedAt>
-    <totalCompanies>32</totalCompanies>
-    <companiesWithFacebook>32</companiesWithFacebook>
-    <generatedAt>2026-03-18T14:59:47.416Z</generatedAt>
-    <totalCompanies>3</totalCompanies>
-    <companiesWithFacebook>3</companiesWithFacebook>
+    <generatedAt>2026-03-19T09:24:37.201Z</generatedAt>
+    <totalCompanies>30</totalCompanies>
+    <companiesWithFacebook>30</companiesWithFacebook>
     <companiesWithoutFacebook>0</companiesWithoutFacebook>
     <country>Cameroon</country>
     <sectors>
@@ -23,43 +18,98 @@
   </summary>
 
   <company index="1">
-    <name>11 Best Construction companies in Cameroon - Project House</name>
-    <websiteUrl>https://project-house.net/construction-companies-in-cameroon/</websiteUrl>
-    <snippet>1). Charis Electric Co Ltd (Bamenda) · 2). George &amp; Jerry Construction Company Ltd (Buea) · 3). Bundes Construction (BUCRES), [Limbe] · 4). BRIC ...</snippet>
+    <name>Accueil - Building and Roofing Industry of Cameroon</name>
+    <websiteUrl>https://briccameroun.com/</websiteUrl>
+    <snippet>BRIC SA (Building and Roofing Industry of Cameroon) est une Société de droit Camerounais, exerçant dans la fabrication des matériaux de construction, le génie ...</snippet>
     <contacts>
-      <email>info@project-house.net</email>
-      <phone>33756811</phone>
-      <phone>20221117</phone>
-      <phone>20230714</phone>
-      <phone>62891585</phone>
-      <phone>+23765047802</phone>
-      <phone>23332410</phone>
-      <phone>69984985</phone>
-      <phone>20111951</phone>
-      <phone>+23769899072</phone>
-      <phone>23765006</phone>
+      <email/>
+      <phone>20170430</phone>
+      <phone>20221205</phone>
+      <phone>20250206</phone>
+      <phone>30539140</phone>
+      <phone>31309545</phone>
+      <phone>62313825</phone>
+      <phone>63710212</phone>
+      <phone>38542079</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/Project-House-Consulting-Services-501149433756811</facebookUrl>
-      <facebookPageName>Project House Consulting Services</facebookPageName>
+      <facebookUrl>https://www.facebook.com/briccm</facebookUrl>
+      <facebookPageName>BRIC Cameroun S.A.</facebookPageName>
       <isVerified>true</isVerified>
-      <followers>71000</followers>
-      <phone>61824556</phone>
-      <email>projecthouseconsultingservices@gmail.com</email>
+      <followers>985</followers>
+      <phone>61888499</phone>
+      <email>serviceclient@briccameroun.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:23:32.603Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:44:53.703Z</scrapedAt>
     </meta>
   </company>
 
   <company index="2">
-    <name>construire la maison de vos rêves</name>
-    <websiteUrl>https://ecoconstructioncameroon.com/fr/</websiteUrl>
-    <snippet>Eco Construction Cameroon conçoit et construit des maisons clé en main pour les clients au Cameroun et de la diaspora camerounaise.</snippet>
+    <name>Accueil - ECO CONSTRUCTION SARL :: est une entreprise ...</name>
+    <websiteUrl>https://ecoconstructionbtp.com/</websiteUrl>
+    <snippet>Bureau ECO CONSTRUCTION SARL : Douala, Ecole Publique New Deido Adresse ECO CONSTRUCTION SARL :BP: 8598 Douala – Cameroun Contacter ECO CONSTRUCTION SARL ...</snippet>
+    <contacts>
+      <email>infos@ecoconstructionbtp.com</email>
+      <email>carrieres@ecoconstructionbtp.com</email>
+      <phone>20743220</phone>
+      <phone>20180424</phone>
+      <phone>20210827</phone>
+      <phone>23769408</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/promedia</facebookUrl>
+      <facebookPageName>Pro Media Production</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>6</followers>
+      <phone>61888508</phone>
+      <email></email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:45:12.404Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="3">
+    <name>Why Truvok is the Leading Construction Company in Douala</name>
+    <websiteUrl>https://truvok.com/why-truvok-is-the-leading-construction-company-in-douala/</websiteUrl>
+    <snippet>As a premier construction company based in Douala, we pride ourselves on delivering top-notch projects from start to finish throughout Cameroon.</snippet>
+    <contacts>
+      <email>contact@truvok.com</email>
+      <phone>20250201</phone>
+      <phone>20250422</phone>
+      <phone>61804697</phone>
+      <phone>+23767474444</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/truvok</facebookUrl>
+      <facebookPageName>Truvok</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>37000</followers>
+      <phone>61888519</phone>
+      <email>contact@truvok.com</email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:45:39.948Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="4">
+    <name>Home - ECO CONSTRUCTION CAMEROON</name>
+    <websiteUrl>https://ecoconstructioncameroon.com/en/</websiteUrl>
+    <snippet>Building the home of your dreams! Eco Construction Cameroon designs and builds turnkey homes for clients in Cameroon and the Cameroonian diaspora.</snippet>
     <contacts>
       <email/>
       <phone>20170722</phone>
@@ -70,19 +120,19 @@
       <facebookUrl>https://www.facebook.com/EcoCamLtd</facebookUrl>
       <facebookPageName>Eco Construction Cameroon</facebookPageName>
       <isVerified>true</isVerified>
-      <followers>207</followers>
-      <phone>61824656</phone>
+      <followers>208</followers>
+      <phone>61888528</phone>
       <email>service@ecoconstructioncameroon.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:27:25.424Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:46:02.999Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="3">
+  <company index="5">
     <name>Diamond Realty</name>
     <websiteUrl>https://www.diamondrealty.estate/</websiteUrl>
     <snippet>Diamond Realty is a real estate company in Cameroon focused on land development, construction, and property management.</snippet>
@@ -104,50 +154,18 @@
       <facebookPageName>Diamond Realty Cameroon</facebookPageName>
       <isVerified>true</isVerified>
       <followers>568</followers>
-      <phone>61824709</phone>
-      <email></email>
-      <address></address>
-      <website></website>
+      <phone>61888549</phone>
+      <email>info@diamondrealty.estate</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:29:30.272Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:46:48.448Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="4">
-    <name>Real estate</name>
-    <websiteUrl>https://groupesohaing.com/our-business/real-estate/</websiteUrl>
-    <snippet>The SOHAING Group&apos;s property development business is mainly based in Cameroon and France. Its portfolio includes: Residential buildings (44,065 sqm) in ...</snippet>
-    <contacts>
-      <email>contact@groupesohaing.com</email>
-      <phone>33420053</phone>
-      <phone>31536000</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com</facebookUrl>
-      <facebookPageName>Facebook</facebookPageName>
-      <isVerified>false</isVerified>
-      <followers></followers>
-      <phone>66666666</phone>
-      <phone>61861010</phone>
-      <email></email>
-      <address></address>
-      <website></website>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:30:12.329Z</scrapedAt>
-      <source>duckduckgo</source>
-      <scrapedAt>2026-03-18T14:58:05.699Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="5">
+  <company index="6">
     <name>SECPE Investments: HOME</name>
     <websiteUrl>https://www.secpeinvestments.com/</websiteUrl>
     <snippet>Africa Real Estate – SECPE Investments Inc ; 2 Bedrooms High end Apartment to rent Yaounde · 600,000.00 Bastos · Area, Approximately 175m2 Sq Ft ; Residence Maurice.</snippet>
@@ -165,44 +183,44 @@
       <facebookPageName>SECPE Investments- SECPE Rentals</facebookPageName>
       <isVerified>true</isVerified>
       <followers>34000</followers>
-      <phone>61824773</phone>
+      <phone>61888557</phone>
       <email>info@secpeinvestments.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:31:51.443Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:47:08.120Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="6">
-    <name>Home - ECO CONSTRUCTION CAMEROON</name>
-    <websiteUrl>https://ecoconstructioncameroon.com/en/</websiteUrl>
-    <snippet>Building the home of your dreams! Eco Construction Cameroon designs and builds turnkey homes for clients in Cameroon and the Cameroonian diaspora.</snippet>
+  <company index="7">
+    <name>Promoteur Immobilier Fiable au Cameroun</name>
+    <websiteUrl>https://centriqrealestate.com/en/</websiteUrl>
+    <snippet>Centriq Real Estate SA specializes in the construction and development of real estate in Cameroon, as well as the management of real estate investments in ...</snippet>
     <contacts>
-      <email/>
-      <phone>20170722</phone>
-      <phone>20250403</phone>
+      <email>sales@centriqrealestate.com</email>
+      <phone>20250530</phone>
+      <phone>20250707</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/EcoCamLtd</facebookUrl>
-      <facebookPageName>Eco Construction Cameroon</facebookPageName>
+      <facebookUrl>https://www.facebook.com/share/1JX8L5SJ4w</facebookUrl>
+      <facebookPageName>Centriq</facebookPageName>
       <isVerified>true</isVerified>
-      <followers>207</followers>
-      <phone>61824792</phone>
-      <email>service@ecoconstructioncameroon.com</email>
+      <followers>38000</followers>
+      <phone>61888562</phone>
+      <email>commercial@centriqreinvest.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:32:42.297Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:47:22.279Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="7">
+  <company index="8">
     <name>KARCH REAL ESTATE</name>
     <websiteUrl>https://realestate.karchltd.com/</websiteUrl>
     <snippet>Discover prime land for sale and rent in Cameroon, including industrial plots, farmlands, and sea-view properties. All lands come with certified titles.</snippet>
@@ -216,138 +234,24 @@
       <facebookPageName>KARCH LTD</facebookPageName>
       <isVerified>true</isVerified>
       <followers>35</followers>
-      <phone>61824812</phone>
+      <phone>61888566</phone>
       <email>info@karchltd.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:33:28.998Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="8">
-    <name>Search properties - mapiole.com</name>
-    <websiteUrl>https://www.mapiole.com/en/product-listing?for=forSale&amp;type=Apartment</websiteUrl>
-    <snippet>Easily buy, sell, rent, or build real estate in Cameroon with Mapiole. Discover top properties &amp; real estate offers on land, houses, apartments, and villas.</snippet>
-    <contacts>
-      <email>info@geniecapital.com</email>
-      <phone/>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/share/1FWoF4KkjF</facebookUrl>
-      <facebookPageName>Mapiole</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>29000</followers>
-      <phone>61824857</phone>
-      <email>info@mapiole.com</email>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:35:14.454Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:47:33.199Z</scrapedAt>
     </meta>
   </company>
 
   <company index="9">
-    <name>KEUR-IMMO Cameroon 🇨🇲 - #1 real estate listings website</name>
-    <websiteUrl>https://keur-immo.com/en/cameroon/</websiteUrl>
-    <snippet>Keur-Immo® Cameroon, Cameroon&apos;s #1 real estate agency! Real estate listings for apartments, villas, houses, and land for sale and rent.</snippet>
-    <contacts>
-      <email>contact@renovbuilding.cm</email>
-      <phone>+23767072620</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/keurimmo.officiel</facebookUrl>
-      <facebookPageName>KEUR-IMMO.com</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>44000</followers>
-      <phone>61824872</phone>
-      <email>contact@keur-immo.com</email>
-      <address></address>
-      <website></website>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:35:51.658Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="10">
-    <name>Cheap Apartments for Sale in Cameroon</name>
-    <websiteUrl>https://realting.com/cameroon/apartments/cheap</websiteUrl>
-    <snippet>Find Cheap Apartments for Sale in Cameroon ✓ Large selection of flats in latest listings ✓ Actual prices ✓ Photos ✓ Description and Location on the map.</snippet>
-    <contacts>
-      <email>contact@groupe-kedibuild.com</email>
-      <phone>25703981</phone>
-      <phone>25721601</phone>
-      <phone>25726000</phone>
-      <phone>61893762</phone>
-      <phone>61935481</phone>
-      <phone>61893758</phone>
-      <phone>33416504</phone>
-      <phone>20250206</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/Realting-Platform-104756424749883</facebookUrl>
-      <facebookPageName>Realting.com</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>19000</followers>
-      <phone>61824882</phone>
-      <email>info@realting.com</email>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:36:11.377Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="11">
-    <name>LISTINGS - Cameroon Real Estate Market</name>
-    <websiteUrl>https://www.secpeinvestments.com/listings/</websiteUrl>
-    <snippet>Fr750,000.00 Bastos Property has 7 apartments with 2 bedrooms each, 1 Sitting room, 1 American style kitchen… Beds, 2. Baths, 2. Area, Approximately - 500 m2 ...</snippet>
-    <contacts>
-      <email>rentalsquare.net@gmail.com</email>
-      <phone>20210407</phone>
-      <phone>20250915</phone>
-      <phone>27061571</phone>
-      <phone>30198988</phone>
-      <phone>20251001</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/secpeinvestments</facebookUrl>
-      <facebookPageName>SECPE Investments- SECPE Rentals</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>34000</followers>
-      <phone>61824892</phone>
-      <email>info@secpeinvestments.com</email>
-      <address></address>
-      <website></website>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:36:36.710Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="12">
     <name>Housing for expats in Cameroon: Find, rent or buy property</name>
     <websiteUrl>https://www.expat.com/en/housing/africa/cameroon/</websiteUrl>
     <snippet>Find your home in Cameroon: Browse housing ads for expats to rent, buy or sell a property. Post your ad for free.</snippet>
     <contacts>
       <email>contact@expat.com</email>
       <phone>20169404</phone>
-      <phone>22012049</phone>
       <phone>69802154</phone>
       <phone>65002695</phone>
       <phone>65002678</phone>
@@ -358,245 +262,155 @@
       <facebookUrl>https://www.facebook.com/expat.blog</facebookUrl>
       <facebookPageName>Expat.com</facebookPageName>
       <isVerified>true</isVerified>
-      <followers>112000</followers>
-      <phone>61824938</phone>
+      <followers>111000</followers>
+      <phone>61888579</phone>
       <email></email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:38:22.996Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:48:02.347Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="10">
+    <name>LISTINGS - Cameroon Real Estate Market</name>
+    <websiteUrl>https://www.secpeinvestments.com/listings/</websiteUrl>
+    <snippet>Fr750,000.00 Bastos Property has 7 apartments with 2 bedrooms each, 1 Sitting room, 1 American style kitchen… Beds, 2. Baths, 2. Area, Approximately - 500 m2 ...</snippet>
+    <contacts>
+      <email/>
+      <phone>20210710</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/secpeinvestments</facebookUrl>
+      <facebookPageName>SECPE Investments- SECPE Rentals</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>34000</followers>
+      <phone>61888583</phone>
+      <email>info@secpeinvestments.com</email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:48:12.903Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="11">
+    <name>Cheap Apartments for Sale in Cameroon</name>
+    <websiteUrl>https://realting.com/cameroon/apartments/cheap</websiteUrl>
+    <snippet>Find Cheap Apartments for Sale in Cameroon ✓ Large selection of flats in latest listings ✓ Actual prices ✓ Photos ✓ Description and Location on the map.</snippet>
+    <contacts>
+      <email>business@realting.com</email>
+      <email>clipboard.min@2.0.10.js</email>
+      <phone>62079451</phone>
+      <phone>30000000</phone>
+      <phone>25000000</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/Realting-Platform-104756424749883</facebookUrl>
+      <facebookPageName>Realting.com</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>19000</followers>
+      <phone>61888589</phone>
+      <email>info@realting.com</email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:48:24.503Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="12">
+    <name>Search properties - mapiole.com</name>
+    <websiteUrl>https://www.mapiole.com/en/product-listing?for=forSale&amp;type=Apartment</websiteUrl>
+    <snippet>Easily buy, sell, rent, or build real estate in Cameroon with Mapiole. Discover top properties &amp; real estate offers on land, houses, apartments, and villas.</snippet>
+    <contacts>
+      <email>info@mapiole.com</email>
+      <phone>33905691</phone>
+      <phone>20240098</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/share/1FWoF4KkjF</facebookUrl>
+      <facebookPageName>Mapiole</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>3000</followers>
+      <phone>61888594</phone>
+      <email>info@mapiole.com</email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:48:35.397Z</scrapedAt>
     </meta>
   </company>
 
   <company index="13">
-    <name>Buea – Royal Property Group</name>
-    <websiteUrl>https://royalpropertygroup.org/property-locations/buea/</websiteUrl>
-    <snippet>We are specialized in property sales, rentals, and construction management of real estate properties. Our goal is to provide our clients with the best possible ...</snippet>
+    <name>BIGC-BTP – Bureau d&apos;Ingenieurs de Genie Civil</name>
+    <websiteUrl>https://bigcbtp.com/</websiteUrl>
+    <snippet>BIGC BTP est une entreprise de génie civil spécialisée dans le bâtiment et travaux publics. Nous maîtrisons une large palette de savoir-faire en construction et ...</snippet>
     <contacts>
-      <email>info@royalpropertygroup.org</email>
-      <phone>24791882</phone>
-      <phone>32257558</phone>
-      <phone>+23767487490</phone>
-      <phone>21099272</phone>
+      <email>bigcbtpsarl@yahoo.com</email>
+      <phone>+23767807094</phone>
+      <phone>+23769679475</phone>
+      <phone>67807094</phone>
+      <phone>69679475</phone>
+      <phone>20250221</phone>
+      <phone>67108864</phone>
+      <phone>20251001</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/royalpropertygroupcm</facebookUrl>
-      <facebookPageName>Royal Property Group</facebookPageName>
+      <facebookUrl>https://www.facebook.com/share/18bwZTfB9S</facebookUrl>
+      <facebookPageName>BIGC BTP Construction SARL</facebookPageName>
       <isVerified>true</isVerified>
-      <followers>181</followers>
-      <phone>61824962</phone>
-      <email>info@royalpropertygroup.net</email>
+      <followers>3000</followers>
+      <phone>61888619</phone>
+      <email>bigcbtpsarl@yahoo.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:39:20.358Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:49:33.677Z</scrapedAt>
     </meta>
   </company>
 
   <company index="14">
-    <name>Accueil - ECO CONSTRUCTION SARL :: est une entreprise ...</name>
-    <websiteUrl>https://ecoconstructionbtp.com/</websiteUrl>
-    <snippet>Adresse ECO CONSTRUCTION SARL :BP: 8598 Douala – Cameroun Contacter ECO CONSTRUCTION SARL : (+237) 694 08 16 78 / 676 74 40 98. Contacter ECO CONSTRUCTION ...</snippet>
-    <contacts>
-      <email>infos@ecoconstructionbtp.com</email>
-      <email>carrieres@ecoconstructionbtp.com</email>
-      <phone>20743220</phone>
-      <phone>20180424</phone>
-      <phone>20210827</phone>
-      <phone>23769408</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/promedia</facebookUrl>
-      <facebookPageName>Pro Media Production</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>6</followers>
-      <phone>61825001</phone>
-      <email></email>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:40:46.457Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="15">
-    <name>EverAfrica | Entreprise de construction partenaire de vos projets</name>
-    <websiteUrl>https://ever-africa.com/</websiteUrl>
-    <snippet>Entreprise de construction, spécialisée dans la conception et la mise en œuvre de bâtiments clé à main (maisons, immeubles, etc.)</snippet>
-    <contacts>
-      <email>contact@ever-africa.com</email>
-      <phone>20200904</phone>
-      <phone>20240905</phone>
-      <phone>25577289</phone>
-      <phone>68734985</phone>
-      <phone>68708615</phone>
-      <phone>68722817</phone>
-      <phone>68709794</phone>
-      <phone>68722819</phone>
-      <phone>68709941</phone>
-      <phone>68572016</phone>
-      <phone>68572015</phone>
-      <phone>68859932</phone>
-      <phone>69260342</phone>
-      <phone>68708643</phone>
-      <phone>68708656</phone>
-      <phone>68708613</phone>
-      <phone>68708640</phone>
-      <phone>68708649</phone>
-      <phone>68708654</phone>
-      <phone>68710975</phone>
-      <phone>68710972</phone>
-      <phone>68794745</phone>
-      <phone>68709001</phone>
-      <phone>68734904</phone>
-      <phone>68709868</phone>
-      <phone>68709830</phone>
-      <phone>68709623</phone>
-      <phone>68709534</phone>
-      <phone>68708999</phone>
-      <phone>68709871</phone>
-      <phone>68709834</phone>
-      <phone>68734907</phone>
-      <phone>68734911</phone>
-      <phone>68709883</phone>
-      <phone>68709837</phone>
-      <phone>68709002</phone>
-      <phone>68709887</phone>
-      <phone>68709839</phone>
-      <phone>68734918</phone>
-      <phone>68709004</phone>
-      <phone>68734924</phone>
-      <phone>68711746</phone>
-      <phone>68709842</phone>
-      <phone>68709005</phone>
-      <phone>68709893</phone>
-      <phone>68709845</phone>
-      <phone>68734932</phone>
-      <phone>68709007</phone>
-      <phone>68734941</phone>
-      <phone>68709895</phone>
-      <phone>68709847</phone>
-      <phone>68709008</phone>
-      <phone>68709899</phone>
-      <phone>68709850</phone>
-      <phone>68734977</phone>
-      <phone>68710958</phone>
-      <phone>68713632</phone>
-      <phone>68713681</phone>
-      <phone>68794778</phone>
-      <phone>68734980</phone>
-      <phone>68709781</phone>
-      <phone>68723024</phone>
-      <phone>68723037</phone>
-      <phone>68723039</phone>
-      <phone>68709792</phone>
-      <phone>61421473</phone>
-      <phone>68712407</phone>
-      <phone>60284164</phone>
-      <phone>60267254</phone>
-      <phone>20250206</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/everafrica.company</facebookUrl>
-      <facebookPageName>EverAfrica</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>1000</followers>
-      <phone>61825027</phone>
-      <email>contact@ever-africa.com</email>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:41:48.866Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="16">
     <name>Centriq Real Estate: Promoteur Immobilier Fiable au Cameroun</name>
     <websiteUrl>https://centriqrealestate.com/</websiteUrl>
     <snippet>Centriq Real Estate SA est une société spécialisée dans la construction et la promotion immobilière au Cameroun, ainsi que dans la gestion d&apos;investissements ...</snippet>
-  <company index="2">
-    <name>BERIA GROUP Sarl | pour une construction durable | Douala-Cameroun</name>
-    <websiteUrl>https://www.beriagroup.com/</websiteUrl>
-    <snippet>BERIA GROUP est une société à responsabilité limitée basée à Douala, Cameroun qui dispose d&apos;une expertise dans les domaines du bâtiment et travaux publics, de l&apos;énergie et de la domotique, de l&apos;import-export et d&apos;une équipe d&apos;ingénieurs qualifiés et bien expérimentés sur tout le territoire national.</snippet>
     <contacts>
       <email>sales@centriqrealestate.com</email>
       <phone>20250530</phone>
       <phone>20250707</phone>
-      <email>info@beriagroup.com</email>
-      <phone>25453524</phone>
-      <phone>20549363</phone>
-      <phone>29072959</phone>
-      <phone>22112212</phone>
-      <phone>22642265</phone>
-      <phone>20132014</phone>
-      <phone>20202022</phone>
-      <phone>20742079</phone>
-      <phone>20802089</phone>
-      <phone>21532154</phone>
-      <phone>28833819</phone>
-      <phone>20322033</phone>
-      <phone>21162117</phone>
-      <phone>21902193</phone>
-      <phone>26102611</phone>
-      <phone>37858592</phone>
-      <phone>69827996</phone>
-      <phone>35067666</phone>
-      <phone>32691835</phone>
-      <phone>65688374</phone>
-      <phone>31297995</phone>
-      <phone>39929367</phone>
-      <phone>34864378</phone>
-      <phone>25908938</phone>
-      <phone>31330748</phone>
-      <phone>27879999</phone>
-      <phone>39968175</phone>
-      <phone>39916890</phone>
-      <phone>20200613</phone>
-      <phone>66471986</phone>
-      <phone>32613137</phone>
-      <phone>27154543</phone>
-      <phone>35850533</phone>
-      <phone>29178430</phone>
-      <phone>64626048</phone>
-      <phone>28994754</phone>
-      <phone>39329420</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
       <facebookUrl>https://www.facebook.com/share/1JX8L5SJ4w</facebookUrl>
       <facebookPageName>Centriq</facebookPageName>
-      <facebookUrl>https://www.facebook.com/BERIA-GROUP-Sarl-111942243520356</facebookUrl>
-      <facebookPageName>BERIA GROUP Sarl</facebookPageName>
       <isVerified>true</isVerified>
       <followers>38000</followers>
-      <phone>61825073</phone>
+      <phone>61888631</phone>
       <email>commercial@centriqreinvest.com</email>
-      <followers>844</followers>
-      <phone>61861028</phone>
-      <email>info@beriagroup.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:43:38.257Z</scrapedAt>
-      <source>duckduckgo</source>
-      <scrapedAt>2026-03-18T14:58:52.383Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:50:03.514Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="17">
+  <company index="15">
     <name>Promotion immobilière</name>
     <websiteUrl>https://groupe-kedibuild.com/promotion-immobiliere/</websiteUrl>
     <snippet>BP : 5335 Douala, Cameroun. Tel: 233 41 65 04. Mail : contact@groupe-kedibuild.com. Liens directs. Immobilier · Cabinet conseil · Investir · Carriere ...</snippet>
@@ -617,18 +431,18 @@
       <facebookPageName>Groupe Kedibuild</facebookPageName>
       <isVerified>true</isVerified>
       <followers>871</followers>
-      <phone>61825081</phone>
+      <phone>61888639</phone>
       <email>contact@groupe-kedibuild.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:43:57.888Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:50:21.145Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="18">
+  <company index="16">
     <name>Agents et Promoteurs immobiliers</name>
     <websiteUrl>https://www.minhdu.gov.cm/agents-et-promoteurs-immobiliers/</websiteUrl>
     <snippet>QUELLES SONT LES CONDITIONS D&apos;ELIGIBILITE A LA PROFESSION DE PROMOTEUR IMMOBILIER ? · Être de nationalité camerounaise ou ressortissant d&apos;un État étranger ayant ...</snippet>
@@ -638,7 +452,6 @@
       <phone>20220616</phone>
       <phone>20240202</phone>
       <phone>22222210</phone>
-      <phone>39026082</phone>
       <phone>20251028</phone>
       <phone>20240913</phone>
       <phone>20230829</phone>
@@ -649,19 +462,98 @@
       <facebookPageName>Ministère de l&apos;Habitat et du Développement Urbain</facebookPageName>
       <isVerified>true</isVerified>
       <followers>41000</followers>
-      <phone>61825095</phone>
+      <phone>61888647</phone>
       <email></email>
       <address></address>
-      <website></website>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:44:27.905Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:50:36.234Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="17">
+    <name>Entreprise BTP Construction Rénovation Génie Civil ...</name>
+    <websiteUrl>https://www.renovbuilding.cm/services</websiteUrl>
+    <snippet>Renov Building, entreprise leader du secteur BTP au Cameroun spécialisée en construction durable, rénovation complète, travaux de génie civil, ...</snippet>
+    <contacts>
+      <email>contact@renovbuilding.cm</email>
+      <phone>+23767072620</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/renovbuilding</facebookUrl>
+      <facebookPageName>Renov Building</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>867</followers>
+      <phone>61888661</phone>
+      <email>contact@renovbuilding.cm</email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:51:10.733Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="18">
+    <name>Approved Real Estate Developer in Cameroon</name>
+    <websiteUrl>https://cfbholding.com/cfb-holding-ltd-now-an-approved-real-estate-developer-in-cameroon/</websiteUrl>
+    <snippet>CFB Holding Ltd unveils its status as a Real Estate Developer in Cameroon, focusing on sustainable living and quality housing.</snippet>
+    <contacts>
+      <email>john@doe.com</email>
+      <phone>20250314</phone>
+      <phone>20251209</phone>
+      <phone>36267898</phone>
+      <phone>61555691</phone>
+      <phone>23782715</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/people/CFB-Holding-Ltd/61555691876999</facebookUrl>
+      <facebookPageName>CFB Holding Ltd</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>14</followers>
+      <phone>61888668</phone>
+      <email>contact@cfbholding.com</email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:51:27.101Z</scrapedAt>
     </meta>
   </company>
 
   <company index="19">
+    <name>Cameroon Investment Properties – Buy-to-Let &amp; Commercial</name>
+    <websiteUrl>https://veles-club.com/projects/cameroon</websiteUrl>
+    <snippet>Find top investment properties in Cameroon, from studio-apartments to luxurious villas. VelesClub Int. supports foreign and local investors with market ...</snippet>
+    <contacts>
+      <email>info@veles-club.com</email>
+      <phone>20250808</phone>
+      <phone>20250809</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/VelesClub.int</facebookUrl>
+      <facebookPageName>VelesClub Int.</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>76000</followers>
+      <phone>61888685</phone>
+      <email></email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:52:08.866Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="20">
     <name>Rental Square : Agence Immobilier Douala Cameroun</name>
     <websiteUrl>https://rentalsquare237.com/</websiteUrl>
     <snippet>Bonamoussadi, Douala ... Votre agence immobilière de référence. +237 6 76 74 07 83. rentalsquare.net@gmail.com. Localisations. Bali · Bonanjo · Bonapriso ...</snippet>
@@ -679,261 +571,101 @@
       <facebookPageName>Facebook</facebookPageName>
       <isVerified>false</isVerified>
       <followers></followers>
-      <phone>61825133</phone>
+      <phone>61888702</phone>
       <email></email>
       <address></address>
       <website>https://ai.meta.com/?utm_source=about_meta_site&amp;utm_medium=web&amp;utm_content=hero_homepage</website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:45:30.781Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="20">
-    <name>BIGC-BTP – Bureau d&apos;Ingenieurs de Genie Civil</name>
-    <websiteUrl>https://bigcbtp.com/</websiteUrl>
-    <snippet>BP : 76 02 douala, Cameroun; Lun-Ven: 8h-18h, Sam-Dim: 8h ... BIGC BTP est une entreprise de génie civil spécialisée dans le bâtiment et travaux publics.</snippet>
-    <contacts>
-      <email>bigcbtpsarl@yahoo.com</email>
-      <phone>+23767807094</phone>
-      <phone>+23769679475</phone>
-      <phone>67807094</phone>
-      <phone>69679475</phone>
-      <phone>20250221</phone>
-      <phone>67108864</phone>
-      <phone>20251001</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/share/18bwZTfB9S</facebookUrl>
-      <facebookPageName>BIGC BTP Construction SARL</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>3000</followers>
-      <phone>61825214</phone>
-      <email></email>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:49:02.636Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:52:41.153Z</scrapedAt>
     </meta>
   </company>
 
   <company index="21">
-    <name>Entreprise BTP Construction Rénovation Génie Civil ...</name>
-    <websiteUrl>https://www.renovbuilding.cm/services</websiteUrl>
-    <snippet>Renov Building, entreprise leader du secteur BTP au Cameroun spécialisée en construction durable, rénovation complète, travaux de génie civil, ...</snippet>
-  <company index="3">
-    <name>List Of Construction companies in Douala - rentechdigital.com</name>
-    <websiteUrl>https://rentechdigital.com/smartscraper/business-report-details/cameroon/littoral/list-of-construction-companies-in-douala</websiteUrl>
-    <snippet>There are 187 Construction companies in Douala as of October 15, 2025; which is an 5.06% increase from 2023. Of these locations, 183 Construction companies which is 97.86% of all Construction companies in Douala are single-owner operations, while the remaining 4 which is 2.14% are part of larger brands. Average age of Construction companies in Douala is 2 years and 10 months.</snippet>
+    <name>Real estate</name>
+    <websiteUrl>https://groupesohaing.com/our-business/real-estate/</websiteUrl>
+    <snippet>The SOHAING Group&apos;s property development business is mainly based in Cameroon and France. Its portfolio includes: Residential buildings (44,065 sqm) in ...</snippet>
     <contacts>
-      <email>contact@renovbuilding.cm</email>
-      <phone>+23767072620</phone>
+      <email>contact@groupesohaing.com</email>
+      <phone>33420053</phone>
+      <phone>31536000</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/renovbuilding</facebookUrl>
-      <facebookPageName>Renov Building</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>867</followers>
-      <phone>61825235</phone>
+      <facebookUrl>https://www.facebook.com</facebookUrl>
+      <facebookPageName>Facebook</facebookPageName>
+      <isVerified>false</isVerified>
+      <followers></followers>
+      <phone>61888714</phone>
       <email></email>
-      <followers>36000</followers>
-      <phone>61861032</phone>
-      <email>sales@rentechdigital.com</email>
       <address></address>
-      <website></website>
+      <website>https://ai.meta.com/?utm_source=about_meta_site&amp;utm_medium=web&amp;utm_content=hero_homepage</website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:49:53.215Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:53:08.718Z</scrapedAt>
     </meta>
   </company>
 
   <company index="22">
-    <name>Approved Real Estate Developer in Cameroon</name>
-    <websiteUrl>https://cfbholding.com/cfb-holding-ltd-now-an-approved-real-estate-developer-in-cameroon/</websiteUrl>
-    <snippet>CFB Holding Ltd unveils its status as a Real Estate Developer in Cameroon, focusing on sustainable living and quality housing.</snippet>
+    <name>Cameroon&apos;s housing developer signs deal with Portuguese ...</name>
+    <websiteUrl>https://www.businessincameroon.com/infrastructures/2410-15243-cameroon-s-housing-developer-signs-deal-with-portuguese-consortium-to-build-110-homes-in-garoua</websiteUrl>
+    <snippet>Cameroon&apos;s public housing developer, the Cameroon Housing Corporation, (SIC), has signed a partnership agreement with Portuguese ...</snippet>
     <contacts>
-      <email>john@doe.com</email>
-      <phone>20250314</phone>
-      <phone>20251209</phone>
-      <phone>36267898</phone>
-      <phone>61555691</phone>
-      <phone>23782715</phone>
+      <email>info@investiraucameroun.com</email>
+      <email>regiepub@investiraucameroun.com</email>
+      <email>redaction@agenceecofin.com</email>
+      <phone>25735632</phone>
+      <phone>32626565</phone>
+      <phone>62023996</phone>
+      <phone>36216561</phone>
+      <phone>20122024</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/people/CFB-Holding-Ltd/61555691876999</facebookUrl>
-      <facebookPageName>CFB Holding Ltd</facebookPageName>
+      <facebookUrl>https://www.facebook.com/investcameroun</facebookUrl>
+      <facebookPageName>Investir au Cameroun</facebookPageName>
       <isVerified>true</isVerified>
-      <followers>13</followers>
-      <phone>61825268</phone>
+      <followers>413000</followers>
+      <phone>61888718</phone>
       <email></email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:51:08.695Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:53:24.870Z</scrapedAt>
     </meta>
   </company>
 
   <company index="23">
-    <name>Real estate development in Cameroon</name>
-    <websiteUrl>https://www.expat.com/en/business/africa/cameroon/9_engineering-construction/195_real-estate-development/</websiteUrl>
-    <snippet>Any property development project in Cameroon? Our Real estate developers in Cameroon directory will help you.</snippet>
-    <contacts>
-      <email>contact@expat.com</email>
-      <phone>20169404</phone>
-      <phone>23765383</phone>
-      <phone>23769285</phone>
-      <phone>65699430</phone>
-      <phone>23723341</phone>
-      <phone>69263237</phone>
-      <phone>23769394</phone>
-      <phone>69800238</phone>
-      <phone>23769347</phone>
-      <phone>69414438</phone>
-      <phone>24245569</phone>
-      <phone>69982903</phone>
-      <phone>32097499</phone>
-      <phone>+23765383930</phone>
-      <phone>0023769285058</phone>
-      <phone>0023769394925</phone>
-      <phone>0023769347995</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/expat.blog</facebookUrl>
-      <facebookPageName>Expat.com</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>112000</followers>
-      <phone>61825329</phone>
-      <email></email>
-      <address></address>
-      <website></website>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:53:36.410Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="24">
-    <name>Brillian and Co. Group Ltd</name>
-    <websiteUrl>https://brillianandco.group/</websiteUrl>
-    <snippet>Our Mission. To revolutionize real estate in Cameroon by providing innovative property solutions, exceptional service, and strategic investment opportunities.</snippet>
-    <contacts>
-      <email/>
-      <phone/>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/share/15VZkFmxTA</facebookUrl>
-      <facebookPageName>Facebook</facebookPageName>
-      <isVerified>false</isVerified>
-      <followers></followers>
-      <phone>61825338</phone>
-      <email></email>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:53:55.323Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="25">
     <name>House Rental &amp; Property Sales in Cameroon</name>
     <websiteUrl>https://amigoconsultingcm.com/house</websiteUrl>
     <snippet>Find Your Dream Home in Cameroon. Discover the perfect property for rent or sale. From luxury homes to affordable apartments, studios, and commercial spaces ...</snippet>
     <contacts>
-      <email>info@geniecapital.com</email>
-      <phone/>
+      <email>amigoconsultingcm@gmail.com</email>
+      <email>teams-cameroon@amigoconsultingcm.com</email>
+      <phone>60518883</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
       <facebookUrl>https://www.facebook.com/amigo%20consulting</facebookUrl>
-      <facebookPageName>Facebook</facebookPageName>
+      <facebookPageName>FacebookFacebook</facebookPageName>
       <isVerified>false</isVerified>
       <followers></followers>
-      <phone>61825382</phone>
+      <phone>61888722</phone>
       <email></email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:55:34.944Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:53:33.772Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="26">
-    <name>Genie Capital: Welcome</name>
-    <websiteUrl>https://geniecapital.co/</websiteUrl>
-    <snippet>Genie Capital Ltd manages guest houses, residential and commercial properties in Buea, Douala, Limbe and Yaounde on behalf of the owners. Portfolio Contact Us ...</snippet>
-    <contacts>
-      <email>info@geniecapital.com</email>
-      <phone/>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/GenieCapitalLtd</facebookUrl>
-      <facebookPageName>Facebook</facebookPageName>
-      <isVerified>false</isVerified>
-      <followers></followers>
-      <phone>61825388</phone>
-      <email></email>
-      <address></address>
-      <website></website>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:55:46.876Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="27">
-    <name>Building and Roofing Industry of Cameroon: Accueil</name>
-    <websiteUrl>https://briccameroun.com/</websiteUrl>
-    <snippet>BRIC SA (Building and Roofing Industry of Cameroon) est une Société de droit Camerounais, exerçant dans la fabrication des matériaux de construction, le génie ...</snippet>
-    <contacts>
-      <email/>
-      <phone>20170430</phone>
-      <phone>20221205</phone>
-      <phone>20250206</phone>
-      <phone>30539140</phone>
-      <phone>31309545</phone>
-      <phone>62313825</phone>
-      <phone>63710212</phone>
-      <phone>62419242</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/briccm</facebookUrl>
-      <facebookPageName>BRIC Cameroun S.A.</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>985</followers>
-      <phone>61825392</phone>
-      <email>serviceclient@briccameroun.com</email>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:56:00.005Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="28">
+  <company index="24">
     <name>Renov Building - Construction, Rénovation, BTP, Plomberie ...</name>
     <websiteUrl>https://www.renovbuilding.cm/</websiteUrl>
     <snippet>Renov Building, entreprise leader du secteur BTP au Cameroun spécialisée en construction durable, rénovation complète, travaux de génie civil, ...</snippet>
@@ -947,118 +679,48 @@
       <facebookPageName>Renov Building</facebookPageName>
       <isVerified>true</isVerified>
       <followers>867</followers>
-      <phone>61825399</phone>
+      <phone>61888730</phone>
       <email>contact@renovbuilding.cm</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:56:16.953Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:53:52.498Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="29">
-    <name>Toutes les villes - adpmrealestate</name>
-    <websiteUrl>https://adpmrealestate.com/fr/</websiteUrl>
-    <snippet>Douala. More Details · 25 Properties. Yaoundé. More Details · 1 Property. Kribi. More Details. &quot;ADPM Real Estate m&apos;a permis d&apos;acheter sereinement depuis la ...</snippet>
+  <company index="25">
+    <name>Residential Building Contractors in Cameroon</name>
+    <websiteUrl>https://truvok.com/residential-building-contractors-in-cameroon-your-ultimate-guide/</websiteUrl>
+    <snippet>In this guide, we&apos;ll explore everything you need to know about residential building contractors in Cameroon, including what to look for, the ...</snippet>
     <contacts>
-      <email>Cameroun@adpmrealestate.com</email>
-      <phone>0023769352952</phone>
-      <phone>20251123</phone>
-      <phone>65356495</phone>
+      <email>contact@truvok.com</email>
+      <phone>20240823</phone>
+      <phone>61804697</phone>
+      <phone>+23767474444</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/ADPMCameroun</facebookUrl>
-      <facebookPageName>African Diaspora Project Management</facebookPageName>
+      <facebookUrl>https://www.facebook.com/truvok</facebookUrl>
+      <facebookPageName>Truvok</facebookPageName>
       <isVerified>true</isVerified>
-      <followers>26000</followers>
-      <phone>61825454</phone>
-      <email>info@adpm-investiraucameroun.com</email>
-      <address></address>
-      <website></website>
+      <followers>37000</followers>
+      <phone>61888733</phone>
+      <email>contact@truvok.com</email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:58:25.382Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:54:00.998Z</scrapedAt>
     </meta>
   </company>
 
-  <company index="30">
-    <name>Agencies - 237immobilier.com</name>
-    <websiteUrl>https://237immobilier.com/agencies/</websiteUrl>
-    <snippet>Alice is a broker associate and Realtor. She is dedicated in helping buyers and sellers throughout the city. She enjoys the local aspect of real estate.</snippet>
-    <contacts>
-      <email>hello@digi-tech.com</email>
-      <email>hello@yoursite.com</email>
-      <email>hello@digit-tech.com</email>
-      <phone>37987884</phone>
-      <phone>37791035</phone>
-      <phone>+23767193709</phone>
-      <phone>37719370</phone>
-      <phone>32759845</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/inspirythemes</facebookUrl>
-      <facebookPageName>InspiryThemes</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>13000</followers>
-      <phone>61825471</phone>
-      <email></email>
-      <address></address>
-      <website></website>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:59:02.867Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="31">
-    <name>Manage - Codecis : Real Estate Agency Cameroon, Yaounde ...</name>
-    <websiteUrl>https://codecis.com/en/manage/</websiteUrl>
-    <snippet>... Real Estate Agents of Cameroon (ANAIC), based in Douala, P.O. Box 11955, Tel (237) 699 94 62 72 / 699 95 79 64, or with the relevant Ministry, which is the ...</snippet>
-    <contacts>
-      <email>medianetmandjan@gmail.com</email>
-      <email>info@codecis.com</email>
-      <phone>+23767519520</phone>
-      <phone>20250409</phone>
-      <phone>20260228</phone>
-      <phone>69838820</phone>
-      <phone>23456789</phone>
-      <phone>20240521</phone>
-      <phone>31536000</phone>
-      <phone>20251215</phone>
-      <phone>25686540</phone>
-    </contacts>
-    <facebook>
-      <hasFacebook>true</hasFacebook>
-      <facebookUrl>https://www.facebook.com/codecis</facebookUrl>
-      <facebookPageName>Codecis: Immobilier Yaoundé</facebookPageName>
-      <isVerified>true</isVerified>
-      <followers>21000</followers>
-      <phone>61825486</phone>
-      <email>info@codecis.com</email>
-      <address></address>
-      <website></website>
-      <address></address>
-      <website></website>
-    </facebook>
-    <meta>
-      <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T15:59:37.581Z</scrapedAt>
-    </meta>
-  </company>
-
-  <company index="32">
-    <name>100 experts immobiliers à proximité - StarOfService</name>
-    <websiteUrl>https://www.starofservice.cm/expertise-immobiliere/near-me</websiteUrl>
-    <snippet>Voici la liste complète de nos meilleurs experts immobiliers évalués par la communauté StarOfService. Vous voulez savoir qui est dans le top 100 ?</snippet>
+  <company index="26">
+    <name>27 agents immobiliers à proximité - StarOfService</name>
+    <websiteUrl>https://www.starofservice.cm/service-d-agent-immobilier/near-me</websiteUrl>
+    <snippet>Agents immobiliers à proximité · Lion&apos;s Immobilier · Titi Multi-service International Sarl · MENBGWA ZIDANE · Lamaison Immobilier · Bureau régional GIZ Yaoundé · SI ...</snippet>
     <contacts>
       <email>exemple@email.com</email>
       <phone>26783251</phone>
@@ -1094,21 +756,23 @@
       <phone>61251687</phone>
       <phone>20241008</phone>
       <phone>20240822</phone>
-      <phone>21100598</phone>
-      <phone>32226536</phone>
-      <phone>61973678</phone>
-      <phone>64014304</phone>
-      <phone>61315359</phone>
-      <phone>69359766</phone>
-      <phone>21254962</phone>
-      <phone>35840767</phone>
-      <phone>37990632</phone>
-      <phone>69767577</phone>
-      <phone>61473839</phone>
-      <phone>64464726</phone>
-      <phone>39887972</phone>
-      <phone>26233077</phone>
-      <phone>37393700</phone>
+      <phone>60724115</phone>
+      <phone>27563654</phone>
+      <phone>68727754</phone>
+      <phone>60668125</phone>
+      <phone>39091409</phone>
+      <phone>38610195</phone>
+      <phone>60984377</phone>
+      <phone>39128141</phone>
+      <phone>39049551</phone>
+      <phone>60045476</phone>
+      <phone>69431116</phone>
+      <phone>66260282</phone>
+      <phone>23446800</phone>
+      <phone>66735794</phone>
+      <phone>35981315</phone>
+      <phone>68741165</phone>
+      <phone>28396883</phone>
     </contacts>
     <facebook>
       <hasFacebook>true</hasFacebook>
@@ -1116,16 +780,151 @@
       <facebookPageName>StarOfService.com</facebookPageName>
       <isVerified>true</isVerified>
       <followers>49000</followers>
-      <phone>61825495</phone>
+      <phone>61888750</phone>
       <email></email>
       <address></address>
       <website></website>
     </facebook>
     <meta>
       <source>google_serpapi</source>
-      <scrapedAt>2026-03-17T16:00:03.484Z</scrapedAt>
+      <scrapedAt>2026-03-19T08:54:40.284Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="27">
+    <name>Manage - Codecis : Real Estate Agency Cameroon, Yaounde ...</name>
+    <websiteUrl>https://codecis.com/en/manage/</websiteUrl>
+    <snippet>... Real Estate Agents of Cameroon (ANAIC), based in Douala, P.O. Box 11955, Tel (237) 699 94 62 72 / 699 95 79 64, or with the relevant Ministry, which is the ...</snippet>
+    <contacts>
+      <email>medianetmandjan@gmail.com</email>
+      <email>info@codecis.com</email>
+      <phone>+23767519520</phone>
+      <phone>20250409</phone>
+      <phone>20260228</phone>
+      <phone>69838820</phone>
+      <phone>23456789</phone>
+      <phone>20240521</phone>
+      <phone>31536000</phone>
+      <phone>20251215</phone>
+      <phone>25686540</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/codecis</facebookUrl>
+      <facebookPageName>Codecis: Immobilier Yaoundé</facebookPageName>
+      <isVerified>true</isVerified>
+      <followers>21000</followers>
+      <phone>61888760</phone>
+      <email>info@codecis.com</email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>google_serpapi</source>
+      <scrapedAt>2026-03-19T08:55:00.897Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="28">
+    <name>SYA- Immobilier | Bobo Dioulasso - Facebook</name>
+    <websiteUrl>https://www.bing.com/ck/a?!&amp;&amp;p=bd7863f7e9e0af9198a986d38f0008e4bd0f5caaf2be84436e0b635caad27d3eJmltdHM9MTc3Mzg3ODQwMA&amp;ptn=3&amp;ver=2&amp;hsh=4&amp;fclid=3851af59-1c9b-68ee-11d1-b8781d8a697c&amp;u=a1aHR0cHM6Ly93d3cuZmFjZWJvb2suY29tL1N5YS5JbW1vYmlsaWVyLw&amp;ntb=1</websiteUrl>
+    <snippet></snippet>
+    <contacts>
+      <email/>
+      <phone/>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/Sya.Immobilier</facebookUrl>
+      <facebookPageName></facebookPageName>
+      <isVerified>false</isVerified>
+      <followers></followers>
+      <phone></phone>
+      <email></email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>bing</source>
+      <scrapedAt>2026-03-19T09:14:10.803Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="29">
+    <name>Valiant Engineering | #1 Construction Company in Cameroon</name>
+    <websiteUrl>https://valiantlimited.co/</websiteUrl>
+    <snippet>To be Cameroon&apos;s most reliable construction partner—delivering projects that stand the test of time through unmatched quality, transparent communication, and unwavering commitment to your success.</snippet>
+    <contacts>
+      <email>hello@valiantlimited.co</email>
+      <phone>+23767094751</phone>
+      <phone>+23769030226</phone>
+      <phone>23767094</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/valaintengineering</facebookUrl>
+      <facebookPageName></facebookPageName>
+      <isVerified>false</isVerified>
+      <followers></followers>
+      <phone></phone>
+      <email></email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
       <source>duckduckgo</source>
-      <scrapedAt>2026-03-18T14:59:01.851Z</scrapedAt>
+      <scrapedAt>2026-03-19T09:22:12.998Z</scrapedAt>
+    </meta>
+  </company>
+
+  <company index="30">
+    <name>Real estate agencies in Cameroon - Expat.com</name>
+    <websiteUrl>https://www.expat.com/en/business/africa/cameroon/2_real-estate/5_real-estate-agencies/</websiteUrl>
+    <snippet>Would you like to rent or buy a property in Cameroon? Find here the list of the real estate agencies in Cameroon.</snippet>
+    <contacts>
+      <email>contact@expat.com</email>
+      <email>03info@lionsimmobilier.comDouala</email>
+      <phone>20169404</phone>
+      <phone>68231399</phone>
+      <phone>69443646</phone>
+      <phone>69686598</phone>
+      <phone>23769704</phone>
+      <phone>23769588</phone>
+      <phone>23769114</phone>
+      <phone>69335804</phone>
+      <phone>0023769704924</phone>
+      <phone>23769110</phone>
+      <phone>69871263</phone>
+      <phone>23767327</phone>
+      <phone>66667138</phone>
+      <phone>65632088</phone>
+      <phone>67326473</phone>
+      <phone>23769479</phone>
+      <phone>65107030</phone>
+      <phone>37680072</phone>
+      <phone>69349471</phone>
+      <phone>0023769988520</phone>
+      <phone>67592719</phone>
+      <phone>23795377</phone>
+      <phone>0023769588228</phone>
+      <phone>0023769114366</phone>
+      <phone>0023769110174</phone>
+      <phone>0023767327028</phone>
+    </contacts>
+    <facebook>
+      <hasFacebook>true</hasFacebook>
+      <facebookUrl>https://www.facebook.com/expat.blog</facebookUrl>
+      <facebookPageName></facebookPageName>
+      <isVerified>false</isVerified>
+      <followers></followers>
+      <phone></phone>
+      <email></email>
+      <address></address>
+      <website></website>
+    </facebook>
+    <meta>
+      <source>duckduckgo</source>
+      <scrapedAt>2026-03-19T09:24:15.514Z</scrapedAt>
     </meta>
   </company>
 

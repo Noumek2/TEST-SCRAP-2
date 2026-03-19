@@ -1,2 +1,5 @@
-2026/03/17-16:22:54.914 3bb4 Creating DB C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\Site Characteristics Database since it was missing.
-2026/03/17-16:22:54.961 3bb4 Reusing MANIFEST C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\Site Characteristics Database/MANIFEST-000001
+2026/03/19-09:44:37.292 8b34 Log #3: 5 ops saved to Table #4 OK
+2026/03/19-09:44:37.298 8b34 Archiving C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Site Characteristics Database/000003.log: OK
+2026/03/19-09:44:37.299 8b34 Table #4: 5 entries OK
+2026/03/19-09:44:37.304 8b34 Archiving C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Site Characteristics Database/MANIFEST-000001: OK
+2026/03/19-09:44:37.315 8b34 **** Repaired leveldb C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Site Characteristics Database; recovered 1 files; 284 bytes. Some data may have been lost. ****

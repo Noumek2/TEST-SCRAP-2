@@ -4,17 +4,16 @@
     "@vercel/blob": "^2.3.1",
     "axios": "^1.13.6",
     "cheerio": "^1.2.0",
-<<<<<<< HEAD
-    "postgres": "^3.4.8",
-=======
+    "express": "^4.18.2",
     "nodemailer": "^6.9.3",
->>>>>>> b3388b1d6500f441d2089be1fddf1d548e895b99
+    "postgres": "^3.4.8",
     "puppeteer": "^24.39.1"
   },
   "scripts": {
     "start": "node index.js",
     "start:facebook-only": "node index.js --facebook-only",
     "start:deep": "node index.js --pages 3",
+    "web": "node server.js",
     "puppeteer-install": "node -e \"require('puppeteer/install')\""
   }
 }

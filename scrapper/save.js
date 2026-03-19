@@ -9,6 +9,7 @@ const fs = require("fs");
 const { saveReport } = require("./report");
 const path = require("path");
 const { supabase } = require("./supabaseClient");
+const { sendEmail } = require("./emailer");
 
 // ── CSV helpers ────────────────────────────────────────────────────────────
 
@@ -312,6 +313,11 @@ async function saveToSupabase(companies, tableName = null) {
   } else {
     console.log(`  ✅ ${targetTable} insert succeeded!`);
     console.log(`     Saved ${dataToSave.length} ${tableDescription}`);
+    
+    // Send email notification for the main storage-scrap table
+    if (targetTable === "storage-scrap" && dataToSave.length > 0) {
+      await sendEmail(dataToSave);
+    }
   }
 }
 

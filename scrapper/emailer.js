@@ -1,0 +1,102 @@
+/**
+ * emailer.js
+ * Sends scraper output via email using nodemailer
+ */
+
+const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
+
+let emailConfig = null;
+
+function loadEmailConfig() {
+  if (emailConfig) return emailConfig;
+  
+  try {
+    const configPath = path.join(__dirname, "config.json");
+    const raw = fs.readFileSync(configPath, "utf8");
+    const config = JSON.parse(raw);
+    
+    if (!config.emailTo || !config.smtp) {
+      console.warn("  [email] config.json missing emailTo or smtp configuration");
+      return null;
+    }
+    
+    emailConfig = config;
+    return config;
+  } catch (err) {
+    console.warn("  [email] Could not load config.json: " + err.message);
+    return null;
+  }
+}
+
+async function sendEmail(companies, options = {}) {
+  const config = loadEmailConfig();
+  if (!config) {
+    console.log("  [email] Email not configured - skipping");
+    return false;
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: config.smtp.host,
+      port: config.smtp.port,
+      secure: config.smtp.secure,
+      auth: {
+        user: config.smtp.auth.user,
+        pass: config.smtp.auth.pass,
+      },
+    });
+
+    // Generate CSV data
+    const { toCsv } = require("./save");
+    const csvData = toCsv(companies);
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+    const csvFilename = `scraped_companies_${timestamp}.csv`;
+
+    // Build email content
+    const totalCompanies = companies.length;
+    const facebookCompanies = companies.filter((c) => c.hasFacebook).length;
+    const subject = `Scraper Report - ${totalCompanies} companies found (${facebookCompanies} with Facebook)`;
+    
+    const htmlContent = `
+      <h2>Scraper Execution Report</h2>
+      <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+      <hr>
+      <h3>Summary</h3>
+      <ul>
+        <li><strong>Total Companies:</strong> ${totalCompanies}</li>
+        <li><strong>Companies with Facebook:</strong> ${facebookCompanies}</li>
+        <li><strong>Companies without Facebook:</strong> ${totalCompanies - facebookCompanies}</li>
+      </ul>
+      <hr>
+      <p>The detailed CSV file is attached to this email with all company information.</p>
+      <p><small>This is an automated message from your Cameroon Company Scraper.</small></p>
+    `;
+
+    // Send email with CSV attachment
+    const mailOptions = {
+      from: config.smtp.auth.user,
+      to: config.emailTo,
+      subject: subject,
+      html: htmlContent,
+      attachments: [
+        {
+          filename: csvFilename,
+          content: csvData,
+          contentType: "text/csv",
+        },
+      ],
+    };
+
+    console.log("\n  Sending email to " + config.emailTo + "...");
+    const info = await transporter.sendMail(mailOptions);
+    console.log("  ✅ Email sent successfully! Message ID: " + info.messageId);
+    return true;
+  } catch (err) {
+    console.error("  ❌ Error sending email: " + err.message);
+    return false;
+  }
+}
+
+module.exports = { sendEmail };
