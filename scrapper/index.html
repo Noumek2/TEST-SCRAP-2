@@ -290,8 +290,8 @@
             logOutput.textContent = "Connecting to scraper...\n";
 
             try {
-                // Assuming index.js is exposed at /api/index (or modify to match your route)
-                const response = await fetch("/scrapper/index.jsindex"); 
+                // Connects to the API route defined in server.js
+                const response = await fetch("/api/run"); 
                 
                 if (!response.ok) {
                     throw new Error("Failed to start scraper");

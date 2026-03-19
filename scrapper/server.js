@@ -13,9 +13,8 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 3. API endpoint that triggers the scraper
-//    This connects the fetch('/scrapper/index.js') in your HTML to the index.js logic
-app.get('/index.js', async (req, res) => {
+// 3. API endpoint that triggers the scraper (Renamed to avoid conflict with static index.js file)
+app.get('/api/run', async (req, res) => {
     try {
         await scraperHandler(req, res);
     } catch (error) {
