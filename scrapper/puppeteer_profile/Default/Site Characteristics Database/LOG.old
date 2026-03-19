@@ -1,5 +1,1 @@
-2026/03/19-09:44:37.292 8b34 Log #3: 5 ops saved to Table #4 OK
-2026/03/19-09:44:37.298 8b34 Archiving C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Site Characteristics Database/000003.log: OK
-2026/03/19-09:44:37.299 8b34 Table #4: 5 entries OK
-2026/03/19-09:44:37.304 8b34 Archiving C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Site Characteristics Database/MANIFEST-000001: OK
-2026/03/19-09:44:37.315 8b34 **** Repaired leveldb C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Site Characteristics Database; recovered 1 files; 284 bytes. Some data may have been lost. ****
+2026/03/19-09:44:37.321 8b34 Reusing MANIFEST C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Site Characteristics Database/MANIFEST-000001

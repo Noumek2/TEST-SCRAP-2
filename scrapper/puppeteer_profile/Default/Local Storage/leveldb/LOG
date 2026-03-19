@@ -1,2 +1,3 @@
-2026/03/19-09:44:37.367 50d0 Creating DB C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Local Storage\leveldb since it was missing.
-2026/03/19-09:44:37.397 50d0 Reusing MANIFEST C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/03/19-10:38:31.818 6f7c Reusing MANIFEST C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/03/19-10:38:31.827 6f7c Recovering log #3
+2026/03/19-10:38:31.833 6f7c Reusing old log C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/000003.log 
