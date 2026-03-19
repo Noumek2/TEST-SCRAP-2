@@ -4,11 +4,28 @@
  * to scrape company Facebook pages as a logged-in user.
  */
 
-const puppeteer = require("puppeteer");
-const axios     = require("axios");
-const cheerio   = require("cheerio");
-const fs        = require("fs");
-const path      = require("path");
+const axios = require("axios");
+const cheerio = require("cheerio");
+const fs = require("fs");
+const path = require("path");
+
+const isVercel = process.env.VERCEL === "1";
+
+let puppeteer;
+try {
+  puppeteer = require(isVercel ? "puppeteer-core" : "puppeteer");
+} catch {
+  puppeteer = require("puppeteer");
+}
+
+let chromium = null;
+if (isVercel) {
+  try {
+    chromium = require("@sparticuz/chromium");
+  } catch {
+    chromium = null;
+  }
+}
 
 const SESSION_FILE = path.join(__dirname, "fb_session.json");
 
@@ -18,14 +35,12 @@ async function sleep(ms) {
 
 const DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
-// ── Regex patterns ─────────────────────────────────────────────────────────
 const PATTERNS = {
-  email:    /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g,
-  phone:    /(?:\+237|00237)?[\s\-.]?(?:6|2|3)\d{1}[\s\-.]?\d{2}[\s\-.]?\d{2}[\s\-.]?\d{2}/g,
+  email: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g,
+  phone: /(?:\+237|00237)?[\s\-.]?(?:6|2|3)\d{1}[\s\-.]?\d{2}[\s\-.]?\d{2}[\s\-.]?\d{2}/g,
   facebook: /https?:\/\/(?:www\.)?facebook\.com\/[A-Za-z0-9.\-_/?=]+/gi,
 };
 
-// ── Parse shorthand numbers e.g. "1.2K", "3M" ─────────────────────────────
 function parseCount(str) {
   if (!str) return null;
   const clean = str.replace(/,/g, "").replace(/\s/g, "").trim();
@@ -35,7 +50,6 @@ function parseCount(str) {
   return isNaN(n) ? null : n;
 }
 
-// ── Extract the most recent year found in a string (e.g. from post timestamps)
 function extractYearFromString(str) {
   if (!str || typeof str !== "string") return null;
   const matches = [...str.matchAll(/\b(20\d{2})\b/g)];
@@ -48,17 +62,16 @@ function extractYearFromString(str) {
 
 function findLatestPostYear(html) {
   if (!html) return null;
-  // Heuristic: look for years in the HTML (prefer newer values)
-  const yearFromHtml = extractYearFromString(html);
-  return yearFromHtml;
+  return extractYearFromString(html);
 }
 
-// ── Facebook URL utilities ─────────────────────────────────────────────────
 function normalizeFacebookUrl(url) {
   try {
     const u = new URL(url);
     return "https://www.facebook.com" + u.pathname.replace(/\/$/, "");
-  } catch { return url; }
+  } catch {
+    return url;
+  }
 }
 
 function isScrapableFacebookUrl(url) {
@@ -72,7 +85,6 @@ function isScrapableFacebookUrl(url) {
   return !blocklist.some((b) => url.includes(b));
 }
 
-// ── Load saved Puppeteer session ───────────────────────────────────────────
 function loadSession() {
   if (!fs.existsSync(SESSION_FILE)) {
     console.warn("\n  [session] No fb_session.json found.");
@@ -89,55 +101,75 @@ function loadSession() {
   }
 }
 
-// ── Launch Puppeteer browser ───────────────────────────────────────────────
 const { getChromeExecutablePath } = require("./chrome-path");
 
-async function launchBrowser() {
-  const executablePath = getChromeExecutablePath();
+async function getServerlessChromePath() {
+  const envPath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ||
+    process.env.CHROME_PATH ||
+    process.env.CHROMIUM_PATH;
 
-  // Use a stable userDataDir (not a tmp folder) to avoid Puppeteer trying to delete locked files
-  // like first_party_sets.db when the process ends.
+  if (envPath) return envPath;
+  if (chromium && typeof chromium.executablePath === "function") {
+    return chromium.executablePath();
+  }
+  return null;
+}
+
+async function launchBrowser() {
+  const executablePath = isVercel
+    ? await getServerlessChromePath()
+    : getChromeExecutablePath();
+
   const userDataDir = path.join(__dirname, "puppeteer_profile");
-  if (!fs.existsSync(userDataDir)) {
+  if (!isVercel && !fs.existsSync(userDataDir)) {
     fs.mkdirSync(userDataDir, { recursive: true });
   }
 
+  const sharedArgs = [
+    "--no-sandbox",
+    "--disable-setuid-sandbox",
+    "--disable-blink-features=AutomationControlled",
+    "--disable-infobars",
+    "--window-size=1366,768",
+    "--disable-background-timer-throttling",
+    "--disable-backgrounding-occluded-windows",
+    "--disable-renderer-backgrounding",
+    "--disable-features=TranslateUI",
+    "--disable-ipc-flooding-protection",
+    "--disable-dev-shm-usage",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--disable-component-extensions-with-background-pages",
+    "--disable-default-apps",
+    "--disable-sync",
+    "--metrics-recording-only",
+    "--no-crash-upload",
+    "--disable-logging",
+    "--disable-login-animations",
+    "--disable-notifications",
+    "--disable-permissions-api",
+    "--disable-session-crashed-bubble",
+  ];
+
   const launchOpts = {
-    headless: "new",   // Invisible browser — runs in background
-    userDataDir,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-blink-features=AutomationControlled",
-      "--disable-infobars",
-      "--window-size=1366,768",
-      "--disable-background-timer-throttling",
-      "--disable-backgrounding-occluded-windows",
-      "--disable-renderer-backgrounding",
-      "--disable-features=TranslateUI",
-      "--disable-ipc-flooding-protection",
-      "--disable-dev-shm-usage",  // Prevent crashes on low-memory systems
-      "--no-first-run",
-      "--no-default-browser-check",
-      "--disable-component-extensions-with-background-pages",
-      "--disable-default-apps",
-      "--disable-sync",
-      "--metrics-recording-only",
-      "--no-crash-upload",
-      "--disable-logging",
-      "--disable-login-animations",
-      "--disable-notifications",
-      "--disable-permissions-api",
-      "--disable-session-crashed-bubble",
-      "--disable-infobars",
-    ],
+    headless: isVercel ? true : "new",
+    args: isVercel && chromium ? [...chromium.args, ...sharedArgs] : sharedArgs,
     ignoreDefaultArgs: ["--enable-automation"],
     ignoreHTTPSErrors: true,
-    timeout: 60000,  // 60 second timeout
+    timeout: 60000,
   };
+
+  if (!isVercel) {
+    launchOpts.userDataDir = userDataDir;
+  }
 
   if (executablePath) {
     launchOpts.executablePath = executablePath;
+  }
+
+  if (isVercel && chromium) {
+    launchOpts.defaultViewport = chromium.defaultViewport;
   }
 
   try {
@@ -145,25 +177,26 @@ async function launchBrowser() {
     return browser;
   } catch (err) {
     console.error("Failed to launch browser: " + err.message);
-    console.error("  - Run: npm run puppeteer-install");
-    console.error("  - Or set PUPPETEER_EXECUTABLE_PATH / CHROME_PATH to a valid chrome.exe");
-    console.error("  - If you get EBUSY errors, try: taskkill /F /IM chrome.exe /T");
-        throw new Error("Failed to launch browser: " + err.message);
-
+    if (isVercel) {
+      console.error("  - Install puppeteer-core and @sparticuz/chromium for serverless Chrome");
+      console.error("  - Redeploy after adding the new dependencies");
+    } else {
+      console.error("  - Run: npm run puppeteer-install");
+      console.error("  - Or set PUPPETEER_EXECUTABLE_PATH / CHROME_PATH to a valid chrome.exe");
+      console.error("  - If you get EBUSY errors, try: taskkill /F /IM chrome.exe /T");
+    }
+    throw new Error("Failed to launch browser: " + err.message);
   }
 }
 
-// ── Apply session to a Puppeteer page ─────────────────────────────────────
 async function applySession(page, session) {
   await page.setUserAgent(session.userAgent || DESKTOP_UA);
 
-  // Hide bot signals
   await page.evaluateOnNewDocument(() => {
     Object.defineProperty(navigator, "webdriver", { get: () => undefined });
     window.chrome = { runtime: {} };
   });
 
-  // Inject saved cookies
   if (session.cookies && session.cookies.length > 0) {
     for (const cookie of session.cookies) {
       try {
@@ -174,7 +207,6 @@ async function applySession(page, session) {
   }
 }
 
-// ── Scrape a Facebook page using Puppeteer ─────────────────────────────────
 async function scrapeFacebookWithPuppeteer(fbUrl, page) {
   const info = {
     facebookPageName: null, followers: null, likes: null,
@@ -185,28 +217,24 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
 
   try {
     await page.goto(fbUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
-    await sleep(2000); // Let dynamic content load
+    await sleep(2000);
 
     const html = await page.content();
-    const $    = cheerio.load(html);
+    const $ = cheerio.load(html);
     const text = $.text();
 
-    // Determine most recent year found in the page (used to filter stale pages)
     const pageYear = findLatestPostYear(html);
     if (pageYear) info.lastPostYear = pageYear;
 
-    // ── Page name ──────────────────────────────────────────────
     info.facebookPageName =
       await page.$eval("h1", (el) => el.innerText.trim()).catch(() => null) ||
       $("title").text().replace(/ [|\-–] Facebook.*/, "").trim() || null;
 
-    // ── Verified ───────────────────────────────────────────────
     info.isVerified =
       html.includes("VerifiedBadge") ||
       html.includes("verified_badge") ||
       await page.$('[aria-label*="erified"]').then((el) => !!el).catch(() => false);
 
-    // ── Followers — try to find the element directly ───────────
     const followerSelectors = [
       'a[href*="followers"] span',
       'a[href*="followers"]',
@@ -221,7 +249,6 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
       }
     }
 
-    // ── Followers — regex fallback on page text ────────────────
     if (!info.followers) {
       const patterns = [
         /([0-9][0-9,\.]*\s*[KkMm]?)\s+followers/gi,
@@ -231,24 +258,28 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
       ];
       for (const p of patterns) {
         const matches = [...(text + html).matchAll(p)];
-        if (matches.length > 0) { info.followers = parseCount(matches[0][1]); break; }
+        if (matches.length > 0) {
+          info.followers = parseCount(matches[0][1]);
+          break;
+        }
       }
     }
 
-    // ── Likes ──────────────────────────────────────────────────
     if (!info.likes) {
       const patterns = [
         /([0-9][0-9,\.]*\s*[KkMm]?)\s+(?:people\s+)?likes?\s+this/gi,
-        /([0-9][0-9,\.]*\s*[KkMm]?)\s+j['']aime/gi,
+        /([0-9][0-9,\.]*\s*[KkMm]?)\s+j['’]aime/gi,
         /"like_count"\s*:\s*([0-9]+)/gi,
       ];
       for (const p of patterns) {
         const matches = [...(text + html).matchAll(p)];
-        if (matches.length > 0) { info.likes = parseCount(matches[0][1]); break; }
+        if (matches.length > 0) {
+          info.likes = parseCount(matches[0][1]);
+          break;
+        }
       }
     }
 
-    // ── Category ───────────────────────────────────────────────
     if (!info.category) {
       $("a, span, div").filter((_, el) => {
         const t = $(el).text().trim();
@@ -259,13 +290,11 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
       });
     }
 
-    // ── About ──────────────────────────────────────────────────
     if (!info.facebookAbout) {
       const ogDesc = $('meta[property="og:description"]').attr("content") || "";
       if (ogDesc.length > 10) info.facebookAbout = ogDesc.slice(0, 300);
     }
 
-    // Also try visiting the About tab
     if (!info.facebookAbout) {
       try {
         const aboutUrl = fbUrl.replace(/\/$/, "") + "/about";
@@ -274,7 +303,6 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
         const aboutHtml = await page.content();
         const $a = cheerio.load(aboutHtml);
 
-        // Get all visible text sections that look like "about" content
         $a("div, p, span").filter((_, el) => {
           const t = $a(el).children().length === 0 ? $a(el).text().trim() : "";
           return t.length > 30 && t.length < 500;
@@ -282,13 +310,11 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
           if (!info.facebookAbout) info.facebookAbout = $a(el).text().trim().slice(0, 300);
         });
 
-        // ── Phone from About page ──────────────────────────────
         if (!info.facebookPhone) {
           const phones = $a.text().match(PATTERNS.phone);
           if (phones) info.facebookPhone = phones[0].replace(/[\s\-.]/g, "").trim();
         }
 
-        // ── Email from About page ──────────────────────────────
         if (!info.facebookEmail) {
           const emails = aboutHtml.match(PATTERNS.email) || [];
           const clean = emails.filter((e) =>
@@ -297,9 +323,8 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
           if (clean.length > 0) info.facebookEmail = clean[0];
         }
 
-        // ── Address from About page ────────────────────────────
         if (!info.facebookAddress) {
-          const cities = ["Douala", "Yaoundé", "Yaounde", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
+          const cities = ["Douala", "Yaounde", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
           $a("div, span, td").each((_, el) => {
             if ($a(el).children().length > 0) return;
             const t = $a(el).text().trim();
@@ -309,7 +334,6 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
           });
         }
 
-        // ── Website from About page ────────────────────────────
         if (!info.facebookWebsite) {
           $a("a[href]").each((_, el) => {
             const href = $a(el).attr("href") || "";
@@ -324,13 +348,11 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
           });
         }
 
-        // Keep the latest year we can find (posts, timestamps)
         const aboutYear = findLatestPostYear(aboutHtml);
         if (aboutYear) {
           info.lastPostYear = Math.max(info.lastPostYear || 0, aboutYear);
         }
 
-        // ── Rating ─────────────────────────────────────────────
         if (!info.rating) {
           const aboutText = $a.text();
           const m = aboutText.match(/([1-5]\.[0-9])\s*(?:out of 5|\/\s*5)/i);
@@ -338,11 +360,9 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
           const mc = aboutText.match(/([0-9][0-9,]*)\s*(?:ratings?|reviews?|avis)/i);
           if (mc) info.ratingCount = parseCount(mc[1]);
         }
-
       } catch {}
     }
 
-    // ── Phone / Email fallback from main page ──────────────────
     if (!info.facebookPhone) {
       const phones = text.match(PATTERNS.phone);
       if (phones) info.facebookPhone = phones[0].replace(/[\s\-.]/g, "").trim();
@@ -354,7 +374,6 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
       );
       if (clean.length > 0) info.facebookEmail = clean[0];
     }
-
   } catch (err) {
     console.log("    [fb] Puppeteer error on " + fbUrl + ": " + err.message);
   }
@@ -362,7 +381,6 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
   return info;
 }
 
-// ── Scrape company website (plain axios) ───────────────────────────────────
 async function scrapeWebsite(siteUrl) {
   const result = { emails: [], phones: [], facebookUrls: [] };
   try {
@@ -371,7 +389,7 @@ async function scrapeWebsite(siteUrl) {
       timeout: 12000, maxRedirects: 5,
     });
     const html = res.data;
-    const $    = cheerio.load(html);
+    const $ = cheerio.load(html);
 
     $("a[href]").each((_, el) => {
       const href = $(el).attr("href") || "";
@@ -400,7 +418,6 @@ async function scrapeWebsite(siteUrl) {
   return result;
 }
 
-// ── DuckDuckGo Facebook search ─────────────────────────────────────────────
 async function ddgFacebookSearch(companyName) {
   const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent('"' + companyName + '" site:facebook.com');
   try {
@@ -413,7 +430,9 @@ async function ddgFacebookSearch(companyName) {
     $(".result__title a, a.result__a").each((_, el) => {
       let href = $(el).attr("href") || "";
       if (href.includes("uddg=")) {
-        try { href = decodeURIComponent(new URL("https:" + href).searchParams.get("uddg") || ""); } catch {}
+        try {
+          href = decodeURIComponent(new URL("https:" + href).searchParams.get("uddg") || "");
+        } catch {}
       }
       if (href.includes("facebook.com") && isScrapableFacebookUrl(href) && !found) {
         found = normalizeFacebookUrl(href);
@@ -421,12 +440,11 @@ async function ddgFacebookSearch(companyName) {
     });
     return found;
   } catch (err) {
-    console.log("    [ddg] Search failed for \"" + companyName + "\": " + err.message);
+    console.log('    [ddg] Search failed for "' + companyName + '": ' + err.message);
     return null;
   }
 }
 
-// ── Detect single company ──────────────────────────────────────────────────
 async function detectCompany(company, page, delayMs) {
   delayMs = delayMs || 2500;
 
@@ -435,17 +453,22 @@ async function detectCompany(company, page, delayMs) {
     websiteUrl: company.url,
     snippet: company.snippet || "",
     source: company.source || "search",
-    emails: [], phones: [],
-    hasFacebook: false, facebookUrl: null,
-    facebookPageName: null, followers: null,
-    category: null, facebookPhone: null,
-    facebookEmail: null, facebookAddress: null, facebookWebsite: null,
+    emails: [],
+    phones: [],
+    hasFacebook: false,
+    facebookUrl: null,
+    facebookPageName: null,
+    followers: null,
+    category: null,
+    facebookPhone: null,
+    facebookEmail: null,
+    facebookAddress: null,
+    facebookWebsite: null,
     scrapedAt: new Date().toISOString(),
   };
 
   console.log("  Detecting: " + company.name);
 
-  // Step 1 — Scrape company website
   if (company.url && company.url.startsWith("http")) {
     const siteData = await scrapeWebsite(company.url);
     enriched.emails = siteData.emails;
@@ -457,7 +480,6 @@ async function detectCompany(company, page, delayMs) {
     }
   }
 
-  // Step 2 — DuckDuckGo fallback
   if (!enriched.hasFacebook) {
     await sleep(1000);
     const fbFromDdg = await ddgFacebookSearch(company.name);
@@ -470,16 +492,15 @@ async function detectCompany(company, page, delayMs) {
     }
   }
 
-  // Step 3 — Scrape Facebook page with Puppeteer
   if (enriched.hasFacebook && enriched.facebookUrl && isScrapableFacebookUrl(enriched.facebookUrl)) {
     console.log("    Scraping Facebook page...");
     const fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
     Object.assign(enriched, fbInfo);
 
     const found = [];
-    if (fbInfo.followers)        found.push("followers: " + fbInfo.followers.toLocaleString());
-    if (fbInfo.likes)            found.push("likes: " + fbInfo.likes.toLocaleString());
-    if (fbInfo.category)         found.push("cat: " + fbInfo.category);
+    if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
+    if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
+    if (fbInfo.category) found.push("cat: " + fbInfo.category);
     if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
     console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
   }
@@ -488,27 +509,22 @@ async function detectCompany(company, page, delayMs) {
   return enriched;
 }
 
-// ── Detect all ─────────────────────────────────────────────────────────────
 async function detectAll(companies, options) {
   options = options || {};
   const facebookOnly = options.facebookOnly || false;
-  const delayMs      = options.delayMs || 2500;
-  const results      = [];
+  const delayMs = options.delayMs || 2500;
+  const results = [];
 
-  // Load session
-    const session = loadSession();
+  const session = loadSession();
   if (!session) {
     throw new Error("No session found. Run: node check_session.js");
   }
 
-
-  // Launch one browser for all companies
   console.log("\n  Launching browser...");
   const browser = await launchBrowser();
-  const page    = await browser.newPage();
+  const page = await browser.newPage();
   await applySession(page, session);
 
-  // Block images/fonts to speed up loading
   await page.setRequestInterception(true);
   page.on("request", (req) => {
     const type = req.resourceType();
@@ -531,17 +547,16 @@ async function detectAll(companies, options) {
   } finally {
     if (browser) {
       try {
-        // Give Puppeteer a moment to finish any pending work.
         await new Promise((r) => setTimeout(r, 250));
         await browser.close();
         console.log("  Browser closed.");
       } catch (closeError) {
-        console.error("  ❌ Error closing browser: " + closeError.message);
+        console.error("  Error closing browser: " + closeError.message);
         try {
           browser.disconnect();
           console.log("  Browser disconnected after close failure.");
         } catch (disconnectError) {
-          console.error("  ❌ Error disconnecting browser: " + disconnectError.message);
+          console.error("  Error disconnecting browser: " + disconnectError.message);
         }
       }
     }
