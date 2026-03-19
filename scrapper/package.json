@@ -12,6 +12,7 @@
   },
   "scripts": {
     "start": "node index.js",
+    "build": "echo \"No build step needed\"",
     "start:facebook-only": "node index.js --facebook-only",
     "start:deep": "node index.js --pages 3",
     "web": "node server.js",
