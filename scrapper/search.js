@@ -8,7 +8,7 @@ const CONFIG = {
 
 
 const SEARCH_QUERIES = [
-  "construction company in Cameroon ",
+  "Hotels au Cameroun", 
   "real estate company Cameroon",
   "societe construction Cameroun",
   "entreprise bâtiment Cameroun",
