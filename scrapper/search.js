@@ -8,11 +8,16 @@ const CONFIG = {
 
 
 const SEARCH_QUERIES = [
-  "construction company Cameroon Douala",
+  "construction company in Cameroon ",
   "real estate company Cameroon",
   "societe construction Cameroun",
   "entreprise bâtiment Cameroun",
-  "property developer Cameroon",
+  "Retauration services Cameroon",
+  "Hotels in Cameroon",
+  "Tourism companies in Cameroon",
+  "Transport companies in Cameroon",
+  "Agriculture companies in Cameroon",
+  "Manufacturing companies in Cameroon",
 ];
 
 // --- RETRY WRAPPER ---
@@ -144,7 +149,7 @@ async function searchCompanies(options = {}) {
 
   try {
     const { filterNew } = require("./scraped");
-    return filterNew(unique);
+    return await filterNew(unique);
   } catch (e) {
     return unique;
   }

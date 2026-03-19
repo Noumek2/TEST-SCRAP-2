@@ -10,7 +10,7 @@
 
 const { searchCompanies } = require("./search");
 const { detectAll } = require("./detect");
-const { saveAll, printSummary } = require("./save");
+const { saveAll, printSummary, saveToSupabase } = require("./save");
 const { markScraped } = require("./scraped");
 const { exec } = require("child_process");
 const util = require("util");
@@ -61,6 +61,10 @@ async function runScraper(options = {}) {
       return;
     }
 
+    logStage("storage-scrap:start");
+    await saveToSupabase(companies, "storage-scrap");
+    logStage("storage-scrap:done");
+
     logStage("detect:start");
     console.log("STEP 2 - Detecting Facebook pages and extracting details...");
     const enriched = await detectAll(companies, { facebookOnly: false, delayMs: 2500 });
@@ -85,39 +89,9 @@ async function runScraper(options = {}) {
     logStage("save:done");
 
     try {
-      const { supabase } = require("./supabaseClient");
-
-      if (supabase) {
-        logStage("supabase:start");
-        console.log("\nSTEP 4 - Saving results to Supabase...");
-
-        const tableName = process.env.SUPABASE_TABLE || "storage-scrap";
-        const columnName = process.env.SUPABASE_COLUMN || "json_files";
-
-        const payload = {
-          scrapedAt: new Date().toISOString(),
-          total: enriched.length,
-          withFacebook: enriched.filter((c) => c.hasFacebook).length,
-          companies: enriched,
-        };
-
-        const { error } = await supabase
-          .from(tableName)
-          .insert([{ [columnName]: payload }]);
-
-        if (error) {
-          console.error("  Supabase insert failed: " + error.message);
-          if (error.details) console.error("  Details: " + error.details);
-          if (error.hint) console.error("  Hint: " + error.hint);
-        } else {
-          console.log("  Supabase insert succeeded!");
-        }
-
-        logStage("supabase:done");
-      } else {
-        console.log("\nSTEP 4 - Skipping Supabase save (not configured).");
-        console.log("  (To enable, create a .env file with SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY)");
-      }
+      logStage("storage-fb-scrap:start");
+      await saveToSupabase(enriched, "storage-fb-scrap");
+      logStage("storage-fb-scrap:done");
     } catch (e) {
       logErrorWithStack("supabase", e);
     }

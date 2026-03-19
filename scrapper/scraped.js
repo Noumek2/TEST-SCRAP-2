@@ -1,14 +1,16 @@
 /**
  * scraped.js
- * Tracks which companies have already been processed to skip them in future runs.
+ * Tracks which companies have already been processed.
  *
- * - `dome/scraped_facebook.json` holds companies with a Facebook page.
- * - `dome/scraped_no_facebook.json` holds companies without a Facebook page.
+ * Local runs keep using dome/*.json files.
+ * Vercel runs use Supabase tables instead of the read-only filesystem.
  */
 
 const fs = require("fs");
 const path = require("path");
+const { supabase } = require("./supabaseClient");
 
+const isVercel = process.env.VERCEL === "1";
 const DOME_DIR = path.join(__dirname, "dome");
 const SCRAPED_FILE = path.join(DOME_DIR, "scraped.json");
 const SCRAPED_FB_FILE = path.join(DOME_DIR, "scraped_facebook.json");
@@ -19,7 +21,6 @@ function ensureDomeDir() {
 }
 
 function makeScrapedKey(company) {
-  // Normalize on name + URL (if available) to avoid re-processing the same company
   const name = (company.name || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 40);
   const url = (company.url || company.websiteUrl || "").toLowerCase().trim();
   return (name ? name : "") + "|" + (url ? url : "");
@@ -41,12 +42,6 @@ function saveJson(filePath, data) {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
 }
 
-function loadScrapedKeys() {
-  const fb = loadJson(SCRAPED_FB_FILE).map(makeScrapedKey);
-  const nofb = loadJson(SCRAPED_NOFB_FILE).map(makeScrapedKey);
-  return new Set([...fb, ...nofb]);
-}
-
 function saveCombinedScraped(fbList, noFbList) {
   const combined = [];
   const seen = new Set();
@@ -64,12 +59,55 @@ function saveCombinedScraped(fbList, noFbList) {
   saveJson(SCRAPED_FILE, combined);
 }
 
-function filterNew(companies) {
-  const seen = loadScrapedKeys();
+async function loadSupabaseCompanies(tableName) {
+  if (!supabase) return [];
+
+  const columnName = process.env.SUPABASE_COLUMN || "json_files";
+  const { data, error } = await supabase
+    .from(tableName)
+    .select(columnName)
+    .limit(200);
+
+  if (error) {
+    console.warn(`[scraped] Could not load ${tableName}: ${error.message}`);
+    return [];
+  }
+
+  return (data || []).flatMap((row) => {
+    const payload = row[columnName];
+    if (!payload) return [];
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload.companies)) return payload.companies;
+    return [];
+  });
+}
+
+async function loadScrapedKeysFromSupabase() {
+  const [rawCompanies, detectedCompanies] = await Promise.all([
+    loadSupabaseCompanies("storage-scrap"),
+    loadSupabaseCompanies("storage-fb-scrap"),
+  ]);
+
+  return new Set([...rawCompanies, ...detectedCompanies].map(makeScrapedKey));
+}
+
+function loadScrapedKeysLocal() {
+  const fb = loadJson(SCRAPED_FB_FILE).map(makeScrapedKey);
+  const nofb = loadJson(SCRAPED_NOFB_FILE).map(makeScrapedKey);
+  return new Set([...fb, ...nofb]);
+}
+
+async function filterNew(companies) {
+  if (isVercel) {
+    const seen = await loadScrapedKeysFromSupabase();
+    return companies.filter((c) => !seen.has(makeScrapedKey(c)));
+  }
+
+  const seen = loadScrapedKeysLocal();
   return companies.filter((c) => !seen.has(makeScrapedKey(c)));
 }
 
-function markScraped(companies) {
+function markScrapedLocal(companies) {
   const fbList = loadJson(SCRAPED_FB_FILE);
   const noFbList = loadJson(SCRAPED_NOFB_FILE);
 
@@ -96,6 +134,14 @@ function markScraped(companies) {
   saveJson(SCRAPED_FB_FILE, fbList);
   saveJson(SCRAPED_NOFB_FILE, noFbList);
   saveCombinedScraped(fbList, noFbList);
+}
+
+function markScraped(companies) {
+  if (isVercel) {
+    console.log("[scraped] Skipping local file tracking on Vercel; Supabase is the source of truth.");
+    return;
+  }
+  markScrapedLocal(companies);
 }
 
 module.exports = { filterNew, markScraped, makeScrapedKey };

@@ -8,8 +8,11 @@
 const fs = require("fs");
 const { saveReport } = require("./report");
 const path = require("path");
+const os = require("os");
 const { supabase } = require("./supabaseClient");
 const { sendEmail } = require("./emailer");
+
+const isVercel = process.env.VERCEL === "1";
 
 // ── CSV helpers ────────────────────────────────────────────────────────────
 
@@ -179,7 +182,7 @@ function ensureDir(dir) {
  */
 function saveAll(companies, options = {}) {
   const {
-    outputDir = path.join(__dirname, "output"),
+    outputDir = isVercel ? path.join(os.tmpdir(), "scrapper-output") : path.join(__dirname, "output"),
     baseName,
     facebookOnly = false,
   } = options;
@@ -314,8 +317,8 @@ async function saveToSupabase(companies, tableName = null) {
     console.log(`  ✅ ${targetTable} insert succeeded!`);
     console.log(`     Saved ${dataToSave.length} ${tableDescription}`);
     
-    // Send email notification for the main storage-scrap table
-    if (targetTable === "storage-scrap" && dataToSave.length > 0) {
+    // Send email after the enriched results table is saved.
+    if (targetTable === "storage-fb-scrap" && dataToSave.length > 0) {
       await sendEmail(dataToSave);
     }
   }
