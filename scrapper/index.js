@@ -39,15 +39,40 @@ async function runScraper(options = {}) {
 
   try {
     // STEP 1 — Search
+   // STEP 1 — Search with Retry Logic
+   // STEP 1 — Search (Optimized for Vercel 10s limit + Retry Logic)
     console.log("STEP 1 — Searching for companies...");
-    const companies = await searchCompanies({ pagesPerQuery, delayMs: 2000 });
+    
+    const isVercel = process.env.VERCEL === '1'; 
+    const searchOptions = { 
+      pagesPerQuery: isVercel ? 1 : pagesPerQuery, 
+      delayMs: isVercel ? 2000 : 4000 // Faster on Vercel to beat the clock
+    };
+
+    let companies = [];
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    while (retryCount < maxRetries) {
+      try {
+        companies = await searchCompanies(searchOptions);
+        break; // Success! Exit the retry loop
+      } catch (err) {
+        if (err.message.includes('429')) {
+          retryCount++;
+          const waitTime = 5000 * retryCount; 
+          console.warn(` ⚠️ Rate limited (429). Retrying in ${waitTime/1000}s... (Attempt ${retryCount}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+        } else {
+          throw err; 
+        }
+      }
+    }
 
     if (companies.length === 0) {
       console.warn("No companies found. Check your internet connection or try again later.");
-      return; // Stop execution
+      return; 
     }
-
-    // STEP 2 — Detect Facebook + extract contact info
     console.log("STEP 2 — Detecting Facebook pages & extracting details...");
     const enriched = await detectAll(companies, { facebookOnly: false, delayMs: 2500 });
 
