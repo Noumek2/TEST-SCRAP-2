@@ -14,8 +14,8 @@ app.get('/', (req, res) => {
 });
 
 // 3. API endpoint that triggers the scraper
-//    This connects the fetch('/api/index') in your HTML to the index.js logic
-app.get('/api/index', async (req, res) => {
+//    This connects the fetch('/scrapper/index.js') in your HTML to the index.js logic
+app.get('/scrapper/index.js', async (req, res) => {
     try {
         await scraperHandler(req, res);
     } catch (error) {
