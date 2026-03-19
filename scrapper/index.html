@@ -215,6 +215,25 @@
             color: #999;
             font-size: 0.9em;
         }
+
+        #log-output {
+            background: #2b2b2b;
+            color: #f1f1f1;
+            font-family: 'Consolas', 'Monaco', monospace;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            font-size: 0.85em;
+            white-space: pre-wrap;
+            display: none;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        #log-output.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -230,12 +249,6 @@
             Searches for construction and real estate companies in Cameroon, extracts contact info, detects Facebook pages, and saves everything to a database. Results are emailed to you automatically.
         </div>
 
-        <div class="button-group">
-            <button id="startBtn" onclick="startScraper()">
-                🚀 START SCRAPER
-            </button>
-        </div>
-
         <div class="progress-bar" id="progressBar">
             <div class="progress-fill"></div>
         </div>
@@ -247,71 +260,64 @@
             </div>
         </div>
 
+        <div id="log-output"></div>
+
         <footer>
             <p>💾 Data is saved to Supabase database<br>📧 Results will be emailed to your configured address</p>
         </footer>
     </div>
 
     <script>
-        const startBtn = document.getElementById("startBtn");
         const statusDiv = document.getElementById("statusDiv");
         const statusText = document.getElementById("statusText");
         const progressBar = document.getElementById("progressBar");
+        const logOutput = document.getElementById("log-output");
 
         async function startScraper() {
-            startBtn.disabled = true;
             statusDiv.className = "status running";
             progressBar.classList.add("active");
             statusText.innerHTML = '<span class="spinner"></span> Starting scraper...';
+            
+            // Reset and show log box
+            logOutput.innerHTML = "";
+            logOutput.classList.add("active");
+            logOutput.textContent = "Connecting to scraper...\n";
 
             try {
-                const response = await fetch("/api/start", { method: "POST" });
+                // Assuming index.js is exposed at /api/index (or modify to match your route)
+                const response = await fetch("/api/index"); 
+                
                 if (!response.ok) {
                     throw new Error("Failed to start scraper");
                 }
 
-                // Poll for status updates
-                const statusInterval = setInterval(async () => {
-                    const statusResponse = await fetch("/api/status");
-                    const status = await statusResponse.json();
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
 
-                    if (status.status === "complete") {
-                        statusDiv.className = "status complete";
-                        statusText.innerHTML = "✅ " + status.progress;
-                        progressBar.classList.remove("active");
-                        clearInterval(statusInterval);
-                        setTimeout(() => {
-                            startBtn.disabled = false;
-                            statusDiv.className = "status idle";
-                        }, 5000);
-                    } else if (status.status === "error") {
-                        statusDiv.className = "status error";
-                        statusText.innerHTML = "❌ " + status.progress;
-                        progressBar.classList.remove("active");
-                        clearInterval(statusInterval);
-                        startBtn.disabled = false;
-                    } else {
-                        statusText.innerHTML =
-                            '<span class="spinner"></span> ' +
-                            status.progress;
-                    }
-                }, 1000);
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    // Decode the stream chunk and append to log box
+                    const text = decoder.decode(value, { stream: true });
+                    logOutput.textContent += text;
+                    logOutput.scrollTop = logOutput.scrollHeight; // Auto-scroll to bottom
+                }
+
+                statusDiv.className = "status complete";
+                statusText.innerHTML = "✅ Scraper finished!";
+                progressBar.classList.remove("active");
+
             } catch (error) {
                 statusDiv.className = "status error";
                 statusText.innerHTML = "❌ Error: " + error.message;
-                startBtn.disabled = false;
+                logOutput.textContent += "\n\nError: " + error.message;
                 progressBar.classList.remove("active");
             }
         }
 
         // Check initial status on page load
-        window.addEventListener("load", async () => {
-            const statusResponse = await fetch("/api/status");
-            const status = await statusResponse.json();
-            if (status.running) {
-                startScraper();
-            }
-        });
+        window.addEventListener("load", startScraper);
     </script>
 </body>
 </html>

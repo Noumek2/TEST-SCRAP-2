@@ -1,0 +1,4 @@
+scrapper/puppeteer_profile/
+.env/
+node_modules/
+output/

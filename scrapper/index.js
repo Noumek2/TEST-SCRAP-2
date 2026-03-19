@@ -14,12 +14,7 @@ const { saveAll, printSummary } = require("./save");
 const { markScraped }        = require("./scraped");
 const { exec }               = require("child_process");
 const path                   = require("path");
-
-const args         = process.argv.slice(2);
-const facebookOnly = args.includes("--facebook-only");
-const noOpen       = args.includes("--no-open");
-const pagesIndex   = args.indexOf("--pages");
-const pagesPerQuery = pagesIndex !== -1 ? parseInt(args[pagesIndex + 1]) || 2 : 2;
+const util                   = require("util");
 
 // Opens a file in the default browser / app depending on OS
 function openFile(filePath) {
@@ -32,7 +27,9 @@ function openFile(filePath) {
   });
 }
 
-async function main() {
+async function runScraper(options = {}) {
+  const { facebookOnly = false, noOpen = false, pagesPerQuery = 2 } = options;
+
   console.log("╔══════════════════════════════════════════════════════════╗");
   console.log("║   Cameroon Construction & Real Estate Company Scraper    ║");
   console.log("╚══════════════════════════════════════════════════════════╝");
@@ -47,7 +44,7 @@ async function main() {
 
     if (companies.length === 0) {
       console.warn("No companies found. Check your internet connection or try again later.");
-      process.exit(1);
+      return; // Stop execution
     }
 
     // STEP 2 — Detect Facebook + extract contact info
@@ -70,34 +67,42 @@ async function main() {
       facebookOnly: true,
     });
 
-    // Optional: upload results to Supabase
-    // Requires: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and a table/column to exist
-    const { supabase } = require("./supabaseClient");
+    // STEP 4 — Optional: upload results to Supabase
+    try {
+      // Ensure environment variables are loaded if not already
+      const { supabase } = require("./supabaseClient");
 
-    async function saveToSupabase(companies) {
-      const tableName = process.env.SUPABASE_TABLE || "storage-scrap";
-      const columnName = process.env.SUPABASE_COLUMN || "json_files";
+      if (supabase) {
+        console.log("\nSTEP 4 — Saving results to Supabase...");
 
-      const payload = {
-        scrapedAt: new Date().toISOString(),
-        total: companies.length,
-        withFacebook: companies.filter((c) => c.hasFacebook).length,
-        companies,
-      };
+        const tableName = process.env.SUPABASE_TABLE || "storage-scrap";
+        const columnName = process.env.SUPABASE_COLUMN || "json_files";
 
-      const { data, error } = await supabase
-        .from(tableName)
-        .insert([{ [columnName]: JSON.stringify(payload) }]);
+        const payload = {
+          scrapedAt: new Date().toISOString(),
+          total: enriched.length,
+          withFacebook: enriched.filter((c) => c.hasFacebook).length,
+          companies: enriched,
+        };
 
-      if (error) {
-        console.error("Supabase insert failed:", error.message || error);
-        if (error.details) console.error("Details:", error.details);
+        const { error } = await supabase
+          .from(tableName)
+          .insert([{ [columnName]: payload }]);
+
+        if (error) {
+          console.error("  ❌ Supabase insert failed:", error.message);
+          if (error.details) console.error("     Details:", error.details);
+          if (error.hint) console.error("     Hint:", error.hint);
+        } else {
+          console.log("  ✅ Supabase insert succeeded!");
+        }
       } else {
-        console.log("Supabase insert succeeded (rows inserted):", data?.length ?? "?");
+        console.log("\nSTEP 4 — Skipping Supabase save (not configured).");
+        console.log("  (To enable, create a .env file with SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY)");
       }
+    } catch (e) {
+      console.error("\n❌ An error occurred during the Supabase operation:", e.message);
     }
-
-    await saveToSupabase(enriched);
 
     // Print summary table to console
     printSummary(enriched);
@@ -117,9 +122,65 @@ async function main() {
     }
 
   } catch (err) {
-    console.error("\nFatal error: " + err.message);
-    process.exit(1);
+    throw err; // Re-throw to be handled by caller
   }
 }
 
-main();
+// --- Execution Logic ---
+
+if (require.main === module) {
+  // Run as CLI script
+  const args = process.argv.slice(2);
+  const options = {
+    facebookOnly: args.includes("--facebook-only"),
+    noOpen: args.includes("--no-open"),
+    pagesPerQuery: args.includes("--pages") ? parseInt(args[args.indexOf("--pages") + 1]) || 2 : 2
+  };
+
+  runScraper(options).catch((err) => {
+    console.error("\nFatal error: " + err.message);
+    process.exit(1);
+  });
+} else {
+  // Run as Web/Serverless handler (e.g. Vercel)
+  module.exports = async (req, res) => {
+    // Parse query params if provided (e.g. ?pages=3&facebookOnly=true)
+    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    const options = {
+      facebookOnly: url.searchParams.get('facebookOnly') === 'true',
+      pagesPerQuery: parseInt(url.searchParams.get('pages')) || 2,
+      noOpen: true // Disable auto-open on server
+    };
+
+    // Set headers for streaming text response
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    // Intercept console.log to write to response stream
+    const originalLog = console.log;
+    const originalWarn = console.warn;
+    const originalError = console.error;
+
+    const writeToStream = (...args) => {
+      const msg = util.format(...args);
+      res.write(msg + '\n');
+    };
+
+    console.log = writeToStream;
+    console.warn = writeToStream;
+    console.error = writeToStream;
+
+    try {
+      await runScraper(options);
+      res.end('\n--- End of Log ---');
+    } catch (err) {
+      res.write(`\nFatal Error: ${err.message}\n`);
+      res.end();
+    } finally {
+      // Restore console
+      console.log = originalLog;
+      console.warn = originalWarn;
+      console.error = originalError;
+    }
+  };
+}
