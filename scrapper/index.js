@@ -42,10 +42,11 @@ async function runScraper(options = {}) {
     console.log("STEP 1 — Searching for companies...");
     const companies = await searchCompanies({ pagesPerQuery, delayMs: 2000 });
 
-    if (companies.length === 2) {
+       if (companies.length === 0) {
       console.warn("No companies found. Check your internet connection or try again later.");
-      return; // Stop execution
+      return;
     }
+
 
     // STEP 2 — Detect Facebook + extract contact info
     console.log("STEP 2 — Detecting Facebook pages & extracting details...");

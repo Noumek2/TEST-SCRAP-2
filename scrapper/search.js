@@ -4,18 +4,10 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 
-function loadConfig() {
-  const cfgPath = path.join(__dirname, "config.json");
-  if (fs.existsSync(cfgPath)) {
-    try {
-      return JSON.parse(fs.readFileSync(cfgPath, "utf8"));
-    } catch (e) {
-      return {};
-    }
-  }
-  return { serpApiKey: process.env.SERPAPI_KEY };
-}
-const CONFIG = loadConfig();
+const CONFIG = {
+  serpApiKey: process.env.SERPAPI_KEY
+};
+
 
 const SEARCH_QUERIES = [
   "construction company Cameroon Douala",

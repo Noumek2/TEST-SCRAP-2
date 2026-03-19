@@ -148,7 +148,8 @@ async function launchBrowser() {
     console.error("  - Run: npm run puppeteer-install");
     console.error("  - Or set PUPPETEER_EXECUTABLE_PATH / CHROME_PATH to a valid chrome.exe");
     console.error("  - If you get EBUSY errors, try: taskkill /F /IM chrome.exe /T");
-    process.exit(1);
+        throw new Error("Failed to launch browser: " + err.message);
+
   }
 }
 
@@ -495,11 +496,11 @@ async function detectAll(companies, options) {
   const results      = [];
 
   // Load session
-  const session = loadSession();
+    const session = loadSession();
   if (!session) {
-    console.error("No session found. Run: node check_session.js");
-    process.exit(1);
+    throw new Error("No session found. Run: node check_session.js");
   }
+
 
   // Launch one browser for all companies
   console.log("\n  Launching browser...");

@@ -4,31 +4,35 @@
  */
 
 const nodemailer = require("nodemailer");
-const fs = require("fs");
-const path = require("path");
+
 
 let emailConfig = null;
 
 function loadEmailConfig() {
   if (emailConfig) return emailConfig;
-  
-  try {
-    const configPath = path.join(__dirname, "config.json");
-    const raw = fs.readFileSync(configPath, "utf8");
-    const config = JSON.parse(raw);
-    
-    if (!config.emailTo || !config.smtp) {
-      console.warn("  [email] config.json missing emailTo or smtp configuration");
-      return null;
-    }
-    
-    emailConfig = config;
-    return config;
-  } catch (err) {
-    console.warn("  [email] Could not load config.json: " + err.message);
+
+  const config = {
+    emailTo: process.env.EMAIL_TO,
+    smtp: {
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT, 10),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    },
+  };
+
+  if (!config.emailTo || !config.smtp.host || !config.smtp.auth.user || !config.smtp.auth.pass) {
+    console.warn("  [email] Missing SMTP or EMAIL_TO environment variables");
     return null;
   }
+
+  emailConfig = config;
+  return config;
 }
+
 
 async function sendEmail(companies, options = {}) {
   const config = loadEmailConfig();
