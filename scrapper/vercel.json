@@ -5,7 +5,7 @@
     { "src": "index.html", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/scrapper/index.html" },
+    { "src": "/(.*)", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/scrapper/server.js"}
   ]
 }
