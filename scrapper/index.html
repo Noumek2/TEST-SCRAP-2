@@ -249,6 +249,10 @@
             Searches for construction and real estate companies in Cameroon, extracts contact info, detects Facebook pages, and saves everything to a database. Results are emailed to you automatically.
         </div>
 
+        <div class="button-group">
+            <button id="startBtn">🚀 Start Scraping</button>
+        </div>
+
         <div class="progress-bar" id="progressBar">
             <div class="progress-fill"></div>
         </div>
@@ -272,8 +276,10 @@
         const statusText = document.getElementById("statusText");
         const progressBar = document.getElementById("progressBar");
         const logOutput = document.getElementById("log-output");
+        const startBtn = document.getElementById("startBtn");
 
         async function startScraper() {
+            startBtn.disabled = true;
             statusDiv.className = "status running";
             progressBar.classList.add("active");
             statusText.innerHTML = '<span class="spinner"></span> Starting scraper...';
@@ -313,11 +319,12 @@
                 statusText.innerHTML = "❌ Error: " + error.message;
                 logOutput.textContent += "\n\nError: " + error.message;
                 progressBar.classList.remove("active");
+                startBtn.disabled = false;
             }
         }
 
         // Check initial status on page load
-        window.addEventListener("load", startScraper);
+        startBtn.addEventListener("click", startScraper);
     </script>
 </body>
 </html>
