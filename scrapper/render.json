@@ -1,0 +1,28 @@
+{
+  "name": "Cameroon Company Scraper",
+  "description": "Scrapes construction and real estate companies in Cameroon from Google, detects Facebook pages, and saves to CSV/XML",
+  "buildCommand": "npm install",
+  "startCommand": "node server.js",
+  "envs": [
+    {
+      "key": "SERPAPI_KEY",
+      "description": "Your SerpAPI key for Google search",
+      "sync": false
+    },
+    {
+      "key": "SUPABASE_URL",
+      "description": "Your Supabase project URL",
+      "sync": false
+    },
+    {
+      "key": "SUPABASE_SERVICE_ROLE_KEY",
+      "description": "Your Supabase service role key (NOT anon key)",
+      "sync": false
+    },
+    {
+      "key": "RENDER",
+      "value": "true",
+      "description": "Identifies this as Render environment"
+    }
+  ]
+}

@@ -12,7 +12,7 @@ const os = require("os");
 const { supabase } = require("./supabaseClient");
 const { sendEmail } = require("./emailer");
 
-const isVercel = process.env.VERCEL === "1";
+const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
 
 // ── CSV helpers ────────────────────────────────────────────────────────────
 

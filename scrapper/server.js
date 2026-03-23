@@ -8,14 +8,23 @@ const PORT = process.env.PORT || 3001; // Use environment variable PORT or defau
 // 1. Serve static files (index.html, CSS, etc.) from the current folder
 app.use(express.static(__dirname));
 
-// 2. Route for the home page
+// 2. Health check endpoint for Render
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// 3. Route for the home page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 3. API endpoint that triggers the scraper (Renamed to avoid conflict with static index.js file)
+// 4. API endpoint that triggers the scraper (Renamed to avoid conflict with static index.js file)
 app.get('/api/run', async (req, res) => {
     try {
+        // Set a longer timeout for Render (default is 30s, we want 30min for long scrapes)
+        req.socket.setTimeout(30 * 60 * 1000); // 30 minutes
+        res.setTimeout(30 * 60 * 1000); // 30 minutes
+        
         await scraperHandler(req, res);
     } catch (error) {
         if (!res.headersSent) {
@@ -24,8 +33,23 @@ app.get('/api/run', async (req, res) => {
     }
 });
 
-// 4. Start the server
-app.listen(PORT, () => {
+// 5. Error handler for 404
+app.use((req, res) => {
+    res.status(404).send('Not Found');
+});
+
+// 6. Start the server
+const server = app.listen(PORT, () => {
     console.log(`\n✅ Web Interface Ready!`);
     console.log(`   Open this link in your browser: http://localhost:${PORT}\n`);
+    console.log(`   Health check: http://localhost:${PORT}/health\n`);
+});
+
+// Graceful shutdown on Render
+process.on('SIGTERM', () => {
+    console.log('\n[SIGTERM] Shutting down gracefully...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
 });

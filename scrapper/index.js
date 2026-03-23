@@ -30,6 +30,13 @@ function logErrorWithStack(context, err) {
 }
 
 function openFile(filePath) {
+  // Skip opening files on serverless platforms (Render, Vercel, etc.)
+  const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
+  if (isServerless) {
+    console.log("  [info] Skipping file open on serverless platform. Output: " + filePath);
+    return;
+  }
+
   const cmd =
     process.platform === "win32" ? 'start "" "' + filePath + '"' :
     process.platform === "darwin" ? 'open "' + filePath + '"' :

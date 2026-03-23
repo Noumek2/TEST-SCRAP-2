@@ -225,6 +225,11 @@
     "hasFacebook": true
   },
   {
+    "name": "Cineman - Facebook",
+    "url": "https://www.bing.com/ck/a?!&&p=1bd014dd9fdb265907011bbc4960f52e6f7a3cf8187df1f23bd4123636d6e5beJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cuZmFjZWJvb2suY29tL0NpbmVtYW5QTC8&ntb=1",
+    "hasFacebook": true
+  },
+  {
     "name": "Les 10 meilleures entreprises de construction à Douala ...",
     "url": "https://www.starofservice.cm/annubis/littoral/sanaga-maritime/douala/service-de-construction",
     "hasFacebook": false
@@ -2747,6 +2752,426 @@
   {
     "name": "[GA4] Measurement ID - Analytics Help",
     "url": "https://www.bing.com/ck/a?!&&p=8e19d9419d9574920ad8d8dfc9e7d2fd17d94d4e0e4290675353e9fa38953dd2JmltdHM9MTc3Mzg3ODQwMA&ptn=3&ver=2&hsh=4&fclid=005e1d2b-282b-6017-38ce-0a0a29d66178&u=a1aHR0cHM6Ly9zdXBwb3J0Lmdvb2dsZS5jb20vYW5hbHl0aWNzL2Fuc3dlci8xMjI3MDM1Nj9obD1lbg&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Hotels.com - Deals & Discounts for Hotel Reservations from Luxury ...",
+    "url": "https://www.bing.com/ck/a?!&&p=a1e1ace9a4502682c3a9d14c90c3b2b28a29acd3b8048e9e622c82ef4ff7248dJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cuaG90ZWxzLmNvbS8_bXNvY2tpZD0wZjM2NzdiNTgyMzM2MzI4MWEwNzYwOTA4MzQ5NjI4Nw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "10 Best Turku Hotels, Finland (From US$74) - Booking.com",
+    "url": "https://www.bing.com/ck/a?!&&p=ea20a3a85470d0b34747dfe958bd4681e432a1fd0fe13a7f751f1baac9e50198JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cuYm9va2luZy5jb20vY2l0eS9maS90dXJrdS5odG1sP21zb2NraWQ9MGYzNjc3YjU4MjMzNjMyODFhMDc2MDkwODM0OTYyODc&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "THE 10 BEST Hotels in Turku, Finland 2026 (from $68) - Tripadvisor",
+    "url": "https://www.bing.com/ck/a?!&&p=b9344d68b7643832a31ab9c04fc122654a556576afe26b2ecc6aa1b24bd3ff14JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cudHJpcGFkdmlzb3IuY29tL0hvdGVscy1nMTg5OTQ5LVR1cmt1X1NvdXRod2VzdF9GaW5sYW5kLUhvdGVscy5odG1s&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "trivago.fi - Vertaile hotellien hintoja kaikkialta maailmasta",
+    "url": "https://www.bing.com/ck/a?!&&p=79a7f62cdf29e7f6739bb22ac86ec28110c9883737d898cb59d8899be7f8deb2JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cudHJpdmFnby5maS8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "11 Best Hotels in Turku, Finland - Agoda",
+    "url": "https://www.bing.com/ck/a?!&&p=7117fea8ae7c0bcf95ac7fc03dcad33f68b10a2d8a9f7a552bd7736aa8a14c71JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cuYWdvZGEuY29tL2NpdHkvdHVya3UtZmkuaHRtbD9tc29ja2lkPTBmMzY3N2I1ODIzMzYzMjgxYTA3NjA5MDgzNDk2Mjg3&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Sokos Hotellit - sokoshotels.fi",
+    "url": "https://www.bing.com/ck/a?!&&p=42680568f545b51974ae18b8d3291fc598b906a47e9e3fcfdb26855a4f213906JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cuc29rb3Nob3RlbHMuZmkv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Hotels.com - Tarjoukset ja alennukset hotellivarauksista ...",
+    "url": "https://www.bing.com/ck/a?!&&p=7185b1b23cd502e207eda3903a35703e5fd8c78a241b8413b3d89d0ea2b0483dJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly9maS5ob3RlbHMuY29tLw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Top Turku Hotels: 2026 Best Hotels in Turku - Expedia",
+    "url": "https://www.bing.com/ck/a?!&&p=37406a29a4b5e53d185a8395dc48d4d9f9438fa80ca854b1bb3af236ee74c50bJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cuZXhwZWRpYS5jb20vRGVzdGluYXRpb25zLUluLVR1cmt1LmQ2MDU2MjEwLkhvdGVsLURlc3RpbmF0aW9ucz9tc29ja2lkPTBmMzY3N2I1ODIzMzYzMjgxYTA3NjA5MDgzNDk2Mjg3&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "𝗧𝗛𝗘 𝟭𝟬 𝗕𝗘𝗦𝗧 Hotels in Turku of 2026 (from S$78) - Tripadvisor",
+    "url": "https://www.bing.com/ck/a?!&&p=1c3d6959dc7b832596216f60585184f4f291885261b17e2fbdcb9a215fdabfafJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cudHJpcGFkdmlzb3IuY29tLnNnL0hvdGVscy1nMTg5OTQ5LVR1cmt1X1NvdXRod2VzdF9GaW5sYW5kLUhvdGVscy5odG1s&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Hotelli Turku | Hotel Kakola | Elämyshotelli Turun sydämessä",
+    "url": "https://www.bing.com/ck/a?!&&p=a5a04eaf0d3170dccba26909a674271750fa8b68a9c30c7774f80c6d58b92be8JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=0f3677b5-8233-6328-1a07-609083496287&u=a1aHR0cHM6Ly93d3cuaG90ZWxrYWtvbGEuZmkv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "如何具体区分genuine, authentic, true, real, actual? - 知乎",
+    "url": "https://www.bing.com/ck/a?!&&p=4aff839b98e69568b9ab7f39ce0bf52714e86a51d5cb08f31b4df8acc461824eJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=3a098073-d144-6f7b-3351-9756d03e6e35&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzM0OTk5ODQ3Ng&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "【买前必看】2025年最新AR眼镜对比测评：XREAL One、雷 ...",
+    "url": "https://www.bing.com/ck/a?!&&p=bf2d543cb38a1ae264aecfcbb21121110c8510857ee26c1b74cacd691a436d57JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=3a098073-d144-6f7b-3351-9756d03e6e35&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3RhcmRpcy9iZC9hcnQvMTEyMDMxNjc4MjI&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "float 和 real 数据类型 的区别？？_百度知道",
+    "url": "https://www.bing.com/ck/a?!&&p=0f4c1973c2b52d4c845839980f5cebf30a73096d6badc383a1cb7a22836e504bJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=3a098073-d144-6f7b-3351-9756d03e6e35&u=a1aHR0cHM6Ly96aGlkYW8uYmFpZHUuY29tL3F1ZXN0aW9uLzQzMzQ5Njc4Lmh0bWw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "true 和 real 有什么区别 - 知乎",
+    "url": "https://www.bing.com/ck/a?!&&p=21581fa7948f8ddd8db02e6e9913ba978b8641e48c47901c69e247605e6600fcJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=3a098073-d144-6f7b-3351-9756d03e6e35&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzI4MTI3MzE2&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "real各种形式？ - 百度知道",
+    "url": "https://www.bing.com/ck/a?!&&p=2f91d4cbb30bcaf31f6094baccd3c0970a07595d3fa6548cdafee7140c12eb0bJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=3a098073-d144-6f7b-3351-9756d03e6e35&u=a1aHR0cHM6Ly96aGlkYW8uYmFpZHUuY29tL3F1ZXN0aW9uLzU1ODQxNDgxNy5odG1s&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "什么样的研究才算真实世界研究 (real world study)？ - 知乎",
+    "url": "https://www.bing.com/ck/a?!&&p=63ba3cfdfc95fbcd844f8b6aea7dbf9fc33e2727881e1c0b2e1003949bf6146eJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=3a098073-d144-6f7b-3351-9756d03e6e35&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzMwMzYyOTIzOA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Harcèlement au collège - aufeminin",
+    "url": "https://www.bing.com/ck/a?!&&p=67c6a8ced219316bf4468018cca78aecb806fb5f7c91fc56997de0bfe5a6c3c7JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vaGFyY2VsZW1lbnQtYXUtY29sbGVnZS1mZDUzNDQxODg&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "MAIS QUELLE EST CETTE SOCIETE PRIVEE",
+    "url": "https://www.bing.com/ck/a?!&&p=64baba686459c34b7a186dbee29fe471b28ee2724a55fe8da247f84698e572e8JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vbWFpcy1xdWVsbGUtZXN0LWNldHRlLXNvY2lldGUtcHJpdmVlLWZkNTU4NTMyMA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "mauvaise nouvelle",
+    "url": "https://www.bing.com/ck/a?!&&p=43e74ecb499240f2769d60beda2c504fa9c621a034ef21f8bf87838df62fcdfdJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vbWF1dmFpc2Utbm91dmVsbGUtZmQ1NzA5MTM5&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "A la question",
+    "url": "https://www.bing.com/ck/a?!&&p=6448fe225adee1662c94face61d19085090a6a83c2040294228f2f9ab08b7609JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vYS1sYS1xdWVzdGlvbi1mZDU2MTQzNjg&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Un monde meilleur",
+    "url": "https://www.bing.com/ck/a?!&&p=1da633e8c82952974b4c5f29038301b423645af4a8c62d4b7c70b71cb70b5fc1JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vdW4tbW9uZGUtbWVpbGxldXItZmQ1NzAxNzQy&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Marre de halloween",
+    "url": "https://www.bing.com/ck/a?!&&p=d863b2f93e4826bcac8b4201012d25022e3c463085a63ae2e5cb122ed37fcb32JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vbWFycmUtZGUtaGFsbG93ZWVuLWZkMjg3MDY1OA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Harcelement moral",
+    "url": "https://www.bing.com/ck/a?!&&p=d32340e24336ba7247df737c88ead36a21f170e02941745737ba720e21400fc6JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vaGFyY2VsZW1lbnQtbW9yYWwtZmQzMTQ1MDI2&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Sos mouches",
+    "url": "https://www.bing.com/ck/a?!&&p=a4caf0f6f01d8c7c72742072a2b53b440adbe8794790d87bf622449cd04788f0JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vc29zLW1vdWNoZXMtZmQyMDA5Nzk1&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Les femmes et l emploi",
+    "url": "https://www.bing.com/ck/a?!&&p=2d4c39ff95a0cbf2f33b21d52ce9bfb156cbd1254547794eb1cae9e2cd602392JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vbGVzLWZlbW1lcy1ldC1sLWVtcGxvaS1mZDY3MDc2NA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Le déni des cultures",
+    "url": "https://www.bing.com/ck/a?!&&p=ab5ba3654145d7a99d54ed7801eefb259c26236bef0ab57d243e9a7656f72a04JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1ceeb537-fe09-6332-0cc6-a212ff506253&u=a1aHR0cHM6Ly9zb2NpZXRlLmF1ZmVtaW5pbi5jb20vZm9ydW0vbGUtZGVuaS1kZXMtY3VsdHVyZXMtZmQxNDM5MTYy&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Immatriculation de l’entreprise et publications au RCS",
+    "url": "https://www.bing.com/ck/a?!&&p=036c354931e6bb208d28f17a075d253bff69f67c84e04c4cabcac5750dffed70JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly9ndWljaGV0LnB1YmxpYy5sdS9mci9lbnRyZXByaXNlcy9nZXN0aW9uLWp1cmlkaXF1ZS1jb21wdGFiaWxpdGUvcmVnaXN0cmUtY29tbWVyY2UvZGVwb3RzLXB1YmxpY2F0aW9ucy9pbW1hdHJpY3VsYXRpb24tZW50cmVwcmlzZS1wdWJsaWNhdGlvbi1yY3MuaHRtbA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Accueil - House of Entrepreneurship",
+    "url": "https://www.bing.com/ck/a?!&&p=89111ae05ead9f3ea288d38cb621a93dd03654274d408adb00ea09b54cf83e4dJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly93d3cuaG91c2VvZmVudHJlcHJlbmV1cnNoaXAubHUv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Societe.com : RCS, siret, siren, bilan, l'information gratuite sur les ...",
+    "url": "https://www.bing.com/ck/a?!&&p=0705b4d8ff74587fef21d299cff814a62a5e90db399019a38b5fd44fe294c68eJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly93d3cuc29jaWV0ZS5jb20v&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Entreprise — Wikipédia",
+    "url": "https://www.bing.com/ck/a?!&&p=2e781a8554e1bfec5981bfbc6469a3b1a8fcb91941c1ff288ed4ced8bfdc3acaJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly9mci53aWtpcGVkaWEub3JnL3dpa2kvRW50cmVwcmlzZQ&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Infogreffe",
+    "url": "https://www.bing.com/ck/a?!&&p=1de94a7c9022516eb0b682c98a2a2773410056d24128b974917013fb9c596a76JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly93d3cuaW5mb2dyZWZmZS5mci8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Unternehmen in Luxemburg | Marktplatz der Luxemburger Wort",
+    "url": "https://www.bing.com/ck/a?!&&p=f3684bfbf71329f9b65ff5ad308733bac56b10f1e37bb214e8341971e1b446d7JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly93d3cud29ydC5sdS9jb21wYW55ZmluZGVyLw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "IRE - Accueil",
+    "url": "https://www.bing.com/ck/a?!&&p=07e58180aebccdecc5ab855791d5bd3920ac08d8fae4c77cf2936d1eb74685efJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly9pcmUubHUv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Qu'est-ce qu'une entreprise ? Définition, caractéristiques",
+    "url": "https://www.bing.com/ck/a?!&&p=4b5de5b0b74ccc578ffc8fb1b957bed9fc61cfee436a7aeb1c683a6ed10d9b09JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly93d3cuY3JlZXJlbnRyZXByaXNlLmZyL3F1ZXN0LWNlLXF1dW5lLWVudHJlcHJpc2UtZGVmaW5pdGlvbi8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "L'entreprise, c'est quoi? - economie.gouv.fr",
+    "url": "https://www.bing.com/ck/a?!&&p=361c67a5ab89f5f70aa1e14a5a8eae51d6c82d53e3bac92e4930f8ad3c54ad6aJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly93d3cuZWNvbm9taWUuZ291di5mci9mYWNpbGVjby9sZW50cmVwcmlzZS1jZXN0LXF1b2k&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Entreprise Luxembourg-Ville - Sociétés à Luxembourg-Ville - Editus",
+    "url": "https://www.bing.com/ck/a?!&&p=9738948e49396c1adc2278ce11705226cbce70bddd02df8dc2f1835dc0e22a4fJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=246f4d48-a46c-6ef7-37d2-5a6da5d86fa8&u=a1aHR0cHM6Ly93d3cuZWRpdHVzLmx1L2ZyL2x1eGVtYm91cmctMXY&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Cineman.pl zamyka się po 16 latach",
+    "url": "https://www.bing.com/ck/a?!&&p=bdbb9badeec95174c870e649cc1cca5310748f023ac179c104d6341392a4b62dJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cud2lydHVhbG5lbWVkaWEucGwvY2luZW1hbi1wbC16YW15a2Etc2llLXBvLTE2LWxhdGFjaCw3MjMxNjMyODM3NDIxOTg0YQ&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Popularny serwis VOD kończy działalność w Polsce. Miał świetne filmy",
+    "url": "https://www.bing.com/ck/a?!&&p=c51e4eda4433e5ea46cb0edc2d363f03b642bf82fce6b9e9c3a4476f3fa87c47JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly9yb3pyeXdrYS5zcGlkZXJzd2ViLnBsL2NpbmVtYW4tdm9kLW9ubGluZS1wcmVtaWVyeS1jby1vYmVqcnplYy1rb25pZWM&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Polski serwis VOD po 16 latach znika z rynku! - rtvManiaK.pl",
+    "url": "https://www.bing.com/ck/a?!&&p=542490b91828c4e0957a7068adb58078eda5ed18603fe46272e52bbfe3b34339JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cucnR2bWFuaWFrLnBsLzk3MTYxMzcvc2Vyd2lzLWNpbmVtYW4tcGwta29uY3p5LWR6aWFsYWxub3NjLw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Polski serwis VOD kończy działalność. Po 16 latach Cineman.pl znika z …",
+    "url": "https://www.bing.com/ck/a?!&&p=8c93b833f8735205c5839b31373a07046b1d92348c245fa79b7b46ae780d2b30JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cuZmFrdC5wbC9waWVuaWFkemUvcG9sc2tpLXNlcndpcy12b2Qta29uY3p5LWR6aWFsYWxub3NjLXBvLTE2LWxhdGFjaC1jaW5lbWFucGwtem5pa2Etei1yeW5rdS9wZG1jZnM4&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Za darmo na Cineman - filmy i seriale | Filmweb",
+    "url": "https://www.bing.com/ck/a?!&&p=4498a0c49caa7f45dcbf4ab9584c994d136329092edfd7b39f6666b3d64ca8ebJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cuZmlsbXdlYi5wbC92b2QvZnJlZS9jaW5lbWFu&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Po 16 latach znika z polskiego internetu. Polski serwis VOD ... - CHIP",
+    "url": "https://www.bing.com/ck/a?!&&p=827b7eac5ba29d483fab8574ed96e5869f706c89a70a6069b888eff383297279JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cuY2hpcC5wbC8yMDI1LzEyL3BvbHNraS1zZXJ3aXMtdm9kLXpuaWthLXBvLTE2LWxhdGFjaC10by1rb25pZWMtY2luZW1hbi1wbA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Nowości na Cineman – premiery VOD w zasięgu ręki",
+    "url": "https://www.bing.com/ck/a?!&&p=cef82146b90ee44ab21894925417dc2b7a9587da88ad4401570ceb1473fa3040JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly9ub3dvc2Npdm9kLnBsL3BsYXRmb3JtYS9jaW5lbWFu&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Cineman.pl po ponad 16 latach znika z rynku",
+    "url": "https://www.bing.com/ck/a?!&&p=1ed5db375ec34f5c25cc99cb987536b8cda60ead2865ff0e08d4e25d8167235bJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cucHJlc3MucGwvdHJlc2MvOTA3MDMsY2luZW1hbl9wbC1wby1wb25hZC0xNi1sYXRhY2gtem5pa2Etei1yeW5rdQ&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Cineman - YouTube",
+    "url": "https://www.bing.com/ck/a?!&&p=6c5d83fd2962beaaf9f120b98281c00e94beb8e1d4f6c061b7bde80132b8ce58JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=16559416-0352-61fc-16e9-83330273601e&u=a1aHR0cHM6Ly93d3cueW91dHViZS5jb20vYy9DaW5lbWFuUG9sc2th&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Tourism can be a catalyst for growth and shared prosperity",
+    "url": "https://www.bing.com/ck/a?!&&p=19627527590e4cbc56cdd4ecc11ce9715ef80b73cd3beea57687a4140d62900bJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI2LzAxL3RvdXJpc3QtY2F0YWx5c3QtY3VsdHVyYWwtZXhjaGFuZ2Utc2hhcmVkLXByb3NwZXJpdHkv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Tourism satellite account: Year ended March 2025 | Stats NZ",
+    "url": "https://www.bing.com/ck/a?!&&p=6fdef8375f87ff7adeee33df8ce41fda5f7fb925f9833db62fc3385a11cc6351JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cuc3RhdHMuZ292dC5uei9pbmZvcm1hdGlvbi1yZWxlYXNlcy90b3VyaXNtLXNhdGVsbGl0ZS1hY2NvdW50LXllYXItZW5kZWQtbWFyY2gtMjAyNS8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Is tourism a right or a privilege? Reimagining an industry for ...",
+    "url": "https://www.bing.com/ck/a?!&&p=99a540ad5e33184f54e24e9638ffa13c0e0c63908a35b5cdda5cf4f52a620892JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzExL3RvdXJpc20tcmlnaHQtb3ItcHJpdmlsZWdlLXJlaW1hZ2luaW5nLWFuLWluZHVzdHJ5LW5vdmVsbGkv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Global Tourism Enters a New Era: Principles Set Blueprint for ...",
+    "url": "https://www.bing.com/ck/a?!&&p=c244cb24ca3addce65d26f1ef3db44b629c4cbed3e8c130bf04250b1f1e9745fJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvcHJlc3MvMjAyNS8xMS9nbG9iYWwtdG91cmlzbS1lbnRlcnMtYS1uZXctZXJhLXByaW5jaXBsZXMtc2V0LWJsdWVwcmludC1mb3ItdHJhbnNmb3JtYXRpdmUtZ3Jvd3RoLw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "The future of tourism: Embracing destination readiness for sustainable ...",
+    "url": "https://www.bing.com/ck/a?!&&p=c6a0f571ce6d71a9f5af99876c6d175e89abdada201bab0de6f6564819aefcb7JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI0LzEyL2Z1dHVyZS1vZi10b3VyaXNtLWVtYnJhY2luZy1kZXN0aW5hdGlvbi1yZWFkaW5lc3Mv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Travel & Tourism Development Index 2024 | World Economic Forum",
+    "url": "https://www.bing.com/ck/a?!&&p=a375f697cd82331e0c6b460bd2e553199c56435417aa3b063e4df7f1029f235eJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvcHVibGljYXRpb25zL3RyYXZlbC10b3VyaXNtLWRldmVsb3BtZW50LWluZGV4LTIwMjQv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Tourism can be an asset for stability, growth and trust",
+    "url": "https://www.bing.com/ck/a?!&&p=ea93ae0402d213cdd1e80c4915727032f64becd04852be2bbbfadfb23aca73f4JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI2LzAxL3RvdXJpc20tYXNzZXQtZ2xvYmFsLXN0YWJpbGl0eS1ncm93dGgv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "4 ways a changing world could transform travel and tourism",
+    "url": "https://www.bing.com/ck/a?!&&p=649608f8245ed2ffbe113416edb38de54d310859a52ca321296bf0ce3f657305JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzA4LzQtc2NlbmFyaW9zLXRyYW5zZm9ybS10cmF2ZWwtdG91cmlzbS1yZXBvcnQta2Vhcm5leS8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Tourism in India | Travel & Tourism | National Portal of India",
+    "url": "https://www.bing.com/ck/a?!&&p=0a45226bb5ca4beb02cdde89e92c26362732fc9e032c37b22823655d7497b8faJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cuaW5kaWEuZ292LmluL2NhdGVnb3J5L3RyYXZlbC10b3VyaXNtL3N1YmNhdGVnb3J5L3RvdXJpc20taW4taW5kaWE&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "How tourism destinations can foster sustainable growth",
+    "url": "https://www.bing.com/ck/a?!&&p=5dcd601e72d46933ed70585f858914e4f578f0e3f85674149e48c54ec7b0d134JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=35c53a13-ecff-6356-28cd-2d36ed7b6284&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzA3L3RvdXJpc20tY291bGQtYmUtYS0xNi10cmlsbGlvbi1pbmR1c3RyeS1ieS0yMDM0LXRoaXMtaXMtaG93LWRlc3RpbmF0aW9ucy1jYW4tY3JlYXRlLXN1c3RhaW5hYmxlLWdyb3d0aC8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "transport, transit, transmit, transfer这几个词如何辨析？",
+    "url": "https://www.bing.com/ck/a?!&&p=d3d6efdef7c37e4797ceba05a8ce45192332aa7849c93df71224eb715d3060d9JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzMxNTg0Mzg1NT9zb3J0PWNyZWF0ZWQ&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "如何评价游戏《狂热运输2 (Transport fever 2)》? - 知乎",
+    "url": "https://www.bing.com/ck/a?!&&p=2938e3fcc15a807118cedd0015d7e61779e7de35b2ea3715254e8aff03d36cfaJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzM2NTAxNTI3MQ&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "npj系列算不算nature子刊? - 知乎",
+    "url": "https://www.bing.com/ck/a?!&&p=a5fe4872d0e5a51efae068a19c9ed43cffa3be11eec212d41f89807134fafba3JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzE1MDU1Nzc1NDg5&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "På jobbet, lag och avtal - Transports frågeforum - Svenska ...",
+    "url": "https://www.bing.com/ck/a?!&&p=0957a783bae0a09471b4233575b0732ad564ecd204cb7f759a0f9672cca785aaJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly9mb3J1bS50cmFuc3BvcnQuc2Uvb3JnL3N2ZW5za2EtdHJhbnNwb3J0YXJiZXRhcmVmb3JidW5kZXQvcG9zdHMvcGEtam9iYmV0LWxhZy1vY2gtYXZ0YWwv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "为什么optimal transport这么的火？ - 知乎",
+    "url": "https://www.bing.com/ck/a?!&&p=a5e1af9a3c39ee8b6adeff12f4baae1ba500c0e02311977e3ca4bdb20e71b3d2JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzYzMTk5ODU2MA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Transports frågeforum - Svenska Transportarbetareförbundet",
+    "url": "https://www.bing.com/ck/a?!&&p=f8197859f8c955f01ab04731e784d589a4243f33009248a808b8d2c04a3d83daJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly9mb3J1bS50cmFuc3BvcnQuc2Uvb3JnL3N2ZW5za2EtdHJhbnNwb3J0YXJiZXRhcmVmb3JidW5kZXQv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "最新版本的dege浏览器一直显示正在设置同步，且同步 ...",
+    "url": "https://www.bing.com/ck/a?!&&p=1d89ae64e70470ae53642cf3ab9992cad35eae9b6d3c16be1378c00505663124JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzY0NTc4ODg1MA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Övriga frågor - Transports frågeforum - Svenska ...",
+    "url": "https://www.bing.com/ck/a?!&&p=aee6ccab3a637070b5eff2183f1bcbe61f90442b5947d18aca13efe919260d0cJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly9mb3J1bS50cmFuc3BvcnQuc2Uvb3JnL3N2ZW5za2EtdHJhbnNwb3J0YXJiZXRhcmVmb3JidW5kZXQvcG9zdHMvb3ZyaWdhLWZyYWdvci8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Intermodal transport和Multimodal 的区别？ - 知乎",
+    "url": "https://www.bing.com/ck/a?!&&p=261710ab6776d605a85551b38ce0d6a019afbac221c6b98ff2faf19a7204fbaeJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=1684f846-629a-613e-0d09-ef63630f60d0&u=a1aHR0cHM6Ly93d3cuemhpaHUuY29tL3F1ZXN0aW9uLzI3MDQ3NjMx&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Agriculture | An Open Access Journal from MDPI",
+    "url": "https://www.bing.com/ck/a?!&&p=219dc653dde80e576956ecc64f561245e978efb17ce9df0a1963da42d8267fafJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cubWRwaS5jb20vam91cm5hbC9hZ3JpY3VsdHVyZQ&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Farming and Agribusiness | World Bank Group",
+    "url": "https://www.bing.com/ck/a?!&&p=7bf3890cd6f095529103117be574755d2a0e4e580a3a1a414237b59430207ad7JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cud29ybGRiYW5rLm9yZy9leHQvZW4vdG9waWMvZmFybWluZy1hbmQtYWdyaWJ1c2luZXNz&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Aims & Scope | Agriculture | MDPI",
+    "url": "https://www.bing.com/ck/a?!&&p=d87312acd763c73f339767bb16c9b7b05d29c2f29af95f0e512cc532e0eeba0bJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cubWRwaS5jb20vam91cm5hbC9hZ3JpY3VsdHVyZS9hYm91dA&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Agriculture | Instructions for Authors - MDPI",
+    "url": "https://www.bing.com/ck/a?!&&p=7d8f75ed172dd228ac5732e9280d17653e7fea6da116944e7697504142d8421aJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cubWRwaS5jb20vam91cm5hbC9hZ3JpY3VsdHVyZS9pbnN0cnVjdGlvbnM&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Agriculture | 2025 - Browse Issues - MDPI",
+    "url": "https://www.bing.com/ck/a?!&&p=feefe6b8404dcca290b55ce030d26c1a962257a43a5b9d1131901883cabf5a99JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cubWRwaS5jb20vMjA3Ny0wNDcyLzE1&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Sustainable Practices for Enhancing Soil Health and Crop Quality in ...",
+    "url": "https://www.bing.com/ck/a?!&&p=1cccf6f4f607179e8dc6dae324c86f62bc2d55f5347884a0d1616b392f6c8484JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cubWRwaS5jb20vMjA3Ny0wNDcyLzE1LzkvOTk4&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Climate-Smart Agriculture - World Bank Group",
+    "url": "https://www.bing.com/ck/a?!&&p=77fc19d48548a9c0475626d7845b08edf9ad83494ad3ed50dbeaf32d4ac2f153JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cud29ybGRiYW5rLm9yZy9lbi90b3BpYy9jbGltYXRlLXNtYXJ0LWFncmljdWx0dXJl&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Agriculture and Rural Development - World Bank Group",
+    "url": "https://www.bing.com/ck/a?!&&p=dc7934f74a2e53b9a99bc451f63e31329b2f2e9c3592119bb57875940f03f3c8JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cud29ybGRiYW5rLm9yZy9lbi9wcm9ncmFtcy9rbm93bGVkZ2UtZm9yLWNoYW5nZS9icmllZi9hZ3JpY3VsdHVyZS1hbmQtcnVyYWwtZGV2ZWxvcG1lbnQ&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Challenges of Smallholder Farming in Ethiopia and Opportunities by ...",
+    "url": "https://www.bing.com/ck/a?!&&p=8d74f8fad8c7a66a63e67e5979f19b6315a498d85f861265011d6e34de2e6871JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cubWRwaS5jb20vMjA3Ny0wNDcyLzExLzMvMTky&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Agriculture | Special Issues - MDPI",
+    "url": "https://www.bing.com/ck/a?!&&p=3fdbb7779139012b8fc1552c94e31d9c70652960fa81d7827b224264aaf666b2JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=287249d9-f858-6697-0845-5efcf95a6737&u=a1aHR0cHM6Ly93d3cubWRwaS5jb20vam91cm5hbC9hZ3JpY3VsdHVyZS9zcGVjaWFsX2lzc3Vlcw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Putting Talent at the Centre: An Evolving Imperative for Manufacturing",
+    "url": "https://www.bing.com/ck/a?!&&p=d1d5c130a550f47ff7e927bf3b7e877b8fdf1c81f5d5671e456744ab5a5c067eJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvcHVibGljYXRpb25zL3B1dHRpbmctdGFsZW50LWF0LXRoZS1jZW50cmUtYW4tZXZvbHZpbmctaW1wZXJhdGl2ZS1mb3ItbWFudWZhY3R1cmluZy0yMDI1Lw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "The future of manufacturing: insights from industry leaders on ...",
+    "url": "https://www.bing.com/ck/a?!&&p=4dc67f55d24c3f0e600a6bb81960cd9419484cbdb807be543514539c6a84c4d6JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDIzLzA2L3RoZS1mdXR1cmUtb2YtbWFudWZhY3R1cmluZy1pbnNpZ2h0cy1mcm9tLWluZHVzdHJ5LWxlYWRlcnMtb24tbmF2aWdhdGluZy10aGUtZm91cnRoLWluZHVzdHJpYWwtcmV2b2x1dGlvbi8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Protecting jobs and boosting productivity when deploying AI in ...",
+    "url": "https://www.bing.com/ck/a?!&&p=8a1ca45f3b2a3ce4c7f123ed7b92a260493ba0a2e411f06e09c0c40ebb16ce6fJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzEyL3Byb3RlY3Rpbmctam9icy1hbmQtYm9vc3RpbmctcHJvZHVjdGl2aXR5LXdoZW4tZGVwbG95aW5nLWFpLWluLW1hbnVmYWN0dXJpbmcv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "A robust green compliance strategy for manufacturing firms",
+    "url": "https://www.bing.com/ck/a?!&&p=95e2b3008615ba6ea481ead5fd83c61c5a5245fc72b45e03941556b3f605247aJmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI2LzAyL3N0ZXBzLXByYWN0aWNhbC1ncmVlbmVyLW1hbnVmYWN0dXJpbmcv&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "A new systematic approach for future-proofing manufacturing",
+    "url": "https://www.bing.com/ck/a?!&&p=bb86c10bf1679e561273cd234f82ee5afa026f13d5dcc3ea6e7ad9d9f4081bb2JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzAxLzE4MWQ3M2NkLTRmZDktNGM4YS1iMDIzLTVlNzZmMjVjODI0Yi8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "How manufacturing is harnessing quantum technologies | World …",
+    "url": "https://www.bing.com/ck/a?!&&p=e19e2b375a399281373831fab35c26be720ef323601e88343f5691b0a5da13f8JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzEwL3doYXQtZXZlcnktbWFudWZhY3R1cmluZy1sZWFkZXIta25vdy1hYm91dC1xdWFudHVtLXRlY2hub2xvZ2llcy8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Made in China 2.0: The future of global manufacturing?",
+    "url": "https://www.bing.com/ck/a?!&&p=a480b25bc804e18e86cef34040dbc4c18aa4ea8de5a06e4ecb03b8f7c68ae009JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzA2L2hvdy1jaGluYS1pcy1yZWludmVudGluZy10aGUtZnV0dXJlLW9mLWdsb2JhbC1tYW51ZmFjdHVyaW5nLw&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Driving the digital transformation of manufacturing through skills",
+    "url": "https://www.bing.com/ck/a?!&&p=4cfc86acb95ce8025bb6c3afb30549039a5b9e38914f68fa54f383d227fbcf22JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzA0L3RoaXMtaXMtaG93LXdlLXVwc2tpbGwtZnV0dXJlLWxlYWRlcnMtdG8tZHJpdmUtdGhlLWRpZ2l0YWwtdHJhbnNmb3JtYXRpb24tb2YtbWFudWZhY3R1cmluZy8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Boosting manufacturing supply chains in a new industrial era",
+    "url": "https://www.bing.com/ck/a?!&&p=994daa4ef84f81a2deb0c1003c28f8dcc43d5af76dc22e76ee2c195754801054JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzA3L3N0cmVuZ3RoZW5pbmctbWFudWZhY3R1cmluZy1zdXBwbHktY2hhaW5zLW5ldy1pbmR1c3RyaWFsLWVyYS8&ntb=1",
+    "hasFacebook": false
+  },
+  {
+    "name": "Why Gen Z is the perfect fit for smart manufacturing",
+    "url": "https://www.bing.com/ck/a?!&&p=4fd971598abb56112f863c43a68d602c8dfff7ebc0b37ac197614fd20b94c576JmltdHM9MTc3NDIyNDAwMA&ptn=3&ver=2&hsh=4&fclid=25df8786-7fc8-6c7d-0bbd-90a37ee16d45&u=a1aHR0cHM6Ly93d3cud2Vmb3J1bS5vcmcvc3Rvcmllcy8yMDI1LzA5L2Jvcm4tZGlnaXRhbC1idWlsdC1pbmR1c3RyaWFsLXdoeS1nZW4tei1pcy10aGUtcGVyZmVjdC1maXQtZm9yLXNtYXJ0LW1hbnVmYWN0dXJpbmcv&ntb=1",
     "hasFacebook": false
   }
 ]

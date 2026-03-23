@@ -9,17 +9,18 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
 
-const isVercel = process.env.VERCEL === "1";
+// Detect if running in a serverless environment (Render, Vercel, or other)
+const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
 
 let puppeteer;
 try {
-  puppeteer = require(isVercel ? "puppeteer-core" : "puppeteer");
+  puppeteer = require(isServerless ? "puppeteer-core" : "puppeteer");
 } catch {
   puppeteer = require("puppeteer");
 }
 
 let chromium = null;
-if (isVercel) {
+if (isServerless) {
   try {
     chromium = require("@sparticuz/chromium");
   } catch {
@@ -117,12 +118,12 @@ async function getServerlessChromePath() {
 }
 
 async function launchBrowser() {
-  const executablePath = isVercel
+  const executablePath = isServerless
     ? await getServerlessChromePath()
     : getChromeExecutablePath();
 
   const userDataDir = path.join(__dirname, "puppeteer_profile");
-  if (!isVercel && !fs.existsSync(userDataDir)) {
+  if (!isServerless && !fs.existsSync(userDataDir)) {
     fs.mkdirSync(userDataDir, { recursive: true });
   }
 
@@ -153,14 +154,14 @@ async function launchBrowser() {
   ];
 
   const launchOpts = {
-    headless: isVercel ? true : "new",
-    args: isVercel && chromium ? [...chromium.args, ...sharedArgs] : sharedArgs,
+    headless: isServerless ? true : "new",
+    args: isServerless && chromium ? [...chromium.args, ...sharedArgs] : sharedArgs,
     ignoreDefaultArgs: ["--enable-automation"],
     ignoreHTTPSErrors: true,
     timeout: 60000,
   };
 
-  if (!isVercel) {
+  if (!isServerless) {
     launchOpts.userDataDir = userDataDir;
   }
 
@@ -168,7 +169,7 @@ async function launchBrowser() {
     launchOpts.executablePath = executablePath;
   }
 
-  if (isVercel && chromium) {
+  if (isServerless && chromium) {
     launchOpts.defaultViewport = chromium.defaultViewport;
   }
 
@@ -177,7 +178,7 @@ async function launchBrowser() {
     return browser;
   } catch (err) {
     console.error("Failed to launch browser: " + err.message);
-    if (isVercel) {
+    if (isServerless) {
       console.error("  - Install puppeteer-core and @sparticuz/chromium for serverless Chrome");
       console.error("  - Redeploy after adding the new dependencies");
     } else {
