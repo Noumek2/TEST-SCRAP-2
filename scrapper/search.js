@@ -131,7 +131,7 @@ async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
   let allResults = [];
   const isVercel = process.env.VERCEL === "1";
-  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 1) : SEARCH_QUERIES;
+  const queriesToRun = SEARCH_QUERIES;
 
   console.log("\n🔍 Searching across Google + Bing + DuckDuckGo...\n");
 
