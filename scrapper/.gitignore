@@ -1,3 +1,4 @@
 scrapper/puppeteer_profile/
+.node_modules/
 .env/
 output/

@@ -12,12 +12,6 @@ const path = require("path");
 // Detect if running in a serverless environment (Render, Vercel, or other)
 const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
 
-console.log("[env] VERCEL =", process.env.VERCEL);
-console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
-console.log("[env] isVercel =", isVercel);
-console.log("[env] chromium loaded =", !!chromium);
-
-
 let puppeteer;
 try {
   puppeteer = require(isServerless ? "puppeteer-core" : "puppeteer");
@@ -33,6 +27,16 @@ if (isServerless) {
     chromium = null;
   }
 }
+
+console.log("[env] VERCEL =", process.env.VERCEL);
+console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
+console.log("[env] isServerless =", isServerless);
+console.log("[env] chromium loaded =", !!chromium);
+
+console.log("[env] VERCEL =", process.env.VERCEL);
+console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
+console.log("[env] isVercel =", isVercel);
+console.log("[env] chromium loaded =", !!chromium);
 
 const SESSION_FILE = path.join(__dirname, "fb_session.json");
 
