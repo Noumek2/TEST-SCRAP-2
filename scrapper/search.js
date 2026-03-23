@@ -1,13 +1,12 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 
-
 const CONFIG = {
-  serpApiKey: process.env.SERPAPI_KEY
+  serpApiKey: process.env.SERPAPI_KEY,
 };
 
-
 const SEARCH_QUERIES = [
+<<<<<<< HEAD
   "Hotels du Cameroun",
   "real estate company Cameroon",
   "societe construction Cameroun",
@@ -20,8 +19,64 @@ const SEARCH_QUERIES = [
   "Manufacturing companies in Cameroon",
   
  ];
+=======
+  "construction company in Cameroon",
+  "real estate company Cameroon",
+  "societe construction Cameroun",
+  "entreprise batiment Cameroun",
+  "restauration services Cameroon",
+  "hotels in Cameroon",
+  "tourism companies in Cameroon",
+  "transport companies in Cameroon",
+  "agriculture companies in Cameroon",
+  "manufacturing companies in Cameroon",
+];
 
-// --- RETRY WRAPPER ---
+const DIRECTORY_HOST_KEYWORDS = [
+  "yellowpages",
+  "businesslist",
+  "business-directory",
+  "directory",
+  "annuaire",
+  "listing",
+  "listings",
+  "tripadvisor",
+  "expedia",
+  "booking",
+  "africabizinfo",
+  "zoominfo",
+  "kompass",
+];
+
+const DIRECTORY_TEXT_KEYWORDS = [
+  "companies",
+  "businesses",
+  "directory",
+  "annuaire",
+  "list of",
+  "top ",
+  "best ",
+  "near me",
+  "find ",
+  "hotels in",
+  "restaurants in",
+];
+
+const SKIP_HOST_KEYWORDS = [
+  "google.",
+  "bing.",
+  "duckduckgo.",
+  "facebook.com",
+  "instagram.com",
+  "linkedin.com",
+  "youtube.com",
+  "x.com",
+  "twitter.com",
+  "tripadvisor.",
+  "booking.com",
+];
+>>>>>>> 3bbe7ef (increase querry5)
+
 async function fetchWithRetry(fn, label = "API", maxRetries = 3) {
   let attempt = 0;
   while (attempt < maxRetries) {
@@ -32,8 +87,8 @@ async function fetchWithRetry(fn, label = "API", maxRetries = 3) {
       if (isRateLimit && attempt < maxRetries - 1) {
         attempt++;
         const waitTime = 5000 * attempt;
-        console.log(`    [${label}] ⚠️ Rate limit hit. Retrying in ${waitTime / 1000}s...`);
-        await new Promise((r) => setTimeout(r, waitTime));
+        console.log(`    [${label}] Rate limit hit. Retrying in ${waitTime / 1000}s...`);
+        await sleep(waitTime);
       } else {
         throw err;
       }
@@ -45,7 +100,71 @@ async function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-// --- GOOGLE SERPAPI ---
+function normalizeUrl(url) {
+  if (!url || typeof url !== "string") return null;
+  try {
+    const parsed = new URL(url);
+    parsed.hash = "";
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
+function getHostname(url) {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+function resolveAbsoluteUrl(href, baseUrl) {
+  if (!href || typeof href !== "string") return null;
+  const trimmed = href.trim();
+  if (!trimmed || /^(mailto:|tel:|javascript:|#)/i.test(trimmed)) return null;
+  try {
+    return normalizeUrl(trimmed.startsWith("http") ? trimmed : new URL(trimmed, baseUrl).toString());
+  } catch {
+    return null;
+  }
+}
+
+function isLikelyDirectoryResult(result) {
+  const url = (result.url || "").toLowerCase();
+  const title = (result.name || "").toLowerCase();
+  const snippet = (result.snippet || "").toLowerCase();
+  const hostname = getHostname(result.url);
+
+  if (DIRECTORY_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
+    return true;
+  }
+
+  const haystack = `${title} ${snippet} ${url}`;
+  return DIRECTORY_TEXT_KEYWORDS.some((keyword) => haystack.includes(keyword));
+}
+
+function isSkippableLink(url) {
+  const normalized = normalizeUrl(url);
+  if (!normalized) return true;
+  if (!/^https?:\/\//i.test(normalized)) return true;
+  if (/\.(pdf|jpg|jpeg|png|gif|webp|svg|zip)$/i.test(normalized)) return true;
+  const hostname = getHostname(normalized);
+  return SKIP_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword));
+}
+
+function inferCompanyName(anchorText, href) {
+  const text = (anchorText || "").replace(/\s+/g, " ").trim();
+  if (text && text.length >= 3) return text;
+
+  try {
+    const parsed = new URL(href);
+    return parsed.hostname.replace(/^www\./, "");
+  } catch {
+    return href;
+  }
+}
+
 async function searchGoogleSerpApi(query, apiKey) {
   const results = [];
   const url = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&location=Cameroon&hl=en&gl=cm&num=10&api_key=${apiKey}`;
@@ -66,7 +185,6 @@ async function searchGoogleSerpApi(query, apiKey) {
   return results;
 }
 
-// --- BING ---
 async function searchBing(query) {
   const results = [];
   try {
@@ -90,7 +208,6 @@ async function searchBing(query) {
   return results;
 }
 
-// --- DUCKDUCKGO ---
 async function searchDuckDuckGo(query) {
   const results = [];
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=cm-fr`;
@@ -103,7 +220,7 @@ async function searchDuckDuckGo(query) {
       if (href.includes("uddg=")) {
         try {
           href = decodeURIComponent(new URL("https:" + href).searchParams.get("uddg") || "");
-        } catch (e) {}
+        } catch {}
       }
       if (name && href.startsWith("http")) {
         results.push({ name, url: href, snippet: "", source: "duckduckgo" });
@@ -116,18 +233,93 @@ async function searchDuckDuckGo(query) {
   return results;
 }
 
-// --- DEDUPLICATION ---
 function deduplicate(results) {
   const seen = new Set();
   return results.filter((r) => {
-    const key = (r.name || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 35);
+    const normalized = normalizeUrl(r.url);
+    const key = normalized || (r.name || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 35);
     if (!key || seen.has(key)) return false;
     seen.add(key);
+    if (normalized) r.url = normalized;
     return true;
   });
 }
 
-// --- MAIN EXPORT ---
+async function extractCompaniesFromListing(result, options = {}) {
+  const maxLinks = options.maxLinks || 8;
+  const extracted = [];
+
+  try {
+    const res = await axios.get(result.url, {
+      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
+      timeout: 15000,
+      maxRedirects: 5,
+    });
+
+    const $ = cheerio.load(res.data);
+    const seen = new Set();
+
+    $("a[href]").each((_, el) => {
+      if (extracted.length >= maxLinks) return false;
+
+      const href = $(el).attr("href") || "";
+      const text = $(el).text().trim();
+      const absolute = resolveAbsoluteUrl(href, result.url);
+
+      if (!absolute || isSkippableLink(absolute)) return;
+      if (absolute === normalizeUrl(result.url)) return;
+
+      const hostname = getHostname(absolute);
+      const sameHost = hostname === getHostname(result.url);
+      const looksLikeDetailPage = /\/company\/|\/business\/|\/listing\/|\/profile\/|\/hotel\/|\/restaurant\//i.test(absolute);
+      const hasUsefulAnchor = text.length >= 3 && text.length <= 120;
+
+      if (!hasUsefulAnchor && !looksLikeDetailPage) return;
+      if (sameHost && !looksLikeDetailPage) return;
+      if (seen.has(absolute)) return;
+
+      seen.add(absolute);
+      extracted.push({
+        name: inferCompanyName(text, absolute),
+        url: absolute,
+        snippet: `Discovered from listing: ${result.name}`,
+        source: `listing:${result.source}`,
+      });
+    });
+
+    console.log(`    [listing] ${result.url} -> ${extracted.length} extracted company links`);
+  } catch (err) {
+    console.log(`    [listing] Failed to expand ${result.url}: ${err.message}`);
+  }
+
+  return extracted;
+}
+
+async function expandDirectoryResults(results, options = {}) {
+  const expanded = [];
+  const delayMs = options.delayMs || 1500;
+
+  for (const result of results) {
+    if (!isLikelyDirectoryResult(result)) {
+      expanded.push(result);
+      continue;
+    }
+
+    console.log(`    [listing] Expanding directory result: ${result.url}`);
+    const extracted = await extractCompaniesFromListing(result, { maxLinks: options.maxLinksPerListing || 8 });
+
+    if (extracted.length > 0) {
+      expanded.push(...extracted);
+    } else {
+      expanded.push(result);
+    }
+
+    await sleep(delayMs);
+  }
+
+  return deduplicate(expanded);
+}
+
 async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
   let allResults = [];
@@ -136,11 +328,15 @@ async function searchCompanies(options = {}) {
   const queriesToRun = SEARCH_QUERIES;
 =======
   const isVercel = process.env.VERCEL === "1";
-  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 4) : SEARCH_QUERIES;
+  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 1) : SEARCH_QUERIES;
 
+<<<<<<< HEAD
 >>>>>>> 5313f5a (increase querry4)
 
   console.log("\n🔍 Searching across Google + Bing + DuckDuckGo...\n");
+=======
+  console.log("\nSearching across Google + Bing + DuckDuckGo...\n");
+>>>>>>> 3bbe7ef (increase querry5)
 
   for (const q of queriesToRun) {
     if (CONFIG.serpApiKey) {
@@ -153,12 +349,16 @@ async function searchCompanies(options = {}) {
   }
 
   const unique = deduplicate(allResults.filter((r) => r.name && r.name.length > 3));
+  const expanded = await expandDirectoryResults(unique, {
+    delayMs: isVercel ? 500 : 1500,
+    maxLinksPerListing: isVercel ? 4 : 8,
+  });
 
   try {
     const { filterNew } = require("./scraped");
-    return await filterNew(unique);
-  } catch (e) {
-    return unique;
+    return await filterNew(expanded);
+  } catch {
+    return expanded;
   }
 }
 
