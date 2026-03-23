@@ -13,6 +13,8 @@ const { supabase } = require("./supabaseClient");
 const { sendEmail } = require("./emailer");
 
 const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
+const isVercel = process.env.VERCEL === "1";
+const isRender = process.env.RENDER === "true";
 
 // ── CSV helpers ────────────────────────────────────────────────────────────
 
@@ -182,7 +184,7 @@ function ensureDir(dir) {
  */
 function saveAll(companies, options = {}) {
   const {
-    outputDir = isVercel ? path.join(os.tmpdir(), "scrapper-output") : path.join(__dirname, "output"),
+    outputDir = (isVercel || isRender) ? path.join(os.tmpdir(), "scrapper-output") : path.join(__dirname, "output"),
     baseName,
     facebookOnly = false,
   } = options;
