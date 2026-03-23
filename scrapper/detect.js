@@ -604,6 +604,8 @@ async function detectAll(companies, options) {
   options = options || {};
   const facebookOnly = options.facebookOnly || false;
   const delayMs = options.delayMs || 2500;
+  const deadlineAt = options.deadlineAt || null;
+  const deadlineBufferMs = options.deadlineBufferMs || 10000;
   const results = [];
 
   const session = loadSession();
@@ -631,6 +633,11 @@ async function detectAll(companies, options) {
 
   try {
     for (let i = 0; i < companies.length; i++) {
+      if (deadlineAt && Date.now() >= deadlineAt - deadlineBufferMs) {
+        console.log("  [timer] Stopping Facebook detection early to stay within the runtime budget");
+        break;
+      }
+
       console.log("[" + (i + 1) + "/" + companies.length + "]");
       const enriched = await detectCompany(companies[i], page, delayMs);
       if (!facebookOnly || enriched.hasFacebook) results.push(enriched);

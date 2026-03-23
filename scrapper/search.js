@@ -629,8 +629,15 @@ async function extractCompaniesFromListing(result, options = {}) {
 async function expandDirectoryResults(results, options = {}) {
   const expanded = [];
   const delayMs = options.delayMs || 1500;
+  const deadlineAt = options.deadlineAt || null;
+  const deadlineBufferMs = options.deadlineBufferMs || 10000;
 
   for (const result of results) {
+    if (deadlineAt && Date.now() >= deadlineAt - deadlineBufferMs) {
+      console.log("    [timer] Stopping listing expansion early to stay within the runtime budget");
+      break;
+    }
+
     if (!isLikelyDirectoryResult(result)) {
       expanded.push(result);
       continue;
@@ -653,13 +660,15 @@ async function expandDirectoryResults(results, options = {}) {
 
 async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
+  const deadlineAt = options.deadlineAt || null;
+  const deadlineBufferMs = options.deadlineBufferMs || 10000;
   let allResults = [];
 <<<<<<< HEAD
   const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
   const queriesToRun = SEARCH_QUERIES;
 =======
   const isVercel = process.env.VERCEL === "1";
-  const queriesToRun =  SEARCH_QUERIES;
+  const queriesToRun = SEARCH_QUERIES;
 
 <<<<<<< HEAD
 >>>>>>> 5313f5a (increase querry4)
@@ -670,6 +679,11 @@ async function searchCompanies(options = {}) {
 >>>>>>> 3bbe7ef (increase querry5)
 
   for (const q of queriesToRun) {
+    if (deadlineAt && Date.now() >= deadlineAt - deadlineBufferMs) {
+      console.log("    [timer] Stopping search queries early to stay within the runtime budget");
+      break;
+    }
+
     if (CONFIG.serpApiKey) {
       allResults = allResults.concat(await searchGoogleSerpApi(q, CONFIG.serpApiKey));
     }
@@ -685,6 +699,8 @@ async function searchCompanies(options = {}) {
   const expanded = await expandDirectoryResults(companyCandidates, {
     delayMs: isVercel ? 500 : 1500,
     maxLinksPerListing: isVercel ? 10 : 10,
+    deadlineAt,
+    deadlineBufferMs,
   });
 
   try {
