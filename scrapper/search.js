@@ -118,6 +118,57 @@ const NON_COMPANY_TEXT_KEYWORDS = [
   "contact us",
 ];
 
+const GENERIC_ANCHOR_KEYWORDS = [
+  "business insight",
+  "career advice",
+  "campus gist",
+  "project tips",
+  "construction news",
+  "cv & motivation letters",
+  "cv and motivation letters",
+  "read more",
+  "learn more",
+  "en savoir plus",
+  "home",
+  "about",
+  "contact",
+  "services",
+  "blog",
+  "news",
+  "tips",
+  "jobs",
+  "careers",
+  "login",
+  "sign up",
+  "privacy policy",
+  "terms of service",
+];
+
+const COUNTRY_LINK_TEXT = [
+  "afrique",
+  "algerie",
+  "algérie",
+  "angola",
+  "benin",
+  "bénin",
+  "burkina faso",
+  "congo-brazzaville",
+  "congo-kinshasa",
+  "cote d’ivoire",
+  "côte d’ivoire",
+  "djibouti",
+  "egypte",
+  "égypte",
+  "gabon",
+  "ghana",
+  "guinee",
+  "guinée",
+  "mali",
+  "senegal",
+  "sénégal",
+  "togo",
+];
+
 const CAMEROON_TERMS = [
   "cameroon",
   "cameroun",
@@ -283,7 +334,22 @@ function looksLikeCompanyAnchor(text) {
   const lowered = normalized.toLowerCase();
   if (NON_COMPANY_TEXT_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
   if (DIRECTORY_TEXT_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
+  if (GENERIC_ANCHOR_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
+  if (COUNTRY_LINK_TEXT.includes(lowered)) return false;
   return true;
+}
+
+function hasNavigationAncestor($, el) {
+  return $(el).parents("nav, header, footer, menu").length > 0;
+}
+
+function pathDepth(url) {
+  try {
+    const pathname = new URL(url).pathname;
+    return pathname.split("/").filter(Boolean).length;
+  } catch {
+    return 0;
+  }
 }
 
 function isCameroonRelevantText(text) {
@@ -520,6 +586,7 @@ async function extractCompaniesFromListing(result, options = {}) {
 
     $("a[href]").each((_, el) => {
       if (extracted.length >= maxLinks) return false;
+      if (hasNavigationAncestor($, el)) return;
 
       const href = $(el).attr("href") || "";
       const text = $(el).text().trim();
@@ -538,7 +605,7 @@ async function extractCompaniesFromListing(result, options = {}) {
         isCameroonRelevantText(candidateText);
 
       if (!hasUsefulAnchor && !looksLikeDetailPage) return;
-      if (sameHost && !looksLikeDetailPage) return;
+      if (sameHost && !looksLikeDetailPage && pathDepth(absolute) < 2) return;
       if (!listingIsCameroonRelevant && !candidateIsCameroonRelevant) return;
       if (seen.has(absolute)) return;
 

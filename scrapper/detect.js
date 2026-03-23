@@ -95,7 +95,7 @@ function isScrapableFacebookUrl(url) {
     if (pathname === "/facebook") return false;
   } catch {}
   const blocklist = [
-    "/sharer", "/share?", "/share/", "/plugins/", "/tr?", "/l.php",
+    "/sharer", "/share?", "/plugins/", "/tr?", "/l.php",
     "/login", "/dialog/", "/photo", "/video",
     "/events", "/groups", "/marketplace", "/watch", "/stories", "/reel",
     "profile.php", "/hashtag/", "/gaming/",
@@ -123,11 +123,12 @@ function namesRoughlyMatch(companyName, pageName) {
 
   const pageSet = new Set(pageTokens);
   const overlap = companyTokens.filter((token) => pageSet.has(token));
+  const longOverlap = overlap.filter((token) => token.length >= 5);
 
   if (companyTokens.length <= 2) {
     return overlap.length >= 1;
   }
-  return overlap.length >= 2;
+  return overlap.length >= 2 || longOverlap.length >= 1;
 }
 
 function isRelevantFacebookPage(company, fbInfo, fbUrl) {
@@ -141,8 +142,11 @@ function isRelevantFacebookPage(company, fbInfo, fbUrl) {
 
   if (!pageName || /^facebook$/i.test(pageName.trim())) return false;
 
+  const companyTokens = normalizeNameTokens(company.name);
+  const pageTokens = normalizeNameTokens(pageName);
   const hasNameMatch = namesRoughlyMatch(company.name, pageName);
   const hasCameroonContext = /cameroon|cameroun|douala|yaounde|yaoundé|bafoussam|bamenda|garoua|buea|\+237/.test(aboutText);
+  const hasBusinessContext = /construction|immobilier|real estate|btp|hotel|restaurant|traiteur|agence|enterprise|entreprise|company|service|property|developer/i.test(aboutText);
   const sharesDomain =
     !!websiteUrl &&
     !!facebookWebsite &&
@@ -153,9 +157,18 @@ function isRelevantFacebookPage(company, fbInfo, fbUrl) {
         return false;
       }
     })();
-  const urlContainsNameToken = normalizeNameTokens(company.name).some((token) => urlText.includes(token));
+  const urlContainsNameToken = companyTokens.some((token) => urlText.includes(token));
+  const pageNameContainsNameToken = companyTokens.some((token) => pageTokens.includes(token));
+  const hasContactSignal = !!(fbInfo.facebookPhone || fbInfo.facebookEmail || fbInfo.facebookWebsite || fbInfo.facebookAddress);
+  const hasActivitySignal = !!(fbInfo.followers || fbInfo.likes || fbInfo.category);
 
-  return hasNameMatch || sharesDomain || (urlContainsNameToken && hasCameroonContext);
+  return (
+    hasNameMatch ||
+    sharesDomain ||
+    (urlContainsNameToken && (hasCameroonContext || hasBusinessContext || hasContactSignal)) ||
+    (pageNameContainsNameToken && hasActivitySignal) ||
+    (hasCameroonContext && hasBusinessContext && hasContactSignal)
+  );
 }
 
 function loadSession() {
