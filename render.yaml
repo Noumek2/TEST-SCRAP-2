@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: cameroon-scraper
+    env: node
+    rootDir: scrapper
+    plan: starter
+    buildCommand: npm install && npx puppeteer browsers install chrome
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SERPAPI_KEY
+        sync: false
+      - key: EMAIL_TO
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_TABLE
+        sync: false
+      - key: SUPABASE_COLUMN
+        sync: false

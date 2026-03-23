@@ -16,8 +16,9 @@
     "socket.io": "^4.7.5"
   },
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
     "build": "echo \"No build step needed\"",
+    "scrape": "node index.js",
     "start:facebook-only": "node index.js --facebook-only",
     "start:deep": "node index.js --pages 3",
     "web": "node server.js",
