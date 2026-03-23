@@ -131,8 +131,14 @@ function deduplicate(results) {
 async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
   let allResults = [];
+<<<<<<< HEAD
   const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
   const queriesToRun = SEARCH_QUERIES;
+=======
+  const isVercel = process.env.VERCEL === "1";
+  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 4) : SEARCH_QUERIES;
+
+>>>>>>> 5313f5a (increase querry4)
 
   console.log("\n🔍 Searching across Google + Bing + DuckDuckGo...\n");
 
