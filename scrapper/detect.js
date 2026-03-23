@@ -79,7 +79,8 @@ function findLatestPostYear(html) {
 function normalizeFacebookUrl(url) {
   try {
     const u = new URL(url);
-    return "https://www.facebook.com" + u.pathname.replace(/\/$/, "");
+    const pathname = u.pathname.replace(/\/$/, "");
+    return "https://www.facebook.com" + pathname;
   } catch {
     return url;
   }
@@ -87,13 +88,74 @@ function normalizeFacebookUrl(url) {
 
 function isScrapableFacebookUrl(url) {
   if (!url || !url.includes("facebook.com")) return false;
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname.replace(/\/+$/, "").toLowerCase();
+    if (!pathname || pathname === "" || pathname === "/") return false;
+    if (pathname === "/facebook") return false;
+  } catch {}
   const blocklist = [
-    "/sharer", "/share?", "/plugins/", "/tr?", "/l.php",
+    "/sharer", "/share?", "/share/", "/plugins/", "/tr?", "/l.php",
     "/login", "/dialog/", "/photo", "/video",
     "/events", "/groups", "/marketplace", "/watch", "/stories", "/reel",
-    "profile.php",
+    "profile.php", "/hashtag/", "/gaming/",
   ];
   return !blocklist.some((b) => url.includes(b));
+}
+
+function normalizeNameTokens(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((token) => token.length > 2)
+    .filter((token) => !["home", "official", "page", "cameroun", "cameroon", "ltd", "sarl", "sas", "inc", "the"].includes(token));
+}
+
+function namesRoughlyMatch(companyName, pageName) {
+  const companyTokens = normalizeNameTokens(companyName);
+  const pageTokens = normalizeNameTokens(pageName);
+
+  if (companyTokens.length === 0 || pageTokens.length === 0) return false;
+
+  const pageSet = new Set(pageTokens);
+  const overlap = companyTokens.filter((token) => pageSet.has(token));
+
+  if (companyTokens.length <= 2) {
+    return overlap.length >= 1;
+  }
+  return overlap.length >= 2;
+}
+
+function isRelevantFacebookPage(company, fbInfo, fbUrl) {
+  if (!fbUrl || !isScrapableFacebookUrl(fbUrl)) return false;
+
+  const pageName = fbInfo.facebookPageName || "";
+  const aboutText = `${fbInfo.facebookAbout || ""} ${fbInfo.category || ""} ${fbInfo.facebookAddress || ""}`.toLowerCase();
+  const websiteUrl = (company.url || company.websiteUrl || "").toLowerCase();
+  const facebookWebsite = (fbInfo.facebookWebsite || "").toLowerCase();
+  const urlText = fbUrl.toLowerCase();
+
+  if (!pageName || /^facebook$/i.test(pageName.trim())) return false;
+
+  const hasNameMatch = namesRoughlyMatch(company.name, pageName);
+  const hasCameroonContext = /cameroon|cameroun|douala|yaounde|yaoundé|bafoussam|bamenda|garoua|buea|\+237/.test(aboutText);
+  const sharesDomain =
+    !!websiteUrl &&
+    !!facebookWebsite &&
+    (() => {
+      try {
+        return new URL(websiteUrl).hostname.replace(/^www\./, "") === new URL(facebookWebsite).hostname.replace(/^www\./, "");
+      } catch {
+        return false;
+      }
+    })();
+  const urlContainsNameToken = normalizeNameTokens(company.name).some((token) => urlText.includes(token));
+
+  return hasNameMatch || sharesDomain || (urlContainsNameToken && hasCameroonContext);
 }
 
 function loadSession() {
@@ -430,7 +492,7 @@ async function scrapeWebsite(siteUrl) {
 }
 
 async function ddgFacebookSearch(companyName) {
-  const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent('"' + companyName + '" site:facebook.com');
+  const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent('"' + companyName + '" Cameroon OR Cameroun site:facebook.com');
   try {
     const res = await axios.get(url, {
       headers: { "User-Agent": DESKTOP_UA, "Accept-Language": "en-US,en;q=0.9" },
@@ -506,14 +568,21 @@ async function detectCompany(company, page, delayMs) {
   if (enriched.hasFacebook && enriched.facebookUrl && isScrapableFacebookUrl(enriched.facebookUrl)) {
     console.log("    Scraping Facebook page...");
     const fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
-    Object.assign(enriched, fbInfo);
 
-    const found = [];
-    if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
-    if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
-    if (fbInfo.category) found.push("cat: " + fbInfo.category);
-    if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
-    console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
+    if (!isRelevantFacebookPage(company, fbInfo, enriched.facebookUrl)) {
+      console.log("    Rejected weak Facebook match: " + enriched.facebookUrl);
+      enriched.hasFacebook = false;
+      enriched.facebookUrl = null;
+    } else {
+      Object.assign(enriched, fbInfo);
+
+      const found = [];
+      if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
+      if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
+      if (fbInfo.category) found.push("cat: " + fbInfo.category);
+      if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
+      console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
+    }
   }
 
   await sleep(delayMs);
