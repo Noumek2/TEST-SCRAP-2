@@ -9,12 +9,7 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
 
-const isVercel = process.env.VERCEL === "5";
-
-console.log("[env] VERCEL =", process.env.VERCEL);
-console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
-console.log("[env] isVercel =", isVercel);
-console.log("[env] chromium loaded =", !!chromium);
+const isVercel = process.env.VERCEL === "1";
 
 
 let puppeteer;
@@ -32,6 +27,11 @@ if (isVercel) {
     chromium = null;
   }
 }
+
+console.log("[env] VERCEL =", process.env.VERCEL);
+console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
+console.log("[env] isVercel =", isVercel);
+console.log("[env] chromium loaded =", !!chromium);
 
 const SESSION_FILE = path.join(__dirname, "fb_session.json");
 
