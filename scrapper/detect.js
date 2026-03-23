@@ -583,19 +583,17 @@ async function detectCompany(company, page, delayMs) {
     const fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
 
     if (!isRelevantFacebookPage(company, fbInfo, enriched.facebookUrl)) {
-      console.log("    Rejected weak Facebook match: " + enriched.facebookUrl);
-      enriched.hasFacebook = false;
-      enriched.facebookUrl = null;
-    } else {
-      Object.assign(enriched, fbInfo);
-
-      const found = [];
-      if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
-      if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
-      if (fbInfo.category) found.push("cat: " + fbInfo.category);
-      if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
-      console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
+      console.log("    Keeping low-confidence Facebook match: " + enriched.facebookUrl);
     }
+
+    Object.assign(enriched, fbInfo);
+
+    const found = [];
+    if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
+    if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
+    if (fbInfo.category) found.push("cat: " + fbInfo.category);
+    if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
+    console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
   }
 
   await sleep(delayMs);
