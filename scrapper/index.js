@@ -41,19 +41,24 @@ function openFile(filePath) {
 }
 
 async function runScraper(options = {}) {
-  const { facebookOnly = false, noOpen = false, pagesPerQuery = 2 } = options;
+  const { facebookOnly = false, noOpen = false, pagesPerQuery = 2, maxRuntimeSeconds = null } = options;
+  const deadlineAt = maxRuntimeSeconds ? Date.now() + (maxRuntimeSeconds * 1000) : null;
+  const deadlineBufferMs = 10000;
 
   console.log("==========================================================");
   console.log("   Cameroon Construction & Real Estate Company Scraper");
   console.log("==========================================================");
   console.log("  Mode        : " + (facebookOnly ? "Facebook-only" : "All companies"));
   console.log("  Pages/query : " + pagesPerQuery);
+  if (maxRuntimeSeconds) {
+    console.log("  Time budget : " + maxRuntimeSeconds + "s");
+  }
   console.log("");
 
   try {
     logStage("search:start");
     console.log("STEP 1 - Searching for companies...");
-    const companies = await searchCompanies({ pagesPerQuery, delayMs: 2000 });
+    const companies = await searchCompanies({ pagesPerQuery, delayMs: 2000, deadlineAt, deadlineBufferMs });
     logStage("search:done", companies.length + " companies");
 
     if (companies.length === 0) {
@@ -67,7 +72,7 @@ async function runScraper(options = {}) {
 
     logStage("detect:start");
     console.log("STEP 2 - Detecting Facebook pages and extracting details...");
-    const enriched = await detectAll(companies, { facebookOnly: false, delayMs: 2500 });
+    const enriched = await detectAll(companies, { facebookOnly: false, delayMs: 2500, deadlineAt, deadlineBufferMs });
     logStage("detect:done", enriched.length + " enriched");
 
     logStage("scraped:mark");
@@ -122,6 +127,7 @@ if (require.main === module) {
     facebookOnly: args.includes("--facebook-only"),
     noOpen: args.includes("--no-open"),
     pagesPerQuery: args.includes("--pages") ? parseInt(args[args.indexOf("--pages") + 1], 10) || 2 : 2,
+    maxRuntimeSeconds: args.includes("--max-seconds") ? parseInt(args[args.indexOf("--max-seconds") + 1], 10) || null : (parseInt(process.env.SCRAPER_MAX_SECONDS, 10) || null),
   };
 
   runScraper(options).catch((err) => {
@@ -134,6 +140,7 @@ if (require.main === module) {
     const options = {
       facebookOnly: url.searchParams.get("facebookOnly") === "true",
       pagesPerQuery: parseInt(url.searchParams.get("pages"), 10) || 2,
+      maxRuntimeSeconds: parseInt(url.searchParams.get("maxSeconds"), 10) || (parseInt(process.env.SCRAPER_MAX_SECONDS, 10) || null),
       noOpen: true,
     };
 
