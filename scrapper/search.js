@@ -44,21 +44,15 @@ const SEARCH_QUERIES = [
   "manufacturing companies in Cameroon",
 ];
 
-const DIRECTORY_HOST_KEYWORDS = [
-  "yellowpages",
-  "businesslist",
-  "business-directory",
-  "directory",
-  "annuaire",
-  "listing",
-  "listings",
-  "africabizinfo",
-  "zoominfo",
-  "kompass",
+const TRUSTED_DIRECTORY_HOSTS = [
+  "businesslist.co.cm",
+  "goafricaonline.com",
+  "africannuaire.com",
 ];
 
 const DIRECTORY_DETAIL_PATH_PATTERNS = [
   /\/category\//i,
+  /\/companies\//i,
   /\/company\//i,
   /\/business\//i,
   /\/listing\//i,
@@ -141,6 +135,59 @@ const GENERIC_ANCHOR_KEYWORDS = [
   "bahasa indonesia",
   "portugues",
   "português",
+  "voir plus",
+  "s inscrire",
+  "s'inscrire",
+  "get listed",
+  "cameroon",
+  "restaurants",
+  "hotel",
+  "hotels",
+  "tourism",
+  "shopping",
+  "legal",
+  "employment",
+  "schools",
+  "real estate",
+  "contractors",
+  "doctors",
+  "business",
+  "data analytics",
+  "data & analytics",
+  "communication publicite",
+  "communication publicité",
+  "agences de communication",
+  "imprimeries",
+  "batiment et construction",
+  "bâtiment et construction",
+  "adduction d eau",
+  "adduction d'eau",
+  "aluminium",
+  "finances",
+  "assurances",
+  "commerces",
+  "food beverage",
+  "food & beverage",
+  "energy power",
+  "energy & power",
+  "electronics electrical",
+  "electronics & electrical",
+  "construction real estate",
+  "construction & real estate",
+  "computer it",
+  "computer & it",
+  "chemicals",
+  "automotive",
+  "automotive automobile",
+  "automotive & automobile",
+  "arts crafts gifts",
+  "arts crafts gifts",
+  "arts, crafts gifts",
+  "arts, crafts & gifts",
+  "apparel fashion",
+  "apparel & fashion",
+  "agro agriculture",
+  "agro & agriculture",
   "home",
   "about",
   "contact",
@@ -204,6 +251,10 @@ const NON_TARGET_HOST_KEYWORDS = [
   "globaldatabase.com",
   "lusha.com",
   "coresignal.com",
+  "zoominfo.com",
+  "pagesjaunes.online",
+  "b2bmap.com",
+  "afrikta.com",
   "constructiondive.com",
   "realtor.com",
   "therealreal.com",
@@ -319,12 +370,23 @@ function isLikelyDirectoryResult(result) {
     return false;
   }
 
-  if (DIRECTORY_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
-    return true;
+  if (!TRUSTED_DIRECTORY_HOSTS.some((trustedHost) => hostname.includes(trustedHost))) {
+    return false;
   }
 
-  const haystack = `${title} ${snippet} ${url}`;
-  return DIRECTORY_TEXT_KEYWORDS.some((keyword) => haystack.includes(keyword));
+  if (hostname === "businesslist.co.cm") {
+    return /\/(category|location|companies)\//i.test(url) || title.includes("business list");
+  }
+
+  if (hostname.includes("goafricaonline.com")) {
+    return /\/cm\/annuaire\//i.test(url);
+  }
+
+  if (hostname.includes("africannuaire.com")) {
+    return /\/resultat\//i.test(url);
+  }
+
+  return false;
 }
 
 function isSkippableLink(url) {
@@ -359,7 +421,10 @@ function looksLikeArticleOrUiPath(url) {
 function looksLikeCompanyAnchor(text) {
   const normalized = String(text || "").replace(/\s+/g, " ").trim();
   if (normalized.length < 3 || normalized.length > 120) return false;
-  const lowered = normalized.toLowerCase();
+  const lowered = normalized
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
   if (NON_COMPANY_TEXT_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
   if (DIRECTORY_TEXT_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
   if (GENERIC_ANCHOR_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
@@ -404,11 +469,11 @@ function looksLikeCompanyCandidate(result) {
     return false;
   }
 
-  if (DIRECTORY_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
+  if (NON_TARGET_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
     return false;
   }
 
-  if (NON_TARGET_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
+  if (looksLikeArticleOrUiPath(result.url)) {
     return false;
   }
 
@@ -635,7 +700,8 @@ async function extractCompaniesFromListing(result, options = {}) {
 
       if (!hasUsefulAnchor && !looksLikeDetailPage) return;
       if (looksLikeArticlePath && !looksLikeDetailPage) return;
-      if (sameHost && !looksLikeDetailPage && pathDepth(absolute) < 2) return;
+      if (sameHost && !looksLikeDetailPage) return;
+      if (!sameHost && !/\.cm$/i.test(hostname) && !candidateIsCameroonRelevant) return;
       if (!listingIsCameroonRelevant && !candidateIsCameroonRelevant) return;
       if (seen.has(absolute)) return;
 
@@ -703,8 +769,8 @@ async function searchCompanies(options = {}) {
   const companyCandidates = unique.filter((result) => isLikelyDirectoryResult(result) || looksLikeCompanyCandidate(result));
   console.log(`    [filter] ${unique.length} raw candidates -> ${companyCandidates.length} likely company/listing pages`);
   const expanded = await expandDirectoryResults(companyCandidates, {
-    delayMs: isVercel ? 500 : 1500,
-    maxLinksPerListing: isVercel ? 10 : 10,
+    delayMs: isVercel ? 400 : 1000,
+    maxLinksPerListing: isVercel ? 5 : 6,
   });
 
   try {
