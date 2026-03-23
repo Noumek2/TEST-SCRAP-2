@@ -1,3 +1,5 @@
+require("./env");
+
 /**
  * check_session.js
  * Opens a real Chrome browser, you log in to Facebook manually,
