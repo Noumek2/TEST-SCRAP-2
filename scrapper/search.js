@@ -659,7 +659,7 @@ async function searchCompanies(options = {}) {
   const queriesToRun = SEARCH_QUERIES;
 =======
   const isVercel = process.env.VERCEL === "1";
-  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 3) : SEARCH_QUERIES;
+  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 2) : SEARCH_QUERIES;
 
 <<<<<<< HEAD
 >>>>>>> 5313f5a (increase querry4)
