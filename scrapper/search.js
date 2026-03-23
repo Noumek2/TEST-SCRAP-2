@@ -92,6 +92,31 @@ const NON_COMPANY_TEXT_KEYWORDS = [
   "contact us",
 ];
 
+const CAMEROON_TERMS = [
+  "cameroon",
+  "cameroun",
+  "douala",
+  "yaounde",
+  "yaoundé",
+  "bafoussam",
+  "bamenda",
+  "garoua",
+  "buea",
+  "+237",
+];
+
+const NON_TARGET_HOST_KEYWORDS = [
+  "constructiondive.com",
+  "realtor.com",
+  "therealreal.com",
+  "zillow.com",
+  "redfin.com",
+  "loopnet.com",
+  "apartments.com",
+  "forbes.com",
+  "wikipedia.org",
+];
+
 const SKIP_HOST_KEYWORDS = [
   "google.",
   "bing.",
@@ -188,6 +213,10 @@ function isLikelyDirectoryResult(result) {
   const snippet = (result.snippet || "").toLowerCase();
   const hostname = getHostname(result.url);
 
+  if (NON_TARGET_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
+    return false;
+  }
+
   if (DIRECTORY_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
     return true;
   }
@@ -217,6 +246,18 @@ function inferCompanyName(anchorText, href) {
   }
 }
 
+function isCameroonRelevantText(text) {
+  const haystack = (text || "").toLowerCase();
+  return CAMEROON_TERMS.some((term) => haystack.includes(term));
+}
+
+function isCameroonRelevantUrl(url) {
+  const normalized = normalizeUrl(url) || "";
+  const hostname = getHostname(normalized);
+  if (hostname.endsWith(".cm")) return true;
+  return isCameroonRelevantText(normalized);
+}
+
 function looksLikeCompanyCandidate(result) {
   const hostname = getHostname(result.url);
   if (!hostname || isSkippableLink(result.url)) return false;
@@ -230,6 +271,19 @@ function looksLikeCompanyCandidate(result) {
   }
 
   if (DIRECTORY_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
+    return false;
+  }
+
+  if (NON_TARGET_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
+    return false;
+  }
+
+  const cameroonRelevant =
+    isCameroonRelevantUrl(result.url) ||
+    isCameroonRelevantText(title) ||
+    isCameroonRelevantText(snippet);
+
+  if (!cameroonRelevant) {
     return false;
   }
 
@@ -428,6 +482,9 @@ async function extractCompaniesFromListing(result, options = {}) {
 
       if (!absolute || isSkippableLink(absolute)) return;
       if (absolute === normalizeUrl(result.url)) return;
+
+      const candidateText = `${text} ${absolute}`;
+      if (!isCameroonRelevantUrl(absolute) && !isCameroonRelevantText(candidateText)) return;
 
       const hostname = getHostname(absolute);
       const sameHost = hostname === getHostname(result.url);
