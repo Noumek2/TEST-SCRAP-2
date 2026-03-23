@@ -29,13 +29,16 @@ const CONFIG = {
 };
 
 const SEARCH_QUERIES = [
+  "companies in Cameroon",
+  "entreprises Cameroun",
+  "business directory Cameroon",
   "construction company in Cameroon",
   "real estate company Cameroon",
   "societe construction Cameroun",
   "entreprise batiment Cameroun",
-  "restauration services Cameroon",
-  "hotels in Cameroon",
-  "tourism companies in Cameroon",
+  "restaurant company Cameroon",
+  "hotel company Cameroon",
+  "tour operator Cameroon",
   "transport companies in Cameroon",
   "agriculture companies in Cameroon",
   "manufacturing companies in Cameroon",
@@ -49,9 +52,6 @@ const DIRECTORY_HOST_KEYWORDS = [
   "annuaire",
   "listing",
   "listings",
-  "tripadvisor",
-  "expedia",
-  "booking",
   "africabizinfo",
   "zoominfo",
   "kompass",
@@ -275,6 +275,10 @@ function isLikelyDirectoryResult(result) {
   const title = (result.name || "").toLowerCase();
   const snippet = (result.snippet || "").toLowerCase();
   const hostname = getHostname(result.url);
+
+  if (!hostname || isSkippableLink(result.url)) {
+    return false;
+  }
 
   if (NON_TARGET_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
     return false;
