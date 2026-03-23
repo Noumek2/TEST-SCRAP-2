@@ -71,6 +71,18 @@ const DIRECTORY_HOST_KEYWORDS = [
   "kompass",
 ];
 
+const DIRECTORY_DETAIL_PATH_PATTERNS = [
+  /\/category\//i,
+  /\/company\//i,
+  /\/business\//i,
+  /\/listing\//i,
+  /\/profile\//i,
+  /\/view\//i,
+  /\/cmp\//i,
+  /\/annuaire\//i,
+  /\/resultat\//i,
+];
+
 const DIRECTORY_TEXT_KEYWORDS = [
   "companies",
   "businesses",
@@ -259,6 +271,19 @@ function inferCompanyName(anchorText, href) {
   } catch {
     return href;
   }
+}
+
+function looksLikeDirectoryDetailPage(url) {
+  return DIRECTORY_DETAIL_PATH_PATTERNS.some((pattern) => pattern.test(url || ""));
+}
+
+function looksLikeCompanyAnchor(text) {
+  const normalized = String(text || "").replace(/\s+/g, " ").trim();
+  if (normalized.length < 3 || normalized.length > 120) return false;
+  const lowered = normalized.toLowerCase();
+  if (NON_COMPANY_TEXT_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
+  if (DIRECTORY_TEXT_KEYWORDS.some((keyword) => lowered.includes(keyword))) return false;
+  return true;
 }
 
 function isCameroonRelevantText(text) {
@@ -482,6 +507,11 @@ async function fetchListingHtml(url) {
 async function extractCompaniesFromListing(result, options = {}) {
   const maxLinks = options.maxLinks || 8;
   const extracted = [];
+  const listingIsCameroonRelevant =
+    isCameroonRelevantUrl(result.url) ||
+    isCameroonRelevantText(result.name) ||
+    isCameroonRelevantText(result.snippet) ||
+    isCameroonRelevantText(result.url);
 
   try {
     const html = await fetchListingHtml(result.url);
@@ -498,16 +528,18 @@ async function extractCompaniesFromListing(result, options = {}) {
       if (!absolute || isSkippableLink(absolute)) return;
       if (absolute === normalizeUrl(result.url)) return;
 
-      const candidateText = `${text} ${absolute}`;
-      if (!isCameroonRelevantUrl(absolute) && !isCameroonRelevantText(candidateText)) return;
-
       const hostname = getHostname(absolute);
       const sameHost = hostname === getHostname(result.url);
-      const looksLikeDetailPage = /\/company\/|\/business\/|\/listing\/|\/profile\/|\/hotel\/|\/restaurant\//i.test(absolute);
-      const hasUsefulAnchor = text.length >= 3 && text.length <= 120;
+      const looksLikeDetailPage = looksLikeDirectoryDetailPage(absolute);
+      const hasUsefulAnchor = looksLikeCompanyAnchor(text);
+      const candidateText = `${text} ${absolute}`;
+      const candidateIsCameroonRelevant =
+        isCameroonRelevantUrl(absolute) ||
+        isCameroonRelevantText(candidateText);
 
       if (!hasUsefulAnchor && !looksLikeDetailPage) return;
       if (sameHost && !looksLikeDetailPage) return;
+      if (!listingIsCameroonRelevant && !candidateIsCameroonRelevant) return;
       if (seen.has(absolute)) return;
 
       seen.add(absolute);
