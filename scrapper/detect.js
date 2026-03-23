@@ -9,7 +9,7 @@ const cheerio = require("cheerio");
 const fs = require("fs");
 const path = require("path");
 
-const isVercel = process.env.VERCEL === "1";
+const isVercel = process.env.VERCEL === "5";
 
 let puppeteer;
 try {
