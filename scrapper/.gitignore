@@ -1,7 +1,7 @@
 node_modules/
 puppeteer_profile/
 puppeteer_session/
-.env
+.env/
 output/
 dome/
 .agents/
