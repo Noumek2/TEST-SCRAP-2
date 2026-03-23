@@ -350,7 +350,7 @@ async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
   let allResults = [];
   const isVercel = process.env.VERCEL === "1";
-  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 1) : SEARCH_QUERIES;
+  const queriesToRun = isVercel ? SEARCH_QUERIES.slice(0, 5) : SEARCH_QUERIES;
 
   console.log("\nSearching across Google + Bing + DuckDuckGo...\n");
 
@@ -369,7 +369,7 @@ async function searchCompanies(options = {}) {
   console.log(`    [filter] ${unique.length} raw candidates -> ${companyCandidates.length} likely company/listing pages`);
   const expanded = await expandDirectoryResults(companyCandidates, {
     delayMs: isVercel ? 500 : 1500,
-    maxLinksPerListing: isVercel ? 4 : 8,
+    maxLinksPerListing: isVercel ? 10 : 10,
   });
 
   try {
