@@ -132,7 +132,7 @@ async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
   let allResults = [];
   const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
-  const queriesToRun = isServerless ? SEARCH_QUERIES.slice(0, 3) : SEARCH_QUERIES;
+  const queriesToRun = SEARCH_QUERIES;
 
   console.log("\n🔍 Searching across Google + Bing + DuckDuckGo...\n");
 
