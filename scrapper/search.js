@@ -1,5 +1,28 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const https = require("https");
+
+const isVercelRuntime = process.env.VERCEL === "1";
+
+let puppeteer = null;
+try {
+  puppeteer = require(isVercelRuntime ? "puppeteer-core" : "puppeteer");
+} catch {
+  try {
+    puppeteer = require("puppeteer");
+  } catch {
+    puppeteer = null;
+  }
+}
+
+let chromium = null;
+if (isVercelRuntime) {
+  try {
+    chromium = require("@sparticuz/chromium");
+  } catch {
+    chromium = null;
+  }
+}
 
 const CONFIG = {
   serpApiKey: process.env.SERPAPI_KEY,
@@ -109,7 +132,7 @@ async function sleep(ms) {
 function normalizeUrl(url) {
   if (!url || typeof url !== "string") return null;
   try {
-    const parsed = new URL(url);
+    const parsed = new URL(decodeSpecialRedirectUrl(url));
     parsed.hash = "";
     return parsed.toString().replace(/\/$/, "");
   } catch {
@@ -119,10 +142,33 @@ function normalizeUrl(url) {
 
 function getHostname(url) {
   try {
-    return new URL(url).hostname.toLowerCase();
+    return new URL(decodeSpecialRedirectUrl(url)).hostname.toLowerCase();
   } catch {
     return "";
   }
+}
+
+function decodeSpecialRedirectUrl(url) {
+  if (!url || typeof url !== "string") return url;
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+
+    if (hostname.includes("bing.com") && parsed.pathname.startsWith("/ck/")) {
+      const wrapped = parsed.searchParams.get("u");
+      if (wrapped) {
+        if (/^a1/i.test(wrapped)) {
+          try {
+            return Buffer.from(wrapped.slice(2), "base64").toString("utf8");
+          } catch {}
+        }
+        return wrapped;
+      }
+    }
+  } catch {}
+
+  return url;
 }
 
 function resolveAbsoluteUrl(href, baseUrl) {
@@ -223,8 +269,9 @@ async function searchBing(query) {
     $("li.b_algo").each((_, el) => {
       const title = $(el).find("h2 a").first().text().trim();
       const href = $(el).find("h2 a").first().attr("href") || "";
-      if (title && href.startsWith("http")) {
-        results.push({ name: title, url: href, snippet: "", source: "bing" });
+      const resolved = normalizeUrl(href);
+      if (title && resolved && resolved.startsWith("http")) {
+        results.push({ name: title, url: resolved, snippet: "", source: "bing" });
       }
     });
     console.log(`    [Bing] "${query}" -> ${results.length} results`);
@@ -248,8 +295,9 @@ async function searchDuckDuckGo(query) {
           href = decodeURIComponent(new URL("https:" + href).searchParams.get("uddg") || "");
         } catch {}
       }
-      if (name && href.startsWith("http")) {
-        results.push({ name, url: href, snippet: "", source: "duckduckgo" });
+      const resolved = normalizeUrl(href);
+      if (name && resolved && resolved.startsWith("http")) {
+        results.push({ name, url: resolved, snippet: "", source: "duckduckgo" });
       }
     });
     console.log(`    [DuckDuckGo] "${query}" -> ${results.length} results`);
@@ -271,18 +319,104 @@ function deduplicate(results) {
   });
 }
 
+function getAxiosHeaders() {
+  return {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept-Language": "en-US,en;q=0.9,fr;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+  };
+}
+
+async function getServerlessChromePath() {
+  const envPath =
+    process.env.PUPPETEER_EXECUTABLE_PATH ||
+    process.env.CHROME_PATH ||
+    process.env.CHROMIUM_PATH;
+
+  if (envPath) return envPath;
+  if (chromium && typeof chromium.executablePath === "function") {
+    return chromium.executablePath();
+  }
+  return null;
+}
+
+async function fetchListingHtmlWithBrowser(url) {
+  if (!puppeteer) {
+    throw new Error("Puppeteer is not available for browser fallback");
+  }
+
+  const executablePath = isVercelRuntime ? await getServerlessChromePath() : undefined;
+  const launchOptions = {
+    headless: isVercelRuntime ? true : "new",
+    ignoreHTTPSErrors: true,
+    args: isVercelRuntime && chromium ? chromium.args : [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-background-networking",
+    ],
+  };
+
+  if (executablePath) {
+    launchOptions.executablePath = executablePath;
+  }
+  if (isVercelRuntime && chromium) {
+    launchOptions.defaultViewport = chromium.defaultViewport;
+  }
+
+  const browser = await puppeteer.launch(launchOptions);
+  try {
+    const page = await browser.newPage();
+    await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+    await sleep(1500);
+    return await page.content();
+  } finally {
+    await browser.close().catch(() => {});
+  }
+}
+
+async function fetchListingHtml(url) {
+  try {
+    const response = await axios.get(url, {
+      headers: getAxiosHeaders(),
+      timeout: 15000,
+      maxRedirects: 5,
+    });
+    return response.data;
+  } catch (err) {
+    const status = err.response && err.response.status;
+    const message = err.message || "";
+
+    if (status === 403) {
+      console.log(`    [listing] Axios blocked on ${url}, retrying with browser fallback...`);
+      return await fetchListingHtmlWithBrowser(url);
+    }
+
+    if (/certificate|self[- ]signed|SSL|unable to verify/i.test(message)) {
+      console.log(`    [listing] SSL issue on ${url}, retrying with insecure HTTPS...`);
+      const insecureResponse = await axios.get(url, {
+        headers: getAxiosHeaders(),
+        timeout: 15000,
+        maxRedirects: 5,
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      });
+      return insecureResponse.data;
+    }
+
+    throw err;
+  }
+}
+
 async function extractCompaniesFromListing(result, options = {}) {
   const maxLinks = options.maxLinks || 8;
   const extracted = [];
 
   try {
-    const res = await axios.get(result.url, {
-      headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" },
-      timeout: 15000,
-      maxRedirects: 5,
-    });
-
-    const $ = cheerio.load(res.data);
+    const html = await fetchListingHtml(result.url);
+    const $ = cheerio.load(html);
     const seen = new Set();
 
     $("a[href]").each((_, el) => {
