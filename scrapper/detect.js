@@ -144,10 +144,81 @@ const COUNTRY_ONLY_ENTRIES = new Set([
   "togo",
 ]);
 
+const GENERIC_NON_COMPANY_ENTRIES = new Set([
+  "original",
+  "disclaimer",
+  "send enquiry",
+  "be the first to comment",
+  "english",
+  "francais",
+  "francais",
+  "espanol",
+  "romana",
+  "bahasa indonesia",
+  "portugues",
+  "small business",
+  "public sector",
+  "service center",
+  "resources",
+  "voir plus",
+  "s inscrire",
+  "restaurants",
+  "hotel",
+  "hotels",
+  "shopping",
+  "legal",
+  "employment",
+  "schools",
+  "get listed",
+  "communication publicite",
+  "communication publicite",
+  "agences de communication",
+  "imprimeries",
+  "batiment et construction",
+  "adduction d eau",
+  "aluminium",
+  "finances",
+  "assurances",
+  "commerces",
+  "business",
+  "data analytics",
+  "data analytics",
+  "cameroon",
+]);
+
+const COMPANY_HINT_TOKENS = [
+  "company", "entreprise", "enterprise", "group", "holding", "holdings",
+  "construction", "realty", "immobilier", "properties", "property",
+  "hotel", "restaurant", "transport", "logistics", "farm", "agro",
+  "manufacturing", "tech", "services", "service", "agency", "agence",
+  "consulting", "consult", "sarl", "ltd", "limited", "corp", "sa", "sas",
+];
+
 function isCountryOnlyEntry(company) {
   const normalizedName = normalizeLooseText(company && company.name);
   if (!normalizedName) return false;
   return COUNTRY_ONLY_ENTRIES.has(normalizedName);
+}
+
+function looksLikeContentPageUrl(url) {
+  return /\/(author|news|article|articles|economy|doc|docs|slideshow|teachers|resources|public-sector|small-business|comments?)\b/i.test(String(url || ""));
+}
+
+function isLikelyNonCompanyEntry(company) {
+  const normalizedName = normalizeLooseText(company && company.name);
+  if (!normalizedName) return true;
+  if (COUNTRY_ONLY_ENTRIES.has(normalizedName)) return true;
+  if (GENERIC_NON_COMPANY_ENTRIES.has(normalizedName)) return true;
+
+  const words = normalizedName.split(/\s+/).filter(Boolean);
+  const hasCompanyHint = COMPANY_HINT_TOKENS.some((token) => normalizedName.includes(token));
+  const looksSentenceLike = words.length >= 8;
+  const hasDateOrHeadlinePattern = /[:!?]|\b\d{4}\b|\bsteps closer\b|\bfirst to\b|\bstate funding\b|\bproject\b/i.test(normalizedName);
+
+  if (looksSentenceLike && !hasCompanyHint) return true;
+  if (hasDateOrHeadlinePattern && !hasCompanyHint) return true;
+
+  return false;
 }
 
 function namesRoughlyMatch(companyName, pageName) {
@@ -566,11 +637,12 @@ async function ddgFacebookSearch(companyName) {
   }
 }
 
-async function detectCompany(company, page, delayMs) {
+async function detectCompany(company, page, delayMs, context) {
   delayMs = delayMs || 2500;
+  context = context || { facebookCache: new Map(), facebookOwnerByUrl: new Map() };
 
-  if (isCountryOnlyEntry(company)) {
-    console.log("  Skipping non-company country entry: " + company.name);
+  if (isLikelyNonCompanyEntry(company)) {
+    console.log("  Skipping non-company entry: " + company.name);
     return null;
   }
 
@@ -599,10 +671,13 @@ async function detectCompany(company, page, delayMs) {
     const siteData = await scrapeWebsite(company.url);
     enriched.emails = siteData.emails;
     enriched.phones = siteData.phones;
-    if (siteData.facebookUrls.length > 0) {
+    const shouldTrustWebsiteFacebook = !looksLikeContentPageUrl(company.url);
+    if (siteData.facebookUrls.length > 0 && shouldTrustWebsiteFacebook) {
       enriched.facebookUrl = siteData.facebookUrls[0];
       enriched.hasFacebook = true;
       console.log("    Facebook found on website: " + enriched.facebookUrl);
+    } else if (siteData.facebookUrls.length > 0) {
+      console.log("    Ignoring site-wide Facebook link from content page");
     }
   }
 
@@ -619,21 +694,40 @@ async function detectCompany(company, page, delayMs) {
   }
 
   if (enriched.hasFacebook && enriched.facebookUrl && isScrapableFacebookUrl(enriched.facebookUrl)) {
-    console.log("    Scraping Facebook page...");
-    const fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
-
-    if (!isRelevantFacebookPage(company, fbInfo, enriched.facebookUrl)) {
-      console.log("    Keeping low-confidence Facebook match: " + enriched.facebookUrl);
+    let fbInfo = context.facebookCache.get(enriched.facebookUrl);
+    if (!fbInfo) {
+      console.log("    Scraping Facebook page...");
+      fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
+      context.facebookCache.set(enriched.facebookUrl, fbInfo);
+    } else {
+      console.log("    Reusing cached Facebook page data...");
     }
 
-    Object.assign(enriched, fbInfo);
+    const claimedBy = context.facebookOwnerByUrl.get(enriched.facebookUrl);
 
-    const found = [];
-    if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
-    if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
-    if (fbInfo.category) found.push("cat: " + fbInfo.category);
-    if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
-    console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
+    if (claimedBy && normalizeLooseText(claimedBy) !== normalizeLooseText(company.name)) {
+      console.log("    Rejecting reused Facebook page from another company: " + enriched.facebookUrl);
+      console.log("    Already claimed by: " + claimedBy);
+      enriched.hasFacebook = false;
+      enriched.facebookUrl = null;
+    } else {
+      const isRelevant = isRelevantFacebookPage(company, fbInfo, enriched.facebookUrl);
+      if (!isRelevant) {
+        console.log("    Keeping low-confidence Facebook match: " + enriched.facebookUrl);
+      }
+      if (!claimedBy) {
+        context.facebookOwnerByUrl.set(enriched.facebookUrl, company.name);
+      }
+
+      Object.assign(enriched, fbInfo);
+
+      const found = [];
+      if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
+      if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
+      if (fbInfo.category) found.push("cat: " + fbInfo.category);
+      if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
+      console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
+    }
   }
 
   await sleep(delayMs);
@@ -645,6 +739,10 @@ async function detectAll(companies, options) {
   const facebookOnly = options.facebookOnly || false;
   const delayMs = options.delayMs || 2500;
   const results = [];
+  const context = {
+    facebookCache: new Map(),
+    facebookOwnerByUrl: new Map(),
+  };
 
   const session = loadSession();
   if (!session) {
@@ -672,7 +770,7 @@ async function detectAll(companies, options) {
   try {
     for (let i = 0; i < companies.length; i++) {
       console.log("[" + (i + 1) + "/" + companies.length + "]");
-      const enriched = await detectCompany(companies[i], page, delayMs);
+      const enriched = await detectCompany(companies[i], page, delayMs, context);
       if (!enriched) continue;
       if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
     }

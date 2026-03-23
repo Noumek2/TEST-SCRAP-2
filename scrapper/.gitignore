@@ -1,4 +1,9 @@
-scrapper/puppeteer_profile/
-.node_modules/
-.env/
+node_modules/
+puppeteer_profile/
+puppeteer_session/
+.env
 output/
+dome/
+.agents/
+scraper_test.txt
+test_output.txt
