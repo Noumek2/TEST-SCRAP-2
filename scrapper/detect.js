@@ -115,6 +115,41 @@ function normalizeNameTokens(value) {
     .filter((token) => !["home", "official", "page", "cameroun", "cameroon", "ltd", "sarl", "sas", "inc", "the"].includes(token));
 }
 
+function normalizeLooseText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const COUNTRY_ONLY_ENTRIES = new Set([
+  "afrique",
+  "algerie",
+  "angola",
+  "benin",
+  "burkina faso",
+  "congo brazzaville",
+  "congo kinshasa",
+  "cote d ivoire",
+  "djibouti",
+  "egypte",
+  "gabon",
+  "ghana",
+  "guinee",
+  "mali",
+  "senegal",
+  "togo",
+]);
+
+function isCountryOnlyEntry(company) {
+  const normalizedName = normalizeLooseText(company && company.name);
+  if (!normalizedName) return false;
+  return COUNTRY_ONLY_ENTRIES.has(normalizedName);
+}
+
 function namesRoughlyMatch(companyName, pageName) {
   const companyTokens = normalizeNameTokens(companyName);
   const pageTokens = normalizeNameTokens(pageName);
@@ -534,6 +569,11 @@ async function ddgFacebookSearch(companyName) {
 async function detectCompany(company, page, delayMs) {
   delayMs = delayMs || 2500;
 
+  if (isCountryOnlyEntry(company)) {
+    console.log("  Skipping non-company country entry: " + company.name);
+    return null;
+  }
+
   const enriched = {
     name: company.name,
     websiteUrl: company.url,
@@ -604,8 +644,6 @@ async function detectAll(companies, options) {
   options = options || {};
   const facebookOnly = options.facebookOnly || false;
   const delayMs = options.delayMs || 2500;
-  const deadlineAt = options.deadlineAt || null;
-  const deadlineBufferMs = options.deadlineBufferMs || 10000;
   const results = [];
 
   const session = loadSession();
@@ -633,13 +671,9 @@ async function detectAll(companies, options) {
 
   try {
     for (let i = 0; i < companies.length; i++) {
-      if (deadlineAt && Date.now() >= deadlineAt - deadlineBufferMs) {
-        console.log("  [timer] Stopping Facebook detection early to stay within the runtime budget");
-        break;
-      }
-
       console.log("[" + (i + 1) + "/" + companies.length + "]");
       const enriched = await detectCompany(companies[i], page, delayMs);
+      if (!enriched) continue;
       if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
     }
   } finally {
