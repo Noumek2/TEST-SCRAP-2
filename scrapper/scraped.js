@@ -83,12 +83,8 @@ async function loadSupabaseCompanies(tableName) {
 }
 
 async function loadScrapedKeysFromSupabase() {
-  const [rawCompanies, detectedCompanies] = await Promise.all([
-    loadSupabaseCompanies("storage-scrap"),
-    loadSupabaseCompanies("storage-fb-scrap"),
-  ]);
-
-  return new Set([...rawCompanies, ...detectedCompanies].map(makeScrapedKey));
+  const detectedCompanies = await loadSupabaseCompanies("storage-fb-scrap");
+  return new Set(detectedCompanies.map(makeScrapedKey));
 }
 
 function loadScrapedKeysLocal() {
