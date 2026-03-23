@@ -62,6 +62,27 @@ const DIRECTORY_TEXT_KEYWORDS = [
   "restaurants in",
 ];
 
+const NON_COMPANY_TEXT_KEYWORDS = [
+  "blog",
+  "news",
+  "article",
+  "guide",
+  "wikipedia",
+  "map",
+  "maps",
+  "review",
+  "reviews",
+  "careers",
+  "jobs",
+  "vacancy",
+  "login",
+  "signup",
+  "sign in",
+  "privacy policy",
+  "terms of service",
+  "contact us",
+];
+
 const SKIP_HOST_KEYWORDS = [
   "google.",
   "bing.",
@@ -163,6 +184,26 @@ function inferCompanyName(anchorText, href) {
   } catch {
     return href;
   }
+}
+
+function looksLikeCompanyCandidate(result) {
+  const hostname = getHostname(result.url);
+  if (!hostname || isSkippableLink(result.url)) return false;
+
+  const title = (result.name || "").toLowerCase();
+  const snippet = (result.snippet || "").toLowerCase();
+  const haystack = `${title} ${snippet}`;
+
+  if (NON_COMPANY_TEXT_KEYWORDS.some((keyword) => haystack.includes(keyword))) {
+    return false;
+  }
+
+  if (DIRECTORY_HOST_KEYWORDS.some((keyword) => hostname.includes(keyword))) {
+    return false;
+  }
+
+  if (title.length < 3) return false;
+  return true;
 }
 
 async function searchGoogleSerpApi(query, apiKey) {
@@ -311,7 +352,7 @@ async function expandDirectoryResults(results, options = {}) {
     if (extracted.length > 0) {
       expanded.push(...extracted);
     } else {
-      expanded.push(result);
+      console.log(`    [listing] Dropping unexpanded listing result: ${result.url}`);
     }
 
     await sleep(delayMs);
@@ -349,7 +390,9 @@ async function searchCompanies(options = {}) {
   }
 
   const unique = deduplicate(allResults.filter((r) => r.name && r.name.length > 3));
-  const expanded = await expandDirectoryResults(unique, {
+  const companyCandidates = unique.filter((result) => isLikelyDirectoryResult(result) || looksLikeCompanyCandidate(result));
+  console.log(`    [filter] ${unique.length} raw candidates -> ${companyCandidates.length} likely company/listing pages`);
+  const expanded = await expandDirectoryResults(companyCandidates, {
     delayMs: isVercel ? 500 : 1500,
     maxLinksPerListing: isVercel ? 4 : 8,
   });
