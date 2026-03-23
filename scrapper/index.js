@@ -8,6 +8,8 @@
  *   node index.js --no-open          # Don't auto-open the HTML report
  */
 
+require("./env");
+
 const { searchCompanies } = require("./search");
 const { detectAll } = require("./detect");
 const { saveAll, printSummary, saveToSupabase } = require("./save");

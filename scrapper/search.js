@@ -104,6 +104,7 @@ const NON_COMPANY_TEXT_KEYWORDS = [
   "blog",
   "news",
   "article",
+  "author",
   "guide",
   "wikipedia",
   "map",
@@ -119,6 +120,17 @@ const NON_COMPANY_TEXT_KEYWORDS = [
   "privacy policy",
   "terms of service",
   "contact us",
+  "disclaimer",
+  "be the first to comment",
+  "send enquiry",
+  "small business",
+  "public sector",
+  "d-u-n-s",
+  "business credit",
+  "business growth",
+  "business risk",
+  "service center",
+  "resources",
 ];
 
 const GENERIC_ANCHOR_KEYWORDS = [
@@ -132,6 +144,20 @@ const GENERIC_ANCHOR_KEYWORDS = [
   "read more",
   "learn more",
   "en savoir plus",
+  "original",
+  "disclaimer",
+  "send enquiry",
+  "be the first to comment!",
+  "be the first to comment",
+  "english",
+  "francais",
+  "français",
+  "espanol",
+  "español",
+  "romana",
+  "bahasa indonesia",
+  "portugues",
+  "português",
   "home",
   "about",
   "contact",
@@ -186,6 +212,15 @@ const CAMEROON_TERMS = [
 ];
 
 const NON_TARGET_HOST_KEYWORDS = [
+  "businessincameroon.com",
+  "stopblablacam.com",
+  "scribd.com",
+  "slideshare.net",
+  "dnb.com",
+  "f6s.com",
+  "globaldatabase.com",
+  "lusha.com",
+  "coresignal.com",
   "constructiondive.com",
   "realtor.com",
   "therealreal.com",
@@ -333,6 +368,10 @@ function inferCompanyName(anchorText, href) {
 
 function looksLikeDirectoryDetailPage(url) {
   return DIRECTORY_DETAIL_PATH_PATTERNS.some((pattern) => pattern.test(url || ""));
+}
+
+function looksLikeArticleOrUiPath(url) {
+  return /\/(author|news|article|articles|economy|slideshow|doc|docs|teachers|resources|smb)\b/i.test(url || "");
 }
 
 function looksLikeCompanyAnchor(text) {
@@ -605,6 +644,7 @@ async function extractCompaniesFromListing(result, options = {}) {
       const hostname = getHostname(absolute);
       const sameHost = hostname === getHostname(result.url);
       const looksLikeDetailPage = looksLikeDirectoryDetailPage(absolute);
+      const looksLikeArticlePath = looksLikeArticleOrUiPath(absolute);
       const hasUsefulAnchor = looksLikeCompanyAnchor(text);
       const candidateText = `${text} ${absolute}`;
       const candidateIsCameroonRelevant =
@@ -612,6 +652,7 @@ async function extractCompaniesFromListing(result, options = {}) {
         isCameroonRelevantText(candidateText);
 
       if (!hasUsefulAnchor && !looksLikeDetailPage) return;
+      if (looksLikeArticlePath && !looksLikeDetailPage) return;
       if (sameHost && !looksLikeDetailPage && pathDepth(absolute) < 2) return;
       if (!listingIsCameroonRelevant && !candidateIsCameroonRelevant) return;
       if (seen.has(absolute)) return;
