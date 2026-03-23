@@ -8,7 +8,7 @@ const CONFIG = {
 
 
 const SEARCH_QUERIES = [
-  "Hotels au Cameroun", ];
+  "Hotels douala", ];
   /*
   "real estate company Cameroon",
   "societe construction Cameroun",
