@@ -1,3 +1,4 @@
+const cors = require('cors');
 const express = require('express');
 const path = require('path');
 const scraperHandler = require('./index'); // Imports the logic from index.js
@@ -7,6 +8,7 @@ const PORT = process.env.PORT || 3001; // Use environment variable PORT or defau
 
 // 1. Serve static files (index.html, CSS, etc.) from the current folder
 app.use(express.static(__dirname));
+app.use(cors());
 
 // 2. Health check endpoint for Render
 app.get('/health', (req, res) => {
