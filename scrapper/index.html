@@ -271,7 +271,7 @@
         </footer>
     </div>
 
-    <script src="..." defer>
+    <script>
         const statusDiv = document.getElementById("statusDiv");
         const statusText = document.getElementById("statusText");
         const progressBar = document.getElementById("progressBar");
@@ -281,20 +281,20 @@
         async function startScraper() {
             startBtn.disabled = true;
             statusDiv.className = "status running";
+            statusText.innerHTML = '<span class="spinner"></span>Scraping in progress...';
             progressBar.classList.add("active");
-           
             
             // Reset and show log box
             logOutput.innerHTML = "";
             logOutput.classList.add("active");
-            logOutput.textContent = "Connecting to scraper...\n";
+            logOutput.textContent = "🚀 Connecting to scraper...\n\n";
 
             try {
                 // Connects to the API route defined in server.js
                 const response = await fetch("/api/run"); 
                 
-                if (!response.ok) {
-                    throw new Error("Failed to start scraper");
+                if (!response.body) {
+                    throw new Error("Response body is empty. Scraper might have failed on the server.");
                 }
 
                 const reader = response.body.getReader();
@@ -304,26 +304,32 @@
                     const { done, value } = await reader.read();
                     if (done) break;
                     
-                    // Decode the stream chunk and append to log box
                     const text = decoder.decode(value, { stream: true });
                     logOutput.textContent += text;
                     logOutput.scrollTop = logOutput.scrollHeight; // Auto-scroll to bottom
                 }
 
+                if (!response.ok) {
+                     throw new Error("Server returned an error status: " + response.status);
+                }
+
                 statusDiv.className = "status complete";
-                statusText.innerHTML = "✅ Scraper finished!";
-                progressBar.classList.remove("active");
+                statusText.innerHTML = "✅ Scraper finished successfully!";
+                logOutput.textContent += "\n\n🎉 Scraping complete!";
 
             } catch (error) {
                 statusDiv.className = "status error";
                 statusText.innerHTML = "❌ Error: " + error.message;
-                logOutput.textContent += "\n\nError: " + error.message;
+                logOutput.textContent += "\n\n🚨 Error: " + error.message;
+
+            } finally {
+                // This block runs whether there was an error or not
                 progressBar.classList.remove("active");
                 startBtn.disabled = false;
             }
         }
 
-        // Check initial status on page load
+        // Add the event listener to the button
         startBtn.addEventListener("click", startScraper);
     </script>
 </body>
