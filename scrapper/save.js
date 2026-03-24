@@ -105,7 +105,7 @@ function escapeXml(str) {
 }
 
 function toXml(companies, meta) {
-  const { generatedAt, totalFound } = meta || {};
+  const { generatedAt, totalFound, country = "Cameroon" } = meta || {};
 
   const nodes = companies.map((c, i) => {
     const emailNodes = c.emails && c.emails.length
@@ -145,7 +145,7 @@ ${phoneNodes}
   const withFb = companies.filter((c) => c.hasFacebook).length;
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<cameroonCompanies>
+<companies>
 
   <!-- Generated: ${escapeXml(generatedAt || new Date().toISOString())} -->
   <!-- Total found: ${totalFound || companies.length} | With Facebook: ${withFb} -->
@@ -155,7 +155,7 @@ ${phoneNodes}
     <totalCompanies>${companies.length}</totalCompanies>
     <companiesWithFacebook>${withFb}</companiesWithFacebook>
     <companiesWithoutFacebook>${companies.length - withFb}</companiesWithoutFacebook>
-    <country>Cameroon</country>
+    <country>${escapeXml(country)}</country>
     <sectors>
       <sector>Construction</sector>
       <sector>Real Estate</sector>
@@ -164,13 +164,36 @@ ${phoneNodes}
   </summary>
 ${nodes}
 
-</cameroonCompanies>`;
+</companies>`;
 }
 
 // ── Save functions ─────────────────────────────────────────────────────────
 
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function saveLatestResultsSnapshot(companies, options = {}) {
+  const {
+    outputDir,
+    country = "Cameroon",
+    title = `${country} Companies`,
+    baseName = "latest_results",
+  } = options;
+
+  const snapshotPath = path.join(outputDir, "latest_results.json");
+  const payload = {
+    title,
+    country,
+    baseName,
+    generatedAt: new Date().toISOString(),
+    totalCompanies: companies.length,
+    companiesWithFacebook: companies.filter((company) => company.hasFacebook).length,
+    companies,
+  };
+
+  fs.writeFileSync(snapshotPath, JSON.stringify(payload, null, 2), "utf8");
+  return snapshotPath;
 }
 
 /**
@@ -187,13 +210,15 @@ function saveAll(companies, options = {}) {
     outputDir = (isVercel || isRender) ? path.join(os.tmpdir(), "scrapper-output") : path.join(__dirname, "output"),
     baseName,
     facebookOnly = false,
+    country = "Cameroon",
+    title,
   } = options;
 
   const toSave = facebookOnly ? companies.filter((c) => c.hasFacebook) : companies;
   ensureDir(outputDir);
 
   const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
-  const base = baseName || ("cameroon_companies_" + ts);
+  const base = baseName || (country.toLowerCase().replace(/[^a-z0-9]+/g, "_") + "_companies_" + ts);
 
   // ── Save CSV ──
   const csvPath = path.join(outputDir, base + ".csv");
@@ -207,14 +232,20 @@ function saveAll(companies, options = {}) {
 
   // ── Save XML ──
   const xmlPath = path.join(outputDir, base + ".xml");
-  const xml = toXml(toSave, { generatedAt: new Date().toISOString(), totalFound: companies.length });
+  const xml = toXml(toSave, { generatedAt: new Date().toISOString(), totalFound: companies.length, country });
   if (fs.existsSync(xmlPath)) fs.unlinkSync(xmlPath);
   fs.writeFileSync(xmlPath, xml, "utf8");
   console.log("XML saved: " + xmlPath + " (" + toSave.length + " records)");
 
   // ── Save HTML report ──
-  const { saveReport } = require("./report");
-  const htmlPath = saveReport(toSave, { outputDir, baseName: base });
+  const htmlPath = saveReport(toSave, { outputDir, baseName: base, title: title || `${country} Companies` });
+  const snapshotPath = saveLatestResultsSnapshot(toSave, {
+    outputDir,
+    country,
+    title: title || `${country} Companies`,
+    baseName: base,
+  });
+  console.log("Latest results snapshot saved: " + snapshotPath);
 
   return { csvPath, xmlPath, htmlPath };
 }

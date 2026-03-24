@@ -237,7 +237,34 @@ function namesRoughlyMatch(companyName, pageName) {
   return overlap.length >= 2 || longOverlap.length >= 1;
 }
 
-function isRelevantFacebookPage(company, fbInfo, fbUrl) {
+function getLocationContext(country = "Cameroon") {
+  const normalizedCountry = String(country || "Cameroon").trim();
+  const key = normalizedCountry.toLowerCase();
+
+  if (key === "cameroon") {
+    return {
+      country: normalizedCountry,
+      terms: ["cameroon", "cameroun", "douala", "yaounde", "yaoundé", "bafoussam", "bamenda", "garoua", "buea", "+237"],
+      facebookQuery: "Cameroon OR Cameroun",
+    };
+  }
+
+  if (key === "ivory coast" || key === "cote d'ivoire" || key === "cote divoire") {
+    return {
+      country: "Ivory Coast",
+      terms: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "abidjan", "+225"],
+      facebookQuery: "Ivory Coast OR Cote d'Ivoire",
+    };
+  }
+
+  return {
+    country: normalizedCountry,
+    terms: [key],
+    facebookQuery: normalizedCountry,
+  };
+}
+
+function isRelevantFacebookPage(company, fbInfo, fbUrl, locationContext) {
   if (!fbUrl || !isScrapableFacebookUrl(fbUrl)) return false;
 
   const pageName = fbInfo.facebookPageName || "";
@@ -251,7 +278,7 @@ function isRelevantFacebookPage(company, fbInfo, fbUrl) {
   const companyTokens = normalizeNameTokens(company.name);
   const pageTokens = normalizeNameTokens(pageName);
   const hasNameMatch = namesRoughlyMatch(company.name, pageName);
-  const hasCameroonContext = /cameroon|cameroun|douala|yaounde|yaoundé|bafoussam|bamenda|garoua|buea|\+237/.test(aboutText);
+  const hasCountryContext = locationContext.terms.some((term) => aboutText.includes(term.toLowerCase()));
   const hasBusinessContext = /construction|immobilier|real estate|btp|hotel|restaurant|traiteur|agence|enterprise|entreprise|company|service|property|developer/i.test(aboutText);
   const sharesDomain =
     !!websiteUrl &&
@@ -271,9 +298,9 @@ function isRelevantFacebookPage(company, fbInfo, fbUrl) {
   return (
     hasNameMatch ||
     sharesDomain ||
-    (urlContainsNameToken && (hasCameroonContext || hasBusinessContext || hasContactSignal)) ||
+    (urlContainsNameToken && (hasCountryContext || hasBusinessContext || hasContactSignal)) ||
     (pageNameContainsNameToken && hasActivitySignal) ||
-    (hasCameroonContext && hasBusinessContext && hasContactSignal)
+    (hasCountryContext && hasBusinessContext && hasContactSignal)
   );
 }
 
@@ -399,7 +426,7 @@ async function applySession(page, session) {
   }
 }
 
-async function scrapeFacebookWithPuppeteer(fbUrl, page) {
+async function scrapeFacebookWithPuppeteer(fbUrl, page, locationContext = getLocationContext()) {
   const info = {
     facebookPageName: null, followers: null, likes: null,
     category: null, facebookAbout: null, facebookPhone: null,
@@ -516,7 +543,7 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
         }
 
         if (!info.facebookAddress) {
-          const cities = ["Douala", "Yaounde", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
+          const cities = ["Douala", "Yaounde", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun", locationContext.country];
           $a("div, span, td").each((_, el) => {
             if ($a(el).children().length > 0) return;
             const t = $a(el).text().trim();
@@ -610,8 +637,9 @@ async function scrapeWebsite(siteUrl) {
   return result;
 }
 
-async function ddgFacebookSearch(companyName) {
-  const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent('"' + companyName + '" Cameroon OR Cameroun site:facebook.com');
+async function ddgFacebookSearch(companyName, country) {
+  const locationContext = getLocationContext(country);
+  const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent('"' + companyName + '" ' + locationContext.facebookQuery + " site:facebook.com");
   try {
     const res = await axios.get(url, {
       headers: { "User-Agent": DESKTOP_UA, "Accept-Language": "en-US,en;q=0.9" },
@@ -639,7 +667,7 @@ async function ddgFacebookSearch(companyName) {
 
 async function detectCompany(company, page, delayMs, context) {
   delayMs = delayMs || 2500;
-  context = context || { facebookCache: new Map(), facebookOwnerByUrl: new Map() };
+  context = context || { facebookCache: new Map(), facebookOwnerByUrl: new Map(), locationContext: getLocationContext() };
 
   if (isLikelyNonCompanyEntry(company)) {
     console.log("  Skipping non-company entry: " + company.name);
@@ -683,7 +711,7 @@ async function detectCompany(company, page, delayMs, context) {
 
   if (!enriched.hasFacebook) {
     await sleep(1000);
-    const fbFromDdg = await ddgFacebookSearch(company.name);
+    const fbFromDdg = await ddgFacebookSearch(company.name, context.locationContext.country);
     if (fbFromDdg) {
       enriched.facebookUrl = fbFromDdg;
       enriched.hasFacebook = true;
@@ -697,7 +725,7 @@ async function detectCompany(company, page, delayMs, context) {
     let fbInfo = context.facebookCache.get(enriched.facebookUrl);
     if (!fbInfo) {
       console.log("    Scraping Facebook page...");
-      fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
+      fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page, context.locationContext);
       context.facebookCache.set(enriched.facebookUrl, fbInfo);
     } else {
       console.log("    Reusing cached Facebook page data...");
@@ -711,7 +739,7 @@ async function detectCompany(company, page, delayMs, context) {
       enriched.hasFacebook = false;
       enriched.facebookUrl = null;
     } else {
-      const isRelevant = isRelevantFacebookPage(company, fbInfo, enriched.facebookUrl);
+      const isRelevant = isRelevantFacebookPage(company, fbInfo, enriched.facebookUrl, context.locationContext);
       if (!isRelevant) {
         console.log("    Keeping low-confidence Facebook match: " + enriched.facebookUrl);
       }
@@ -739,9 +767,11 @@ async function detectAll(companies, options) {
   const facebookOnly = options.facebookOnly || false;
   const delayMs = options.delayMs || 2500;
   const results = [];
+  const locationContext = getLocationContext(options.country || "Cameroon");
   const context = {
     facebookCache: new Map(),
     facebookOwnerByUrl: new Map(),
+    locationContext,
   };
 
   const session = loadSession();

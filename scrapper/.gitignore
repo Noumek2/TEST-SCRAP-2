@@ -7,3 +7,4 @@ dome/
 .agents/
 scraper_test.txt
 test_output.txt
+.control-center-settings.json
