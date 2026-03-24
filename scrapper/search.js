@@ -28,20 +28,20 @@ const CONFIG = {
   serpApiKey: process.env.SERPAPI_KEY,
 };
 
-const SEARCH_QUERIES = [
-  "companies in Cameroon",
-  "entreprises Cameroun",
-  "business directory Cameroon",
-  "construction company in Cameroon",
-  "real estate company Cameroon",
-  "societe construction Cameroun",
-  "entreprise batiment Cameroun",
-  "restaurant company Cameroon",
-  "hotel company Cameroon",
-  "tour operator Cameroon",
-  "transport companies in Cameroon",
-  "agriculture companies in Cameroon",
-  "manufacturing companies in Cameroon",
+const SEARCH_QUERY_TEMPLATES = [
+  "entreprises au {country}",
+  "entreprises {country}",
+  "startups au {country}",
+  "societes financieres au {country}",
+  "entreprise de construction au {country}",
+  "entreprise immobiliere au {country}",
+  "entreprise BTP {country}",
+  "ecoles au {country}",
+  "hotel au {country}",
+  "imprimerie au {country}",
+  "entreprise import export au {country}",
+  "entreprises agricoles au {country}",
+  "entreprises industrielles au {country}",
 ];
 
 const TRUSTED_DIRECTORY_HOSTS = [
@@ -228,18 +228,32 @@ const COUNTRY_LINK_TEXT = [
   "togo",
 ];
 
-const CAMEROON_TERMS = [
-  "cameroon",
-  "cameroun",
-  "douala",
-  "yaounde",
-  "yaoundé",
-  "bafoussam",
-  "bamenda",
-  "garoua",
-  "buea",
-  "+237",
-];
+const COUNTRY_ALIASES = {
+  cameroon: {
+    canonical: "Cameroon",
+    gl: "cm",
+    serpLocation: "Cameroon",
+    aliases: ["cameroon", "cameroun", "douala", "yaounde", "yaoundé", "bafoussam", "bamenda", "garoua", "buea", "+237"],
+  },
+  "ivory coast": {
+    canonical: "Ivory Coast",
+    gl: "ci",
+    serpLocation: "",
+    aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
+  },
+  "cote d'ivoire": {
+    canonical: "Ivory Coast",
+    gl: "ci",
+    serpLocation: "",
+    aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
+  },
+  "cote divoire": {
+    canonical: "Ivory Coast",
+    gl: "ci",
+    serpLocation: "",
+    aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
+  },
+};
 
 const NON_TARGET_HOST_KEYWORDS = [
   "businessincameroon.com",
@@ -445,19 +459,38 @@ function pathDepth(url) {
   }
 }
 
-function isCameroonRelevantText(text) {
-  const haystack = (text || "").toLowerCase();
-  return CAMEROON_TERMS.some((term) => haystack.includes(term));
+function buildCountryContext(country = "Cameroon") {
+  const normalizedCountry = String(country || "Cameroon").trim();
+  const key = normalizedCountry.toLowerCase();
+  const alphaOnly = key.replace(/[^a-z]/g, "");
+  const config = COUNTRY_ALIASES[key] || COUNTRY_ALIASES[alphaOnly] || null;
+  const aliases = config ? config.aliases : [key];
+
+  return {
+    country: config ? config.canonical : normalizedCountry,
+    aliases: [...new Set([key, alphaOnly, ...aliases].filter(Boolean))],
+    gl: config ? config.gl : "",
+    serpLocation: config ? config.serpLocation : "",
+  };
 }
 
-function isCameroonRelevantUrl(url) {
+function buildSearchQueries(country) {
+  return SEARCH_QUERY_TEMPLATES.map((template) => template.replace(/\{country\}/g, country));
+}
+
+function isCountryRelevantText(text, countryContext) {
+  const haystack = (text || "").toLowerCase();
+  return countryContext.aliases.some((term) => haystack.includes(term));
+}
+
+function isCountryRelevantUrl(url, countryContext) {
   const normalized = normalizeUrl(url) || "";
   const hostname = getHostname(normalized);
-  if (hostname.endsWith(".cm")) return true;
-  return isCameroonRelevantText(normalized);
+  if (countryContext.gl && hostname.endsWith("." + countryContext.gl)) return true;
+  return isCountryRelevantText(normalized, countryContext);
 }
 
-function looksLikeCompanyCandidate(result) {
+function looksLikeCompanyCandidate(result, countryContext) {
   const hostname = getHostname(result.url);
   if (!hostname || isSkippableLink(result.url)) return false;
 
@@ -477,12 +510,13 @@ function looksLikeCompanyCandidate(result) {
     return false;
   }
 
-  const cameroonRelevant =
-    isCameroonRelevantUrl(result.url) ||
-    isCameroonRelevantText(title) ||
-    isCameroonRelevantText(snippet);
+  const countryRelevant =
+    isCountryRelevantUrl(result.url, countryContext) ||
+    isCountryRelevantText(title, countryContext) ||
+    isCountryRelevantText(snippet, countryContext) ||
+    isCountryRelevantText(result.query || "", countryContext);
 
-  if (!cameroonRelevant) {
+  if (!countryRelevant) {
     return false;
   }
 
@@ -490,9 +524,24 @@ function looksLikeCompanyCandidate(result) {
   return true;
 }
 
-async function searchGoogleSerpApi(query, apiKey) {
+async function searchGoogleSerpApi(query, apiKey, countryContext) {
   const results = [];
-  const url = `https://serpapi.com/search.json?q=${encodeURIComponent(query)}&location=Cameroon&hl=en&gl=cm&num=10&api_key=${apiKey}`;
+  const params = new URLSearchParams({
+    q: query,
+    hl: "en",
+    num: "10",
+    api_key: apiKey,
+  });
+
+  if (countryContext.serpLocation) {
+    params.set("location", countryContext.serpLocation);
+  }
+
+  if (countryContext.gl) {
+    params.set("gl", countryContext.gl);
+  }
+
+  const url = `https://serpapi.com/search.json?${params.toString()}`;
 
   try {
     const res = await fetchWithRetry(() => axios.get(url, { timeout: 15000 }), "SerpApi");
@@ -500,7 +549,7 @@ async function searchGoogleSerpApi(query, apiKey) {
 
     (data.organic_results || []).forEach((r) => {
       if (r.title && r.link && !r.link.includes("google.com")) {
-        results.push({ name: r.title, url: r.link, snippet: r.snippet || "", source: "google_serpapi" });
+        results.push({ name: r.title, url: r.link, snippet: r.snippet || "", source: "google_serpapi", query });
       }
     });
     console.log(`    [Google/SerpApi] "${query}" -> ${results.length} results`);
@@ -522,9 +571,10 @@ async function searchBing(query) {
     $("li.b_algo").each((_, el) => {
       const title = $(el).find("h2 a").first().text().trim();
       const href = $(el).find("h2 a").first().attr("href") || "";
+      const snippet = $(el).find(".b_caption p").first().text().trim();
       const resolved = normalizeUrl(href);
       if (title && resolved && resolved.startsWith("http")) {
-        results.push({ name: title, url: resolved, snippet: "", source: "bing" });
+        results.push({ name: title, url: resolved, snippet, source: "bing", query });
       }
     });
     console.log(`    [Bing] "${query}" -> ${results.length} results`);
@@ -536,7 +586,7 @@ async function searchBing(query) {
 
 async function searchDuckDuckGo(query) {
   const results = [];
-  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=cm-fr`;
+  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
   try {
     const res = await axios.get(url, { timeout: 15000 });
     const $ = cheerio.load(res.data);
@@ -550,7 +600,7 @@ async function searchDuckDuckGo(query) {
       }
       const resolved = normalizeUrl(href);
       if (name && resolved && resolved.startsWith("http")) {
-        results.push({ name, url: resolved, snippet: "", source: "duckduckgo" });
+        results.push({ name, url: resolved, snippet: "", source: "duckduckgo", query });
       }
     });
     console.log(`    [DuckDuckGo] "${query}" -> ${results.length} results`);
@@ -666,11 +716,12 @@ async function fetchListingHtml(url) {
 async function extractCompaniesFromListing(result, options = {}) {
   const maxLinks = options.maxLinks || 8;
   const extracted = [];
-  const listingIsCameroonRelevant =
-    isCameroonRelevantUrl(result.url) ||
-    isCameroonRelevantText(result.name) ||
-    isCameroonRelevantText(result.snippet) ||
-    isCameroonRelevantText(result.url);
+  const countryContext = options.countryContext || buildCountryContext();
+  const listingIsCountryRelevant =
+    isCountryRelevantUrl(result.url, countryContext) ||
+    isCountryRelevantText(result.name, countryContext) ||
+    isCountryRelevantText(result.snippet, countryContext) ||
+    isCountryRelevantText(result.url, countryContext);
 
   try {
     const html = await fetchListingHtml(result.url);
@@ -694,15 +745,15 @@ async function extractCompaniesFromListing(result, options = {}) {
       const looksLikeArticlePath = looksLikeArticleOrUiPath(absolute);
       const hasUsefulAnchor = looksLikeCompanyAnchor(text);
       const candidateText = `${text} ${absolute}`;
-      const candidateIsCameroonRelevant =
-        isCameroonRelevantUrl(absolute) ||
-        isCameroonRelevantText(candidateText);
+      const candidateIsCountryRelevant =
+        isCountryRelevantUrl(absolute, countryContext) ||
+        isCountryRelevantText(candidateText, countryContext);
 
       if (!hasUsefulAnchor && !looksLikeDetailPage) return;
       if (looksLikeArticlePath && !looksLikeDetailPage) return;
       if (sameHost && !looksLikeDetailPage) return;
-      if (!sameHost && !/\.cm$/i.test(hostname) && !candidateIsCameroonRelevant) return;
-      if (!listingIsCameroonRelevant && !candidateIsCameroonRelevant) return;
+      if (!sameHost && (!countryContext.gl || !hostname.endsWith("." + countryContext.gl)) && !candidateIsCountryRelevant) return;
+      if (!listingIsCountryRelevant && !candidateIsCountryRelevant) return;
       if (seen.has(absolute)) return;
 
       seen.add(absolute);
@@ -733,7 +784,10 @@ async function expandDirectoryResults(results, options = {}) {
     }
 
     console.log(`    [listing] Expanding directory result: ${result.url}`);
-    const extracted = await extractCompaniesFromListing(result, { maxLinks: options.maxLinksPerListing || 8 });
+    const extracted = await extractCompaniesFromListing(result, {
+      maxLinks: options.maxLinksPerListing || 8,
+      countryContext: options.countryContext,
+    });
 
     if (extracted.length > 0) {
       expanded.push(...extracted);
@@ -749,15 +803,17 @@ async function expandDirectoryResults(results, options = {}) {
 
 async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
+  const companyLimit = Math.max(1, parseInt(options.companyLimit, 10) || 25);
   let allResults = [];
   const isVercel = process.env.VERCEL === "1";
-  const queriesToRun = SEARCH_QUERIES;
+  const countryContext = buildCountryContext(options.country || "Cameroon");
+  const queriesToRun = buildSearchQueries(countryContext.country);
 
-  console.log("\nSearching across Google + Bing + DuckDuckGo...\n");
+  console.log(`\nSearching across Google + Bing + DuckDuckGo for ${countryContext.country}...\n`);
 
   for (const q of queriesToRun) {
     if (CONFIG.serpApiKey) {
-      allResults = allResults.concat(await searchGoogleSerpApi(q, CONFIG.serpApiKey));
+      allResults = allResults.concat(await searchGoogleSerpApi(q, CONFIG.serpApiKey, countryContext));
     }
     allResults = allResults.concat(await searchBing(q));
     await sleep(delayMs);
@@ -766,18 +822,20 @@ async function searchCompanies(options = {}) {
   }
 
   const unique = deduplicate(allResults.filter((r) => r.name && r.name.length > 3));
-  const companyCandidates = unique.filter((result) => isLikelyDirectoryResult(result) || looksLikeCompanyCandidate(result));
+  const companyCandidates = unique.filter((result) => isLikelyDirectoryResult(result) || looksLikeCompanyCandidate(result, countryContext));
   console.log(`    [filter] ${unique.length} raw candidates -> ${companyCandidates.length} likely company/listing pages`);
   const expanded = await expandDirectoryResults(companyCandidates, {
     delayMs: isVercel ? 400 : 1000,
     maxLinksPerListing: isVercel ? 5 : 6,
+    countryContext,
   });
 
   try {
     const { filterNew } = require("./scraped");
-    return await filterNew(expanded);
+    const filtered = await filterNew(expanded);
+    return filtered.slice(0, companyLimit);
   } catch {
-    return expanded;
+    return expanded.slice(0, companyLimit);
   }
 }
 

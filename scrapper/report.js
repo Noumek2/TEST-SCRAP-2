@@ -308,7 +308,7 @@ function generateHtml(companies, title) {
 <div class="header">
   <div class="header-top">
     <div>
-      <h1>🇨🇲 <span>Cameroon</span> Companies Dashboard</h1>
+      <h1><span>Company</span> Results Dashboard</h1>
       <div class="header-meta">
         ${escHtml(title)} &nbsp;·&nbsp; Generated ${escHtml(generatedAt)}
       </div>
@@ -572,8 +572,8 @@ function escHtml(str) {
 function saveReport(companies, options) {
   options = options || {};
   const outputDir = options.outputDir || path.join(__dirname, "output");
-  const baseName  = options.baseName  || ("cameroon_companies_" + new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19));
-  const title     = options.title     || "Cameroon Construction & Real Estate Companies";
+  const baseName  = options.baseName  || ("companies_" + new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19));
+  const title     = options.title     || "Company Results";
 
   if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
