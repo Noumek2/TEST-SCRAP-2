@@ -801,7 +801,9 @@ async function detectAll(companies, options) {
       let page = null;
 
       try {
+        console.log("  Opening page for: " + company.name);
         page = await browser.newPage();
+        console.log("  Applying session for: " + company.name);
         await applySession(page, session);
 
         await page.setRequestInterception(true);
