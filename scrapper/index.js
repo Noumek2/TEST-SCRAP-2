@@ -173,6 +173,15 @@ function runScraperManaged(options = {}) {
 async function streamScraperRun(req, res, options = {}) {
   res.setHeader("Content-Type", "text/plain; charset=utf-8");
   res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+
+  if (typeof res.flushHeaders === "function") {
+    res.flushHeaders();
+  }
+
+  res.write("Connected to scraper stream...\n");
 
   const originalLog = console.log;
   const originalWarn = console.warn;
