@@ -467,7 +467,7 @@ function buildCountryContext(country = "Cameroon") {
   const aliases = config ? config.aliases : [key];
 
   return {
-    country: config ? config.canonical : normalizedCountry,
+    country: normalizedCountry,
     aliases: [...new Set([key, alphaOnly, ...aliases].filter(Boolean))],
     gl: config ? config.gl : "",
     serpLocation: config ? config.serpLocation : "",
