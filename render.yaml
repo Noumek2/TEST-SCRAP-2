@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: cameroon-company-scraper
+    runtime: node
+    rootDir: scrapper
+    buildCommand: npm install
+    startCommand: npm run web
+    autoDeployTrigger: commit
+    envVars:
+      - key: RENDER
+        value: "true"
+      - key: SERPAPI_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false

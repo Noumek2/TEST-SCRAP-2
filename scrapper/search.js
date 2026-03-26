@@ -2,11 +2,11 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const https = require("https");
 
-const isVercelRuntime = process.env.VERCEL === "1";
+const isServerRuntime = process.env.VERCEL === "1" || process.env.RENDER === "true";
 
 let puppeteer = null;
 try {
-  puppeteer = require(isVercelRuntime ? "puppeteer-core" : "puppeteer");
+  puppeteer = require(isServerRuntime ? "puppeteer-core" : "puppeteer");
 } catch {
   try {
     puppeteer = require("puppeteer");
@@ -16,7 +16,7 @@ try {
 }
 
 let chromium = null;
-if (isVercelRuntime) {
+if (isServerRuntime) {
   try {
     chromium = require("@sparticuz/chromium");
   } catch {
@@ -650,11 +650,11 @@ async function fetchListingHtmlWithBrowser(url) {
     throw new Error("Puppeteer is not available for browser fallback");
   }
 
-  const executablePath = isVercelRuntime ? await getServerlessChromePath() : undefined;
+  const executablePath = isServerRuntime ? await getServerlessChromePath() : undefined;
   const launchOptions = {
-    headless: isVercelRuntime ? true : "new",
+    headless: isServerRuntime ? true : "new",
     ignoreHTTPSErrors: true,
-    args: isVercelRuntime && chromium ? chromium.args : [
+    args: isServerRuntime && chromium ? chromium.args : [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
@@ -665,7 +665,7 @@ async function fetchListingHtmlWithBrowser(url) {
   if (executablePath) {
     launchOptions.executablePath = executablePath;
   }
-  if (isVercelRuntime && chromium) {
+  if (isServerRuntime && chromium) {
     launchOptions.defaultViewport = chromium.defaultViewport;
   }
 
@@ -805,7 +805,7 @@ async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
   const companyLimit = Math.max(1, parseInt(options.companyLimit, 10) || 25);
   let allResults = [];
-  const isVercel = process.env.VERCEL === "1";
+  const isHostedRuntime = process.env.VERCEL === "1" || process.env.RENDER === "true";
   const countryContext = buildCountryContext(options.country || "Cameroon");
   const queriesToRun = buildSearchQueries(countryContext.country);
 
@@ -825,8 +825,8 @@ async function searchCompanies(options = {}) {
   const companyCandidates = unique.filter((result) => isLikelyDirectoryResult(result) || looksLikeCompanyCandidate(result, countryContext));
   console.log(`    [filter] ${unique.length} raw candidates -> ${companyCandidates.length} likely company/listing pages`);
   const expanded = await expandDirectoryResults(companyCandidates, {
-    delayMs: isVercel ? 400 : 1000,
-    maxLinksPerListing: isVercel ? 5 : 6,
+    delayMs: isHostedRuntime ? 400 : 1000,
+    maxLinksPerListing: isHostedRuntime ? 5 : 6,
     countryContext,
   });
 
