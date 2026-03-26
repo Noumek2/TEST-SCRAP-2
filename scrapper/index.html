@@ -593,6 +593,7 @@
     const heroResults = document.getElementById("heroResults");
     const resultsMeta = document.getElementById("resultsMeta");
     const resultsContainer = document.getElementById("resultsContainer");
+    let runStatusPoller = null;
 
     function formatDate(value) {
       if (!value) return "Not available";
@@ -701,6 +702,72 @@
       `;
     }
 
+    function renderRunState(run, settings) {
+      const logs = Array.isArray(run && run.logs) ? run.logs : [];
+      logOutput.textContent = logs.length > 0 ? logs.join("\n") : "Waiting for a run...";
+      logOutput.scrollTop = logOutput.scrollHeight;
+
+      if (!run || run.status === "idle") {
+        runSummary.textContent = `Ready for ${settings.country} with a target of ${settings.enterpriseLimit} enterprises.`;
+        return;
+      }
+
+      if (run.status === "running") {
+        runSummary.textContent = `Scrape running for ${settings.country}...`;
+        return;
+      }
+
+      if (run.status === "completed") {
+        runSummary.textContent = `Run finished for ${settings.country}.`;
+        return;
+      }
+
+      if (run.status === "failed") {
+        runSummary.textContent = `Run failed: ${run.error || "Unknown error"}`;
+      }
+    }
+
+    function stopRunPolling() {
+      if (runStatusPoller) {
+        clearInterval(runStatusPoller);
+        runStatusPoller = null;
+      }
+    }
+
+    async function pollRunStatus(loadResultsWhenDone = false) {
+      const settings = collectFormSettings();
+      try {
+        const response = await fetch("/api/run-status");
+        if (!response.ok) throw new Error("Failed to load run status");
+        const data = await response.json();
+        const run = data.run || { status: "idle", logs: [] };
+        renderRunState(run, settings);
+
+        const isRunning = run.status === "running";
+        startBtn.disabled = isRunning;
+        saveBtn.disabled = isRunning;
+        refreshBtn.disabled = isRunning;
+        viewResultsBtn.disabled = isRunning;
+        refreshResultsBtn.disabled = isRunning;
+
+        if (!isRunning) {
+          stopRunPolling();
+          await loadSettings(false);
+          if (loadResultsWhenDone && run.status === "completed") {
+            await loadResults(true);
+          }
+        }
+      } catch (error) {
+        logOutput.textContent += `\n\nRun status error: ${error.message}`;
+        stopRunPolling();
+        startBtn.disabled = false;
+        saveBtn.disabled = false;
+        refreshBtn.disabled = false;
+        viewResultsBtn.disabled = false;
+        refreshResultsBtn.disabled = false;
+      }
+    }
+
     async function loadSettings(showFeedback) {
       try {
         const response = await fetch("/api/settings");
@@ -765,7 +832,7 @@
       refreshBtn.disabled = true;
       viewResultsBtn.disabled = true;
       refreshResultsBtn.disabled = true;
-      logOutput.textContent = "Connecting to scraper...\n";
+      logOutput.textContent = "Starting scraper run...\n";
       runSummary.textContent = `Launching scrape for ${settings.country}...`;
 
       try {
@@ -775,28 +842,21 @@
           body: JSON.stringify(settings),
         });
 
-        if (!response.ok || !response.body) {
-          const message = await response.text();
+        const data = await response.json();
+        if (!response.ok) {
+          const message = data && data.message ? data.message : "Failed to start scraper";
           throw new Error(message || "Failed to start scraper");
         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          logOutput.textContent += decoder.decode(value, { stream: true });
-          logOutput.scrollTop = logOutput.scrollHeight;
-        }
-
-        runSummary.textContent = `Run finished for ${settings.country}.`;
-        await loadSettings(false);
-        await loadResults(true);
+        renderRunState(data.run, settings);
+        stopRunPolling();
+        runStatusPoller = setInterval(() => {
+          pollRunStatus(true);
+        }, 3000);
+        await pollRunStatus(true);
       } catch (error) {
         logOutput.textContent += `\n\nError: ${error.message}`;
         runSummary.textContent = `Run failed: ${error.message}`;
-      } finally {
         startBtn.disabled = false;
         saveBtn.disabled = false;
         refreshBtn.disabled = false;
@@ -817,6 +877,7 @@
 
     loadSettings(false);
     loadResults(false);
+    pollRunStatus(false);
   </script>
 </body>
 </html>

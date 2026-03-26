@@ -10,13 +10,34 @@ const { detectAll } = require("./detect");
 const { saveAll, printSummary, saveToSupabase } = require("./save");
 const { markScraped } = require("./scraped");
 const { exec } = require("child_process");
-const util = require("util");
-
 let activeRunPromise = null;
+const MAX_LOG_LINES = 500;
+const runState = {
+  status: "idle",
+  startedAt: null,
+  completedAt: null,
+  error: null,
+  logs: [],
+};
 
 function logStage(stage, detail = "") {
   const suffix = detail ? " - " + detail : "";
   console.log("[stage] " + stage + suffix);
+}
+
+function appendRunLog(message) {
+  runState.logs.push(message);
+  if (runState.logs.length > MAX_LOG_LINES) {
+    runState.logs.splice(0, runState.logs.length - MAX_LOG_LINES);
+  }
+}
+
+function setRunState(patch) {
+  Object.assign(runState, patch);
+}
+
+function resetRunLogs() {
+  runState.logs = [];
 }
 
 function logErrorWithStack(context, err) {
@@ -163,54 +184,61 @@ function runScraperManaged(options = {}) {
     return activeRunPromise;
   }
 
-  activeRunPromise = runScraper(options).finally(() => {
-    activeRunPromise = null;
+  resetRunLogs();
+  setRunState({
+    status: "running",
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+    error: null,
   });
-
-  return activeRunPromise;
-}
-
-async function streamScraperRun(req, res, options = {}) {
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
-  res.setHeader("X-Content-Type-Options", "nosniff");
-  res.setHeader("Cache-Control", "no-cache, no-transform");
-  res.setHeader("Connection", "keep-alive");
-  res.setHeader("X-Accel-Buffering", "no");
-
-  if (typeof res.flushHeaders === "function") {
-    res.flushHeaders();
-  }
-
-  res.write("Connected to scraper stream...\n");
 
   const originalLog = console.log;
   const originalWarn = console.warn;
   const originalError = console.error;
 
-  const writeToStream = (...args) => {
-    const msg = util.format(...args);
-    res.write(msg + "\n");
+  const capture = (writer) => (...args) => {
+    const message = args.map((arg) => {
+      if (typeof arg === "string") return arg;
+      try {
+        return JSON.stringify(arg);
+      } catch {
+        return String(arg);
+      }
+    }).join(" ");
+
+    appendRunLog(message);
+    writer(...args);
   };
 
-  console.log = writeToStream;
-  console.warn = writeToStream;
-  console.error = writeToStream;
+  console.log = capture(originalLog);
+  console.warn = capture(originalWarn);
+  console.error = capture(originalError);
 
-  try {
-    logStage("request:start", req.url || "/");
-    await runScraperManaged(options);
-    res.end("\n--- End of Log ---");
-  } catch (err) {
-    res.write("\nFatal Error: " + err.message + "\n");
-    if (err && err.stack) {
-      res.write("[stack]\n" + err.stack + "\n");
-    }
-    res.end();
-  } finally {
-    console.log = originalLog;
-    console.warn = originalWarn;
-    console.error = originalError;
-  }
+  activeRunPromise = runScraper(options)
+    .then((result) => {
+      setRunState({
+        status: "completed",
+        completedAt: new Date().toISOString(),
+        error: null,
+      });
+      return result;
+    })
+    .catch((error) => {
+      setRunState({
+        status: "failed",
+        completedAt: new Date().toISOString(),
+        error: error.message,
+      });
+      throw error;
+    })
+    .finally(() => {
+      console.log = originalLog;
+      console.warn = originalWarn;
+      console.error = originalError;
+      activeRunPromise = null;
+    });
+
+  return activeRunPromise;
 }
 
 if (require.main === module) {
@@ -230,10 +258,13 @@ if (require.main === module) {
 }
 
 module.exports = {
+  getLatestRunState: () => ({
+    ...runState,
+    logs: [...runState.logs],
+  }),
   logErrorWithStack,
   normalizeRunOptions,
   runScraper,
   runScraperManaged,
-  streamScraperRun,
   getIsRunInProgress: () => !!activeRunPromise,
 };

@@ -4,7 +4,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { loadSettings, saveSettings, sanitizeSettings } = require("./settings");
-const { normalizeRunOptions, runScraperManaged, streamScraperRun, logErrorWithStack, getIsRunInProgress } = require("./index");
+const { normalizeRunOptions, runScraperManaged, logErrorWithStack, getIsRunInProgress, getLatestRunState } = require("./index");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -93,6 +93,13 @@ app.get("/api/results", (req, res) => {
   }
 });
 
+app.get("/api/run-status", (req, res) => {
+  res.json({
+    ok: true,
+    run: getLatestRunState(),
+  });
+});
+
 app.post("/api/settings", (req, res) => {
   const nextSettings = saveSettings(req.body || {});
   refreshScheduler();
@@ -109,7 +116,11 @@ app.post("/api/settings", (req, res) => {
 app.all("/api/run", async (req, res) => {
   try {
     if (getIsRunInProgress()) {
-      res.status(409).send("A scraper run is already in progress.");
+      res.status(409).json({
+        ok: false,
+        message: "A scraper run is already in progress.",
+        run: getLatestRunState(),
+      });
       return;
     }
 
@@ -122,11 +133,17 @@ app.all("/api/run", async (req, res) => {
       noOpen: true,
     });
 
-    await streamScraperRun(req, res, options);
+    runScraperManaged(options).catch((error) => {
+      logErrorWithStack("api-run", error);
+    });
+
+    res.status(202).json({
+      ok: true,
+      message: "Scraper run started.",
+      run: getLatestRunState(),
+    });
   } catch (error) {
-    if (!res.headersSent) {
-      res.status(500).send("Server Error: " + error.message);
-    }
+    res.status(500).json({ ok: false, message: "Server Error: " + error.message });
   }
 });
 
