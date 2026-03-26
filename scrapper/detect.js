@@ -40,6 +40,19 @@ async function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function withTimeout(promise, ms, label) {
+  let timer = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(label + " timed out after " + ms + "ms"));
+    }, ms);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
+
 const DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
 const PATTERNS = {
@@ -762,6 +775,7 @@ async function detectAll(companies, options) {
   options = options || {};
   const facebookOnly = options.facebookOnly || false;
   const delayMs = options.delayMs || 2500;
+  const companyTimeoutMs = options.companyTimeoutMs || 120000;
   const results = [];
   const locationContext = getLocationContext(options.country || "Cameroon");
   const context = {
@@ -777,28 +791,49 @@ async function detectAll(companies, options) {
 
   console.log("\n  Launching browser...");
   const browser = await launchBrowser();
-  const page = await browser.newPage();
-  await applySession(page, session);
-
-  await page.setRequestInterception(true);
-  page.on("request", (req) => {
-    const type = req.resourceType();
-    if (["image", "font", "media"].includes(type)) {
-      req.abort();
-    } else {
-      req.continue();
-    }
-  });
-
   console.log("  Browser ready.");
   console.log("  Starting detection on " + companies.length + " companies...\n");
 
   try {
     for (let i = 0; i < companies.length; i++) {
       console.log("[" + (i + 1) + "/" + companies.length + "]");
-      const enriched = await detectCompany(companies[i], page, delayMs, context);
-      if (!enriched) continue;
-      if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      const company = companies[i];
+      let page = null;
+
+      try {
+        page = await browser.newPage();
+        await applySession(page, session);
+
+        await page.setRequestInterception(true);
+        page.on("request", (req) => {
+          const type = req.resourceType();
+          if (["image", "font", "media"].includes(type)) {
+            req.abort();
+          } else {
+            req.continue();
+          }
+        });
+
+        const enriched = await withTimeout(
+          detectCompany(company, page, delayMs, context),
+          companyTimeoutMs,
+          "Detection for " + company.name
+        );
+
+        if (!enriched) continue;
+        if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      } catch (error) {
+        console.error("  Skipping company after detection failure: " + company.name);
+        console.error("  Reason: " + error.message);
+      } finally {
+        if (page) {
+          try {
+            await page.close();
+          } catch (pageCloseError) {
+            console.error("  Error closing page: " + pageCloseError.message);
+          }
+        }
+      }
     }
   } finally {
     if (browser) {
