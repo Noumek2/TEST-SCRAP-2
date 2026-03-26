@@ -16,6 +16,12 @@ const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1"
 const isVercel = process.env.VERCEL === "1";
 const isRender = process.env.RENDER === "true";
 
+function getOutputDir() {
+  return (isVercel || isRender)
+    ? path.join(os.tmpdir(), "scrapper-output")
+    : path.join(__dirname, "output");
+}
+
 // ── CSV helpers ────────────────────────────────────────────────────────────
 
 // CSV columns in order
@@ -207,7 +213,7 @@ function saveLatestResultsSnapshot(companies, options = {}) {
  */
 function saveAll(companies, options = {}) {
   const {
-    outputDir = (isVercel || isRender) ? path.join(os.tmpdir(), "scrapper-output") : path.join(__dirname, "output"),
+    outputDir = getOutputDir(),
     baseName,
     facebookOnly = false,
     country = "Cameroon",
@@ -357,4 +363,4 @@ async function saveToSupabase(companies, tableName = null) {
   }
 }
 
-module.exports = { saveAll, printSummary, toCsv, toXml, saveToSupabase };
+module.exports = { saveAll, printSummary, toCsv, toXml, saveToSupabase, getOutputDir };

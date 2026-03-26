@@ -4,6 +4,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { loadSettings, saveSettings, sanitizeSettings } = require("./settings");
+const { getOutputDir } = require("./save");
 const { normalizeRunOptions, runScraperManaged, logErrorWithStack, getIsRunInProgress, getLatestRunState } = require("./index");
 
 const app = express();
@@ -78,7 +79,7 @@ app.get("/api/settings", (req, res) => {
 });
 
 app.get("/api/results", (req, res) => {
-  const resultsPath = path.join(__dirname, "output", "latest_results.json");
+  const resultsPath = path.join(getOutputDir(), "latest_results.json");
 
   if (!fs.existsSync(resultsPath)) {
     res.status(404).json({ ok: false, message: "No scrape results available yet." });
