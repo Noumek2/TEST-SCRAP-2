@@ -129,14 +129,14 @@ async function runScraper(inputOptions = {}) {
     const fbBase = `${country.toLowerCase().replace(/[^a-z0-9]+/g, "_") || "companies"}_facebook_companies`;
     const reportTitle = `${country} Companies`;
 
-    const { csvPath: allCsv, xmlPath: allXml, htmlPath: allHtml } = saveAll(enriched, {
+    const { csvPath: allCsv, xmlPath: allXml, htmlPath: allHtml } = await saveAll(enriched, {
       baseName: allBase,
       facebookOnly: false,
       country,
       title: reportTitle,
     });
 
-    const { csvPath: fbCsv, xmlPath: fbXml, htmlPath: fbHtml } = saveAll(enriched, {
+    const { csvPath: fbCsv, xmlPath: fbXml, htmlPath: fbHtml } = await saveAll(enriched, {
       baseName: fbBase,
       facebookOnly: true,
       country,

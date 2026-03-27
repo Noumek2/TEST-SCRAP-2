@@ -11,6 +11,7 @@ const path = require("path");
 const os = require("os");
 const { supabase } = require("./supabaseClient");
 const { sendEmail } = require("./emailer");
+const { isGoogleDriveConfigured, uploadFilesToDrive } = require("./driveUploader");
 
 const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
 const isVercel = process.env.VERCEL === "1";
@@ -211,7 +212,7 @@ function saveLatestResultsSnapshot(companies, options = {}) {
  * @param {boolean} options.facebookOnly
  * @returns {{ csvPath, xmlPath }}
  */
-function saveAll(companies, options = {}) {
+async function saveAll(companies, options = {}) {
   const {
     outputDir = getOutputDir(),
     baseName,
@@ -252,6 +253,13 @@ function saveAll(companies, options = {}) {
     baseName: base,
   });
   console.log("Latest results snapshot saved: " + snapshotPath);
+
+  await uploadFilesToDrive([
+    { path: csvPath, mimeType: "text/csv" },
+    { path: xmlPath, mimeType: "application/xml" },
+    { path: htmlPath, mimeType: "text/html" },
+    { path: snapshotPath, mimeType: "application/json" },
+  ]);
 
   return { csvPath, xmlPath, htmlPath };
 }
@@ -356,9 +364,13 @@ async function saveToSupabase(companies, tableName = null) {
     console.log(`  ✅ ${targetTable} insert succeeded!`);
     console.log(`     Saved ${dataToSave.length} ${tableDescription}`);
     
-    // Send email after the enriched results table is saved.
+    // Send email after the enriched results table is saved, unless Drive delivery is enabled.
     if (targetTable === "storage-fb-scrap" && dataToSave.length > 0) {
-      await sendEmail(dataToSave);
+      if (isGoogleDriveConfigured()) {
+        console.log("  [delivery] Google Drive delivery is enabled - skipping email.");
+      } else {
+        await sendEmail(dataToSave);
+      }
     }
   }
 }

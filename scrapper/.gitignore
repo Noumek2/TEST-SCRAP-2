@@ -8,3 +8,5 @@ dome/
 scraper_test.txt
 test_output.txt
 .control-center-settings.json
+scrapper-google-service-account.json
+google-drive-service-account.json

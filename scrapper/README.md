@@ -63,6 +63,30 @@ npm run start:facebook-only
 npm run start:deep        # 3 pages per query
 ```
 
+## Google Drive Delivery
+
+You can upload the generated CSV/XML/HTML/JSON result files to Google Drive instead of emailing them.
+
+Set these environment variables:
+
+```bash
+GOOGLE_DRIVE_FOLDER_ID=your_drive_folder_id
+GOOGLE_SERVICE_ACCOUNT_FILE=google-service-account.json
+```
+
+Or provide the service account directly as JSON:
+
+```bash
+GOOGLE_DRIVE_FOLDER_ID=your_drive_folder_id
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+```
+
+Notes:
+
+- Share the target Google Drive folder with the service account email
+- When Google Drive delivery is configured, the scraper skips the email send step
+- The generated result files are still saved locally and can still be stored in Supabase
+
 ## Output XML Structure
 
 ```xml
