@@ -261,7 +261,7 @@ async function saveAll(companies, options = {}) {
     { path: snapshotPath, mimeType: "application/json" },
   ]);
 
-  return { csvPath, xmlPath, htmlPath };
+  return { csvPath, xmlPath, htmlPath, snapshotPath };
 }
 
 /**

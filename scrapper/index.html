@@ -712,6 +712,11 @@
         return;
       }
 
+      if (run.status === "pending") {
+        runSummary.textContent = `Scrape queued for ${settings.country}...`;
+        return;
+      }
+
       if (run.status === "running") {
         runSummary.textContent = `Scrape running for ${settings.country}...`;
         return;
@@ -743,14 +748,14 @@
         const run = data.run || { status: "idle", logs: [] };
         renderRunState(run, settings);
 
-        const isRunning = run.status === "running";
-        startBtn.disabled = isRunning;
-        saveBtn.disabled = isRunning;
-        refreshBtn.disabled = isRunning;
-        viewResultsBtn.disabled = isRunning;
-        refreshResultsBtn.disabled = isRunning;
+        const isActive = run.status === "pending" || run.status === "running";
+        startBtn.disabled = isActive;
+        saveBtn.disabled = isActive;
+        refreshBtn.disabled = isActive;
+        viewResultsBtn.disabled = isActive;
+        refreshResultsBtn.disabled = isActive;
 
-        if (!isRunning) {
+        if (!isActive) {
           stopRunPolling();
           await loadSettings(false);
           if (loadResultsWhenDone && run.status === "completed") {

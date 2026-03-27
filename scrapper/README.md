@@ -87,6 +87,17 @@ Notes:
 - When Google Drive delivery is configured, the scraper skips the email send step
 - The generated result files are still saved locally and can still be stored in Supabase
 
+## Render Worker Setup
+
+For Render, run the dashboard as a web service and the scraper as a background worker.
+
+1. Create the `scrape_jobs` table in Supabase using [supabase_scrape_jobs.sql](/c:/Users/Guest%20Aaron/OneDrive/Desktop/TEST%20SCRAP%202/scrapper/supabase_scrape_jobs.sql)
+2. In Render, deploy both services from `render.yaml`
+3. The web service runs `npm run web`
+4. The worker service runs `npm run worker`
+
+The dashboard queues jobs in Supabase, and the worker picks them up and runs the scraper in the background.
+
 ## Output XML Structure
 
 ```xml

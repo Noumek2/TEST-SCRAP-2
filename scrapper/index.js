@@ -5,6 +5,7 @@
 
 require("./env");
 
+const fs = require("fs");
 const { searchCompanies } = require("./search");
 const { detectAll } = require("./detect");
 const { saveAll, printSummary, saveToSupabase } = require("./save");
@@ -129,14 +130,14 @@ async function runScraper(inputOptions = {}) {
     const fbBase = `${country.toLowerCase().replace(/[^a-z0-9]+/g, "_") || "companies"}_facebook_companies`;
     const reportTitle = `${country} Companies`;
 
-    const { csvPath: allCsv, xmlPath: allXml, htmlPath: allHtml } = await saveAll(enriched, {
+    const { csvPath: allCsv, xmlPath: allXml, htmlPath: allHtml, snapshotPath: allSnapshot } = await saveAll(enriched, {
       baseName: allBase,
       facebookOnly: false,
       country,
       title: reportTitle,
     });
 
-    const { csvPath: fbCsv, xmlPath: fbXml, htmlPath: fbHtml } = await saveAll(enriched, {
+    const { csvPath: fbCsv, xmlPath: fbXml, htmlPath: fbHtml, snapshotPath: fbSnapshot } = await saveAll(enriched, {
       baseName: fbBase,
       facebookOnly: true,
       country,
@@ -171,7 +172,8 @@ async function runScraper(inputOptions = {}) {
     return {
       companiesFound: companies.length,
       enrichedCount: enriched.length,
-      output: { allHtml, allCsv, allXml, fbHtml, fbCsv, fbXml },
+      latestResults: fs.existsSync(fbSnapshot) ? JSON.parse(fs.readFileSync(fbSnapshot, "utf8")) : null,
+      output: { allHtml, allCsv, allXml, allSnapshot, fbHtml, fbCsv, fbXml, fbSnapshot },
     };
   } catch (err) {
     logErrorWithStack("runScraper", err);
