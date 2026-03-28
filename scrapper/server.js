@@ -10,7 +10,14 @@ const { enqueueJob, getLatestCompletedJob, getLatestJob, hasJobQueue } = require
 
 const app = express();
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 10000; 
+/**
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Serveur démarré sur le port ${PORT}`);
+});
+*/
+
+
 
 let schedulerTimer = null;
 let schedulerState = {

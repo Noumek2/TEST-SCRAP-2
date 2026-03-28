@@ -69,6 +69,15 @@ function openFile(filePath) {
   });
 }
 
+// Exemple de fonction pour attendre 5 secondes
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+// Dans ta boucle de recherche :
+for (const query of queries) {
+    await delay(5000); // Attend 5 secondes entre chaque recherche
+    // ... lancer la recherche
+}
+
 function normalizeRunOptions(options = {}) {
   return {
     facebookOnly: options.facebookOnly === true,
