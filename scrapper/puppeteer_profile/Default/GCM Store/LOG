@@ -1,2 +1,4 @@
-2026/03/28-14:05:27.275 1b54 Creating DB C:\Users\SURFACE\Desktop\scapper 2\TEST-SCRAP-2\scrapper\puppeteer_profile\Default\GCM Store since it was missing.
-2026/03/28-14:05:27.509 1b54 Reusing MANIFEST C:\Users\SURFACE\Desktop\scapper 2\TEST-SCRAP-2\scrapper\puppeteer_profile\Default\GCM Store/MANIFEST-000001
+2026/03/28-16:50:55.302 16b4 Creating DB C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\GCM Store since it was missing.
+2026/03/28-16:51:28.026 16b4 Reusing MANIFEST C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\GCM Store/MANIFEST-000001
+2026/03/28-16:51:28.706 16b4 Recovering log #3
+2026/03/28-16:51:30.727 16b4 Reusing old log C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\GCM Store/000003.log 

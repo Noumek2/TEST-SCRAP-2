@@ -1,3 +1,2 @@
-2026/03/28-14:04:41.215 bf0 Reusing MANIFEST C:\Users\SURFACE\Desktop\scapper 2\TEST-SCRAP-2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/MANIFEST-000001
-2026/03/28-14:04:41.278 bf0 Recovering log #3
-2026/03/28-14:04:41.404 bf0 Reusing old log C:\Users\SURFACE\Desktop\scapper 2\TEST-SCRAP-2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/000003.log 
+2026/03/28-16:44:42.540 4644 Creating DB C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\Local Storage\leveldb since it was missing.
+2026/03/28-16:44:47.866 4644 Reusing MANIFEST C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/MANIFEST-000001
