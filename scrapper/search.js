@@ -45,7 +45,7 @@ const SEARCH_QUERY_TEMPLATES = [
 ];
 
 const SEARCH_QUERIES = [
-  "Hotels de edea", 
+  "Hotels de comeroun", 
   "real estate company Cameroon",
   "societe construction Cameroun",
   "entreprise bâtiment Cameroun",
