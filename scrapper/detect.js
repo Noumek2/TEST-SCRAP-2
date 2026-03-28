@@ -28,10 +28,29 @@ if (isServerless) {
   }
 }
 
+console.log("[env] VERCEL =", process.env.VERCEL);
+console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
+console.log("[env] RENDER =", process.env.RENDER);
+console.log("[env] isServerless =", isServerless);
+console.log("[env] chromium loaded =", !!chromium);
+
 const SESSION_FILE = path.join(__dirname, "fb_session.json");
 
 async function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function withTimeout(promise, ms, label) {
+  let timer = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(label + " timed out after " + ms + "ms"));
+    }, ms);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
 }
 
 const DESKTOP_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
@@ -69,7 +88,8 @@ function findLatestPostYear(html) {
 function normalizeFacebookUrl(url) {
   try {
     const u = new URL(url);
-    return "https://www.facebook.com" + u.pathname.replace(/\/$/, "");
+    const pathname = u.pathname.replace(/\/$/, "");
+    return "https://www.facebook.com" + pathname;
   } catch {
     return url;
   }
@@ -77,13 +97,220 @@ function normalizeFacebookUrl(url) {
 
 function isScrapableFacebookUrl(url) {
   if (!url || !url.includes("facebook.com")) return false;
+  try {
+    const parsed = new URL(url);
+    const pathname = parsed.pathname.replace(/\/+$/, "").toLowerCase();
+    if (!pathname || pathname === "" || pathname === "/") return false;
+    if (pathname === "/facebook") return false;
+  } catch {}
   const blocklist = [
     "/sharer", "/share?", "/plugins/", "/tr?", "/l.php",
     "/login", "/dialog/", "/photo", "/video",
     "/events", "/groups", "/marketplace", "/watch", "/stories", "/reel",
-    "profile.php",
+    "profile.php", "/hashtag/", "/gaming/",
   ];
   return !blocklist.some((b) => url.includes(b));
+}
+
+function normalizeNameTokens(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter((token) => token.length > 2)
+    .filter((token) => !["home", "official", "page", "cameroun", "cameroon", "ltd", "sarl", "sas", "inc", "the"].includes(token));
+}
+
+function normalizeLooseText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const COUNTRY_ONLY_ENTRIES = new Set([
+  "afrique",
+  "algerie",
+  "angola",
+  "benin",
+  "burkina faso",
+  "congo brazzaville",
+  "congo kinshasa",
+  "cote d ivoire",
+  "djibouti",
+  "egypte",
+  "gabon",
+  "ghana",
+  "guinee",
+  "mali",
+  "senegal",
+  "togo",
+]);
+
+const GENERIC_NON_COMPANY_ENTRIES = new Set([
+  "original",
+  "disclaimer",
+  "send enquiry",
+  "be the first to comment",
+  "english",
+  "francais",
+  "francais",
+  "espanol",
+  "romana",
+  "bahasa indonesia",
+  "portugues",
+  "small business",
+  "public sector",
+  "service center",
+  "resources",
+  "voir plus",
+  "s inscrire",
+  "restaurants",
+  "hotel",
+  "hotels",
+  "shopping",
+  "legal",
+  "employment",
+  "schools",
+  "get listed",
+  "communication publicite",
+  "communication publicite",
+  "agences de communication",
+  "imprimeries",
+  "batiment et construction",
+  "adduction d eau",
+  "aluminium",
+  "finances",
+  "assurances",
+  "commerces",
+  "business",
+  "data analytics",
+  "data analytics",
+  "cameroon",
+]);
+
+const COMPANY_HINT_TOKENS = [
+  "company", "entreprise", "enterprise", "group", "holding", "holdings",
+  "construction", "realty", "immobilier", "properties", "property",
+  "hotel", "restaurant", "transport", "logistics", "farm", "agro",
+  "manufacturing", "tech", "services", "service", "agency", "agence",
+  "consulting", "consult", "sarl", "ltd", "limited", "corp", "sa", "sas",
+];
+
+function isCountryOnlyEntry(company) {
+  const normalizedName = normalizeLooseText(company && company.name);
+  if (!normalizedName) return false;
+  return COUNTRY_ONLY_ENTRIES.has(normalizedName);
+}
+
+function looksLikeContentPageUrl(url) {
+  return /\/(author|news|article|articles|economy|doc|docs|slideshow|teachers|resources|public-sector|small-business|comments?)\b/i.test(String(url || ""));
+}
+
+function isLikelyNonCompanyEntry(company) {
+  const normalizedName = normalizeLooseText(company && company.name);
+  if (!normalizedName) return true;
+  if (COUNTRY_ONLY_ENTRIES.has(normalizedName)) return true;
+  if (GENERIC_NON_COMPANY_ENTRIES.has(normalizedName)) return true;
+
+  const words = normalizedName.split(/\s+/).filter(Boolean);
+  const hasCompanyHint = COMPANY_HINT_TOKENS.some((token) => normalizedName.includes(token));
+  const looksSentenceLike = words.length >= 8;
+  const hasDateOrHeadlinePattern = /[:!?]|\b\d{4}\b|\bsteps closer\b|\bfirst to\b|\bstate funding\b|\bproject\b/i.test(normalizedName);
+
+  if (looksSentenceLike && !hasCompanyHint) return true;
+  if (hasDateOrHeadlinePattern && !hasCompanyHint) return true;
+
+  return false;
+}
+
+function namesRoughlyMatch(companyName, pageName) {
+  const companyTokens = normalizeNameTokens(companyName);
+  const pageTokens = normalizeNameTokens(pageName);
+
+  if (companyTokens.length === 0 || pageTokens.length === 0) return false;
+
+  const pageSet = new Set(pageTokens);
+  const overlap = companyTokens.filter((token) => pageSet.has(token));
+  const longOverlap = overlap.filter((token) => token.length >= 5);
+
+  if (companyTokens.length <= 2) {
+    return overlap.length >= 1;
+  }
+  return overlap.length >= 2 || longOverlap.length >= 1;
+}
+
+function getLocationContext(country = "Cameroon") {
+  const normalizedCountry = String(country || "Cameroon").trim();
+  const key = normalizedCountry.toLowerCase();
+
+  if (key === "cameroon") {
+    return {
+      country: normalizedCountry,
+      terms: ["cameroon", "cameroun", "douala", "yaounde", "yaoundé", "bafoussam", "bamenda", "garoua", "buea", "+237"],
+      facebookQuery: "Cameroon OR Cameroun",
+    };
+  }
+
+  if (key === "ivory coast" || key === "cote d'ivoire" || key === "cote divoire") {
+    return {
+      country: "Ivory Coast",
+      terms: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "abidjan", "+225"],
+      facebookQuery: "Ivory Coast OR Cote d'Ivoire",
+    };
+  }
+
+  return {
+    country: normalizedCountry,
+    terms: [key],
+    facebookQuery: normalizedCountry,
+  };
+}
+
+function isRelevantFacebookPage(company, fbInfo, fbUrl, locationContext) {
+  if (!fbUrl || !isScrapableFacebookUrl(fbUrl)) return false;
+
+  const pageName = fbInfo.facebookPageName || "";
+  const aboutText = `${fbInfo.facebookAbout || ""} ${fbInfo.category || ""} ${fbInfo.facebookAddress || ""}`.toLowerCase();
+  const websiteUrl = (company.url || company.websiteUrl || "").toLowerCase();
+  const facebookWebsite = (fbInfo.facebookWebsite || "").toLowerCase();
+  const urlText = fbUrl.toLowerCase();
+
+  if (!pageName || /^facebook$/i.test(pageName.trim())) return false;
+
+  const companyTokens = normalizeNameTokens(company.name);
+  const pageTokens = normalizeNameTokens(pageName);
+  const hasNameMatch = namesRoughlyMatch(company.name, pageName);
+  const hasCountryContext = locationContext.terms.some((term) => aboutText.includes(term.toLowerCase()));
+  const hasBusinessContext = /construction|immobilier|real estate|btp|hotel|restaurant|traiteur|agence|enterprise|entreprise|company|service|property|developer/i.test(aboutText);
+  const sharesDomain =
+    !!websiteUrl &&
+    !!facebookWebsite &&
+    (() => {
+      try {
+        return new URL(websiteUrl).hostname.replace(/^www\./, "") === new URL(facebookWebsite).hostname.replace(/^www\./, "");
+      } catch {
+        return false;
+      }
+    })();
+  const urlContainsNameToken = companyTokens.some((token) => urlText.includes(token));
+  const pageNameContainsNameToken = companyTokens.some((token) => pageTokens.includes(token));
+  const hasContactSignal = !!(fbInfo.facebookPhone || fbInfo.facebookEmail || fbInfo.facebookWebsite || fbInfo.facebookAddress);
+  const hasActivitySignal = !!(fbInfo.followers || fbInfo.likes || fbInfo.category);
+
+  return (
+    hasNameMatch ||
+    sharesDomain ||
+    (urlContainsNameToken && (hasCountryContext || hasBusinessContext || hasContactSignal)) ||
+    (pageNameContainsNameToken && hasActivitySignal) ||
+    (hasCountryContext && hasBusinessContext && hasContactSignal)
+  );
 }
 
 function loadSession() {
@@ -208,7 +435,7 @@ async function applySession(page, session) {
   }
 }
 
-async function scrapeFacebookWithPuppeteer(fbUrl, page) {
+async function scrapeFacebookWithPuppeteer(fbUrl, page, locationContext = getLocationContext()) {
   const info = {
     facebookPageName: null, followers: null, likes: null,
     category: null, facebookAbout: null, facebookPhone: null,
@@ -325,7 +552,7 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page) {
         }
 
         if (!info.facebookAddress) {
-          const cities = ["Douala", "Yaounde", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun"];
+          const cities = ["Douala", "Yaounde", "Yaoundé", "Bafoussam", "Garoua", "Bamenda", "Cameroon", "Cameroun", locationContext.country];
           $a("div, span, td").each((_, el) => {
             if ($a(el).children().length > 0) return;
             const t = $a(el).text().trim();
@@ -419,8 +646,9 @@ async function scrapeWebsite(siteUrl) {
   return result;
 }
 
-async function ddgFacebookSearch(companyName) {
-  const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent('"' + companyName + '" site:facebook.com');
+async function ddgFacebookSearch(companyName, country) {
+  const locationContext = getLocationContext(country);
+  const url = "https://html.duckduckgo.com/html/?q=" + encodeURIComponent('"' + companyName + '" ' + locationContext.facebookQuery + " site:facebook.com");
   try {
     const res = await axios.get(url, {
       headers: { "User-Agent": DESKTOP_UA, "Accept-Language": "en-US,en;q=0.9" },
@@ -446,8 +674,14 @@ async function ddgFacebookSearch(companyName) {
   }
 }
 
-async function detectCompany(company, page, delayMs) {
+async function detectCompany(company, page, delayMs, context) {
   delayMs = delayMs || 2500;
+  context = context || { facebookCache: new Map(), facebookOwnerByUrl: new Map(), locationContext: getLocationContext() };
+
+  if (isLikelyNonCompanyEntry(company)) {
+    console.log("  Skipping non-company entry: " + company.name);
+    return null;
+  }
 
   const enriched = {
     name: company.name,
@@ -474,16 +708,19 @@ async function detectCompany(company, page, delayMs) {
     const siteData = await scrapeWebsite(company.url);
     enriched.emails = siteData.emails;
     enriched.phones = siteData.phones;
-    if (siteData.facebookUrls.length > 0) {
+    const shouldTrustWebsiteFacebook = !looksLikeContentPageUrl(company.url);
+    if (siteData.facebookUrls.length > 0 && shouldTrustWebsiteFacebook) {
       enriched.facebookUrl = siteData.facebookUrls[0];
       enriched.hasFacebook = true;
       console.log("    Facebook found on website: " + enriched.facebookUrl);
+    } else if (siteData.facebookUrls.length > 0) {
+      console.log("    Ignoring site-wide Facebook link from content page");
     }
   }
 
   if (!enriched.hasFacebook) {
     await sleep(1000);
-    const fbFromDdg = await ddgFacebookSearch(company.name);
+    const fbFromDdg = await ddgFacebookSearch(company.name, context.locationContext.country);
     if (fbFromDdg) {
       enriched.facebookUrl = fbFromDdg;
       enriched.hasFacebook = true;
@@ -494,16 +731,40 @@ async function detectCompany(company, page, delayMs) {
   }
 
   if (enriched.hasFacebook && enriched.facebookUrl && isScrapableFacebookUrl(enriched.facebookUrl)) {
-    console.log("    Scraping Facebook page...");
-    const fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page);
-    Object.assign(enriched, fbInfo);
+    let fbInfo = context.facebookCache.get(enriched.facebookUrl);
+    if (!fbInfo) {
+      console.log("    Scraping Facebook page...");
+      fbInfo = await scrapeFacebookWithPuppeteer(enriched.facebookUrl, page, context.locationContext);
+      context.facebookCache.set(enriched.facebookUrl, fbInfo);
+    } else {
+      console.log("    Reusing cached Facebook page data...");
+    }
 
-    const found = [];
-    if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
-    if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
-    if (fbInfo.category) found.push("cat: " + fbInfo.category);
-    if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
-    console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
+    const claimedBy = context.facebookOwnerByUrl.get(enriched.facebookUrl);
+
+    if (claimedBy && normalizeLooseText(claimedBy) !== normalizeLooseText(company.name)) {
+      console.log("    Rejecting reused Facebook page from another company: " + enriched.facebookUrl);
+      console.log("    Already claimed by: " + claimedBy);
+      enriched.hasFacebook = false;
+      enriched.facebookUrl = null;
+    } else {
+      const isRelevant = isRelevantFacebookPage(company, fbInfo, enriched.facebookUrl, context.locationContext);
+      if (!isRelevant) {
+        console.log("    Keeping low-confidence Facebook match: " + enriched.facebookUrl);
+      }
+      if (!claimedBy) {
+        context.facebookOwnerByUrl.set(enriched.facebookUrl, company.name);
+      }
+
+      Object.assign(enriched, fbInfo);
+
+      const found = [];
+      if (fbInfo.followers) found.push("followers: " + fbInfo.followers.toLocaleString());
+      if (fbInfo.likes) found.push("likes: " + fbInfo.likes.toLocaleString());
+      if (fbInfo.category) found.push("cat: " + fbInfo.category);
+      if (fbInfo.facebookPageName) found.push("name: " + fbInfo.facebookPageName);
+      console.log("    " + (found.length > 0 ? found.join(" | ") : "Limited public data"));
+    }
   }
 
   await sleep(delayMs);
@@ -514,7 +775,14 @@ async function detectAll(companies, options) {
   options = options || {};
   const facebookOnly = options.facebookOnly || false;
   const delayMs = options.delayMs || 2500;
+  const companyTimeoutMs = options.companyTimeoutMs || 120000;
   const results = [];
+  const locationContext = getLocationContext(options.country || "Cameroon");
+  const context = {
+    facebookCache: new Map(),
+    facebookOwnerByUrl: new Map(),
+    locationContext,
+  };
 
   const session = loadSession();
   if (!session) {
@@ -523,27 +791,51 @@ async function detectAll(companies, options) {
 
   console.log("\n  Launching browser...");
   const browser = await launchBrowser();
-  const page = await browser.newPage();
-  await applySession(page, session);
-
-  await page.setRequestInterception(true);
-  page.on("request", (req) => {
-    const type = req.resourceType();
-    if (["image", "font", "media"].includes(type)) {
-      req.abort();
-    } else {
-      req.continue();
-    }
-  });
-
   console.log("  Browser ready.");
   console.log("  Starting detection on " + companies.length + " companies...\n");
 
   try {
     for (let i = 0; i < companies.length; i++) {
       console.log("[" + (i + 1) + "/" + companies.length + "]");
-      const enriched = await detectCompany(companies[i], page, delayMs);
-      if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      const company = companies[i];
+      let page = null;
+
+      try {
+        console.log("  Opening page for: " + company.name);
+        page = await browser.newPage();
+        console.log("  Applying session for: " + company.name);
+        await applySession(page, session);
+
+        await page.setRequestInterception(true);
+        page.on("request", (req) => {
+          const type = req.resourceType();
+          if (["image", "font", "media"].includes(type)) {
+            req.abort();
+          } else {
+            req.continue();
+          }
+        });
+
+        const enriched = await withTimeout(
+          detectCompany(company, page, delayMs, context),
+          companyTimeoutMs,
+          "Detection for " + company.name
+        );
+
+        if (!enriched) continue;
+        if (!facebookOnly || enriched.hasFacebook) results.push(enriched);
+      } catch (error) {
+        console.error("  Skipping company after detection failure: " + company.name);
+        console.error("  Reason: " + error.message);
+      } finally {
+        if (page) {
+          try {
+            await page.close();
+          } catch (pageCloseError) {
+            console.error("  Error closing page: " + pageCloseError.message);
+          }
+        }
+      }
     }
   } finally {
     if (browser) {

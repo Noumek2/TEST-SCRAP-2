@@ -1,24 +1,45 @@
 /**
  * index.js - Main runner
- * Orchestrates search.js -> detect.js -> save.js -> report.js
- *
- * Usage:
- *   node index.js                    # Full run
- *   node index.js --facebook-only    # Only save companies with Facebook
- *   node index.js --no-open          # Don't auto-open the HTML report
+ * Orchestrates search.js -> detect.js -> save.js
  */
 
+require("./env");
+
+const fs = require("fs");
 const { searchCompanies } = require("./search");
 const { detectAll } = require("./detect");
 const { saveAll, printSummary, saveToSupabase } = require("./save");
 const { markScraped } = require("./scraped");
 const { sendCsv } = require("./send_csv");
 const { exec } = require("child_process");
-const util = require("util");
+let activeRunPromise = null;
+const MAX_LOG_LINES = 500;
+const runState = {
+  status: "idle",
+  startedAt: null,
+  completedAt: null,
+  error: null,
+  logs: [],
+};
 
 function logStage(stage, detail = "") {
   const suffix = detail ? " - " + detail : "";
   console.log("[stage] " + stage + suffix);
+}
+
+function appendRunLog(message) {
+  runState.logs.push(message);
+  if (runState.logs.length > MAX_LOG_LINES) {
+    runState.logs.splice(0, runState.logs.length - MAX_LOG_LINES);
+  }
+}
+
+function setRunState(patch) {
+  Object.assign(runState, patch);
+}
+
+function resetRunLogs() {
+  runState.logs = [];
 }
 
 function logErrorWithStack(context, err) {
@@ -48,12 +69,25 @@ function openFile(filePath) {
   });
 }
 
-async function runScraper(options = {}) {
-  const { facebookOnly = false, noOpen = false, pagesPerQuery = 2 } = options;
+function normalizeRunOptions(options = {}) {
+  return {
+    facebookOnly: options.facebookOnly === true,
+    noOpen: options.noOpen !== false,
+    pagesPerQuery: Math.max(1, parseInt(options.pagesPerQuery, 10) || 2),
+    enterpriseLimit: Math.max(1, parseInt(options.enterpriseLimit, 10) || 25),
+    country: String(options.country || "Cameroon").trim() || "Cameroon",
+  };
+}
+
+async function runScraper(inputOptions = {}) {
+  const options = normalizeRunOptions(inputOptions);
+  const { facebookOnly, noOpen, pagesPerQuery, enterpriseLimit, country } = options;
 
   console.log("==========================================================");
-  console.log("   Cameroon Construction & Real Estate Company Scraper");
+  console.log("   Company Scraper Control Center Run");
   console.log("==========================================================");
+  console.log("  Country     : " + country);
+  console.log("  Target count: " + enterpriseLimit);
   console.log("  Mode        : " + (facebookOnly ? "Facebook-only" : "All companies"));
   console.log("  Pages/query : " + pagesPerQuery);
   console.log("");
@@ -61,12 +95,17 @@ async function runScraper(options = {}) {
   try {
     logStage("search:start");
     console.log("STEP 1 - Searching for companies...");
-    const companies = await searchCompanies({ pagesPerQuery, delayMs: 2000 });
+    const companies = await searchCompanies({
+      country,
+      companyLimit: enterpriseLimit,
+      pagesPerQuery,
+      delayMs: 2000,
+    });
     logStage("search:done", companies.length + " companies");
 
     if (companies.length === 0) {
       console.warn("No companies found. Check your internet connection or try again later.");
-      return;
+      return { companiesFound: 0 };
     }
 
     logStage("storage-scrap:start");
@@ -75,7 +114,11 @@ async function runScraper(options = {}) {
 
     logStage("detect:start");
     console.log("STEP 2 - Detecting Facebook pages and extracting details...");
-    const enriched = await detectAll(companies, { facebookOnly: false, delayMs: 2500 });
+    const enriched = await detectAll(companies, {
+      country,
+      facebookOnly: false,
+      delayMs: 2500,
+    });
     logStage("detect:done", enriched.length + " enriched");
 
     logStage("scraped:mark");
@@ -84,14 +127,22 @@ async function runScraper(options = {}) {
     logStage("save:start");
     console.log("STEP 3 - Saving results...");
 
-    const { csvPath: allCsv, xmlPath: allXml, htmlPath: allHtml } = saveAll(enriched, {
-      baseName: "all_companies",
+    const allBase = `${country.toLowerCase().replace(/[^a-z0-9]+/g, "_") || "companies"}_all_companies`;
+    const fbBase = `${country.toLowerCase().replace(/[^a-z0-9]+/g, "_") || "companies"}_facebook_companies`;
+    const reportTitle = `${country} Companies`;
+
+    const { csvPath: allCsv, xmlPath: allXml, htmlPath: allHtml, snapshotPath: allSnapshot } = await saveAll(enriched, {
+      baseName: allBase,
       facebookOnly: false,
+      country,
+      title: reportTitle,
     });
 
-    const { csvPath: fbCsv, xmlPath: fbXml, htmlPath: fbHtml } = saveAll(enriched, {
-      baseName: "facebook_companies",
+    const { csvPath: fbCsv, xmlPath: fbXml, htmlPath: fbHtml, snapshotPath: fbSnapshot } = await saveAll(enriched, {
+      baseName: fbBase,
       facebookOnly: true,
+      country,
+      title: `${country} Facebook Companies`,
     });
 
     logStage("save:done");
@@ -131,63 +182,105 @@ async function runScraper(options = {}) {
       console.log("\nOpening HTML report in your browser...");
       openFile(allHtml);
     }
+
+    return {
+      companiesFound: companies.length,
+      enrichedCount: enriched.length,
+      latestResults: fs.existsSync(fbSnapshot) ? JSON.parse(fs.readFileSync(fbSnapshot, "utf8")) : null,
+      output: { allHtml, allCsv, allXml, allSnapshot, fbHtml, fbCsv, fbXml, fbSnapshot },
+    };
   } catch (err) {
     logErrorWithStack("runScraper", err);
     throw err;
   }
 }
 
+function runScraperManaged(options = {}) {
+  if (activeRunPromise) {
+    return activeRunPromise;
+  }
+
+  resetRunLogs();
+  setRunState({
+    status: "running",
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+    error: null,
+  });
+
+  const originalLog = console.log;
+  const originalWarn = console.warn;
+  const originalError = console.error;
+
+  const capture = (writer) => (...args) => {
+    const message = args.map((arg) => {
+      if (typeof arg === "string") return arg;
+      try {
+        return JSON.stringify(arg);
+      } catch {
+        return String(arg);
+      }
+    }).join(" ");
+
+    appendRunLog(message);
+    writer(...args);
+  };
+
+  console.log = capture(originalLog);
+  console.warn = capture(originalWarn);
+  console.error = capture(originalError);
+
+  activeRunPromise = runScraper(options)
+    .then((result) => {
+      setRunState({
+        status: "completed",
+        completedAt: new Date().toISOString(),
+        error: null,
+      });
+      return result;
+    })
+    .catch((error) => {
+      setRunState({
+        status: "failed",
+        completedAt: new Date().toISOString(),
+        error: error.message,
+      });
+      throw error;
+    })
+    .finally(() => {
+      console.log = originalLog;
+      console.warn = originalWarn;
+      console.error = originalError;
+      activeRunPromise = null;
+    });
+
+  return activeRunPromise;
+}
+
 if (require.main === module) {
   const args = process.argv.slice(2);
   const options = {
     facebookOnly: args.includes("--facebook-only"),
-    noOpen: args.includes("--no-open"),
-    pagesPerQuery: args.includes("--pages") ? parseInt(args[args.indexOf("--pages") + 1], 10) || 2 : 2,
+    noOpen: !args.includes("--open"),
+    pagesPerQuery: args.includes("--pages") ? args[args.indexOf("--pages") + 1] : 2,
+    enterpriseLimit: args.includes("--limit") ? args[args.indexOf("--limit") + 1] : 25,
+    country: args.includes("--country") ? args[args.indexOf("--country") + 1] : "Cameroon",
   };
 
-  runScraper(options).catch((err) => {
+  runScraperManaged(options).catch((err) => {
     logErrorWithStack("cli", err);
     process.exit(1);
   });
-} else {
-  module.exports = async (req, res) => {
-    const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
-    const options = {
-      facebookOnly: url.searchParams.get("facebookOnly") === "true",
-      pagesPerQuery: parseInt(url.searchParams.get("pages"), 10) || 2,
-      noOpen: true,
-    };
-
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.setHeader("X-Content-Type-Options", "nosniff");
-
-    const originalLog = console.log;
-    const originalWarn = console.warn;
-    const originalError = console.error;
-
-    const writeToStream = (...args) => {
-      const msg = util.format(...args);
-      res.write(msg + "\n");
-    };
-
-    console.log = writeToStream;
-    console.warn = writeToStream;
-    console.error = writeToStream;
-
-    try {
-      logStage("request:start", req.url || "/");
-      await runScraper(options);
-      res.end("\n--- End of Log ---");
-    } catch (err) {
-      res.write("\nFatal Error: " + err.message + "\n");
-      if (err && err.stack) {
-        res.write("[stack]\n" + err.stack + "\n");
-      }
-      res.end();
-    } finally {
-      console.log = originalLog;
-      console.warn = originalWarn;
-      console.error = originalError;
-    }
-  };
 }
+
+module.exports = {
+  getLatestRunState: () => ({
+    ...runState,
+    logs: [...runState.logs],
+  }),
+  logErrorWithStack,
+  normalizeRunOptions,
+  runScraper,
+  runScraperManaged,
+  getIsRunInProgress: () => !!activeRunPromise,
+};

@@ -5,12 +5,7 @@
 
 const nodemailer = require("nodemailer");
 
-
-let emailConfig = null;
-
 function loadEmailConfig() {
-  if (emailConfig) return emailConfig;
-
   const config = {
     emailTo: process.env.EMAIL_TO,
     smtp: {
@@ -29,7 +24,6 @@ function loadEmailConfig() {
     return null;
   }
 
-  emailConfig = config;
   return config;
 }
 
