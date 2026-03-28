@@ -1,4 +1,12 @@
-scrapper/puppeteer_profile/
-.env/
 node_modules/
+puppeteer_profile/
+puppeteer_session/
+.env/
 output/
+dome/
+.agents/
+scraper_test.txt
+test_output.txt
+.control-center-settings.json
+scrapper-google-service-account.json
+google-drive-service-account.json

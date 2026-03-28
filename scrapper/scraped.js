@@ -10,7 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { supabase } = require("./supabaseClient");
 
-const isVercel = process.env.VERCEL === "1";
+const isHostedRuntime = process.env.VERCEL === "1" || process.env.RENDER === "true";
 const DOME_DIR = path.join(__dirname, "dome");
 const SCRAPED_FILE = path.join(DOME_DIR, "scraped.json");
 const SCRAPED_FB_FILE = path.join(DOME_DIR, "scraped_facebook.json");
@@ -83,12 +83,8 @@ async function loadSupabaseCompanies(tableName) {
 }
 
 async function loadScrapedKeysFromSupabase() {
-  const [rawCompanies, detectedCompanies] = await Promise.all([
-    loadSupabaseCompanies("storage-scrap"),
-    loadSupabaseCompanies("storage-fb-scrap"),
-  ]);
-
-  return new Set([...rawCompanies, ...detectedCompanies].map(makeScrapedKey));
+  const detectedCompanies = await loadSupabaseCompanies("storage-fb-scrap");
+  return new Set(detectedCompanies.map(makeScrapedKey));
 }
 
 function loadScrapedKeysLocal() {
@@ -98,9 +94,9 @@ function loadScrapedKeysLocal() {
 }
 
 async function filterNew(companies) {
-  if (isVercel) {
-    const seen = await loadScrapedKeysFromSupabase();
-    return companies.filter((c) => !seen.has(makeScrapedKey(c)));
+  if (isHostedRuntime) {
+    console.log("[scraped] Hosted runtime detected; using fresh current-run results without local history filtering.");
+    return companies;
   }
 
   const seen = loadScrapedKeysLocal();
@@ -137,8 +133,8 @@ function markScrapedLocal(companies) {
 }
 
 function markScraped(companies) {
-  if (isVercel) {
-    console.log("[scraped] Skipping local file tracking on Vercel; Supabase is the source of truth.");
+  if (isHostedRuntime) {
+    console.log("[scraped] Skipping local file tracking on hosted runtime.");
     return;
   }
   markScrapedLocal(companies);

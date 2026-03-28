@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: cameroon-company-scraper
+    runtime: node
+    rootDir: scrapper
+    buildCommand: npm install
+    startCommand: npm run web
+    autoDeployTrigger: commit
+    envVars:
+      - key: RENDER
+        value: "true"
+      - key: SCRAPE_JOBS_TABLE
+        value: "scrape_jobs"
+      - key: SERPAPI_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
+  - type: worker
+    name: cameroon-company-scraper-worker
+    runtime: node
+    rootDir: scrapper
+    buildCommand: npm install
+    startCommand: npm run worker
+    autoDeployTrigger: commit
+    envVars:
+      - key: RENDER
+        value: "true"
+      - key: SCRAPE_JOBS_TABLE
+        value: "scrape_jobs"
+      - key: SERPAPI_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: GOOGLE_DRIVE_FOLDER_ID
+        sync: false
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false
