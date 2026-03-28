@@ -12,6 +12,7 @@ const { searchCompanies } = require("./search");
 const { detectAll } = require("./detect");
 const { saveAll, printSummary, saveToSupabase } = require("./save");
 const { markScraped } = require("./scraped");
+const { sendCsv } = require("./send_csv");
 const { exec } = require("child_process");
 const util = require("util");
 
@@ -101,6 +102,19 @@ async function runScraper(options = {}) {
       logStage("storage-fb-scrap:done");
     } catch (e) {
       logErrorWithStack("supabase", e);
+    }
+
+    // --- ENVOI AUTOMATIQUE DU CSV ---
+    console.log("\nSTEP 4 - Envoi automatique des données par email...");
+    try {
+      const leadsCount = enriched.filter(c => c.hasFacebook).length;
+      await sendCsv({ 
+        csvPath: fbCsv, 
+        subject: `Rapport Scraper : ${leadsCount} prospects Facebook trouvés` 
+      });
+      console.log("  ✅ Email envoyé avec succès !");
+    } catch (emailErr) {
+      console.error("  ❌ Erreur lors de l'envoi automatique : " + emailErr.message);
     }
 
     printSummary(enriched);

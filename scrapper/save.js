@@ -318,11 +318,6 @@ async function saveToSupabase(companies, tableName = null) {
   } else {
     console.log(`  ✅ ${targetTable} insert succeeded!`);
     console.log(`     Saved ${dataToSave.length} ${tableDescription}`);
-    
-    // Send email after the enriched results table is saved.
-    if (targetTable === "storage-fb-scrap" && dataToSave.length > 0) {
-      await sendEmail(dataToSave);
-    }
   }
 }
 

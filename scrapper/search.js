@@ -8,7 +8,8 @@ const CONFIG = {
 
 
 const SEARCH_QUERIES = [
-  "Hotels du Cameroun",
+  "Hotels de edea", ];
+  /**
   "real estate company Cameroon",
   "societe construction Cameroun",
   "entreprise bâtiment Cameroun",
@@ -17,9 +18,9 @@ const SEARCH_QUERIES = [
   "Tourism companies in Cameroon",
   "Transport companies in Cameroon",
   "Agriculture companies in Cameroon",
-  "Manufacturing companies in Cameroon",
+  "Manufacturing companies in Cameroon", */
   
- ];
+
 
 // --- RETRY WRAPPER ---
 async function fetchWithRetry(fn, label = "API", maxRetries = 3) {
