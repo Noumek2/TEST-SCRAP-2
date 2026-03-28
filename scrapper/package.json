@@ -21,7 +21,7 @@
     "build": "echo \"No build step needed\"",
     "start:facebook-only": "node index.js --facebook-only",
     "start:deep": "node index.js --pages 3",
-    "web": "node index.js & node server.js",
+    "web": "node server.js &  node index.js",
     "worker": "node worker.js",
     "puppeteer-install": "node -e \"require('puppeteer/install')\""
   }
