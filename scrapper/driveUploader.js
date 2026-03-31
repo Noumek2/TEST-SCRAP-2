@@ -45,13 +45,19 @@ function getDriveConfig() {
 
 function isGoogleDriveConfigured() {
   const config = getDriveConfig();
-  return !!(config.folderId && (config.credentials || config.keyFile));
+  const configured = !!(config.folderId && (config.credentials || config.keyFile));
+  console.log("  [drive] Configured:", configured, "- Folder:", !!config.folderId, "- Credentials:", !!(config.credentials || config.keyFile));
+  return configured;
 }
 
 async function createDriveClient() {
   const config = getDriveConfig();
   if (!config.folderId) {
     throw new Error("GOOGLE_DRIVE_FOLDER_ID is missing");
+  }
+
+  if (config.folderId === "1your-folder-id-here") {
+    throw new Error("GOOGLE_DRIVE_FOLDER_ID is still set to placeholder value. Please set it to your actual Google Drive folder ID.");
   }
 
   const authOptions = {
@@ -109,6 +115,14 @@ async function uploadFilesToDrive(files = []) {
     return [];
   }
 
+  try {
+    await createDriveClient(); // Test connection
+    console.log("  [drive] Connection to Google Drive established");
+  } catch (error) {
+    console.error("  [drive] Failed to connect to Google Drive:", error.message);
+    return [];
+  }
+
   const uploaded = [];
   for (const file of files) {
     if (!file || !file.path) continue;
@@ -124,9 +138,9 @@ async function uploadFilesToDrive(files = []) {
         "Google Drive upload for " + path.basename(file.path)
       );
       uploaded.push(result);
-      console.log("  [drive] Uploaded: " + (result.webViewLink || result.id));
+      console.log("  [drive] ✅ Uploaded: " + (result.webViewLink || result.id));
     } catch (error) {
-      console.error("  [drive] Upload failed for " + file.path + ": " + error.message);
+      console.error("  [drive] ❌ Upload failed for " + file.path + ": " + error.message);
     }
   }
 

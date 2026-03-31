@@ -35,6 +35,11 @@ async function sendEmail(companies, options = {}) {
     return false;
   }
 
+  if (!companies || companies.length === 0) {
+    console.log("  [email] No companies to send - skipping email");
+    return false;
+  }
+
   try {
     const transporter = nodemailer.createTransport({
       host: config.smtp.host,
@@ -44,11 +49,17 @@ async function sendEmail(companies, options = {}) {
         user: config.smtp.auth.user,
         pass: config.smtp.auth.pass,
       },
+      // Add timeout and connection settings for better reliability
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000,   // 30 seconds
+      socketTimeout: 60000,     // 60 seconds
     });
 
     // Generate CSV data
     const { toCsv } = require("./save");
     const csvData = toCsv(companies);
+    const csvSize = Buffer.byteLength(csvData, 'utf8');
+    console.log(`  [email] CSV size: ${csvSize} bytes (${companies.length} companies)`);
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
     const csvFilename = `scraped_companies_${timestamp}.csv`;
 
@@ -78,21 +89,27 @@ async function sendEmail(companies, options = {}) {
       to: config.emailTo,
       subject: subject,
       html: htmlContent,
-      attachments: [
+      attachments: companies.length > 0 ? [
         {
           filename: csvFilename,
           content: csvData,
           contentType: "text/csv",
         },
-      ],
+      ] : [],
     };
 
     console.log("\n  Sending email to " + config.emailTo + "...");
+    console.log("  [email] Using SMTP:", config.smtp.host + ":" + config.smtp.port, "(secure:", config.smtp.secure + ")");
+    
     const info = await transporter.sendMail(mailOptions);
     console.log("  ✅ Email sent successfully! Message ID: " + info.messageId);
     return true;
   } catch (err) {
     console.error("  ❌ Error sending email: " + err.message);
+    if (err.code) console.error("     Error code:", err.code);
+    if (err.response) console.error("     SMTP response:", err.response);
+    if (err.responseCode) console.error("     Response code:", err.responseCode);
+    console.error("  Full error:", err);
     return false;
   }
 }
