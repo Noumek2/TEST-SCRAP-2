@@ -8,7 +8,13 @@ require("./env");
 const fs = require("fs");
 const { searchCompanies } = require("./search");
 const { detectAll } = require("./detect");
-const { saveAll, printSummary, saveToSupabase } = require("./save");
+const {
+  STORAGE_FB_SCRAP_TABLE,
+  STORAGE_SCRAP_TABLE,
+  saveAll,
+  printSummary,
+  saveToSupabase,
+} = require("./save");
 const { markScraped } = require("./scraped");
 const { sendCsv } = require("./send_csv");
 const { exec } = require("child_process");
@@ -111,7 +117,7 @@ async function runScraper(inputOptions = {}) {
     }
 
     logStage("storage-scrap:start");
-    await saveToSupabase(companies, "storage-scrap");
+    await saveToSupabase(companies, STORAGE_SCRAP_TABLE);
     logStage("storage-scrap:done");
 
     logStage("detect:start");
@@ -151,7 +157,7 @@ async function runScraper(inputOptions = {}) {
 
     try {
       logStage("storage-fb-scrap:start");
-      await saveToSupabase(enriched, "storage-fb-scrap");
+      await saveToSupabase(enriched, STORAGE_FB_SCRAP_TABLE);
       logStage("storage-fb-scrap:done");
     } catch (e) {
       logErrorWithStack("supabase", e);

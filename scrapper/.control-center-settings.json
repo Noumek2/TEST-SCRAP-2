@@ -1,6 +1,6 @@
 {
   "country": "Cote d'Ivoire",
-  "enterpriseLimit": 30,
-  "pagesPerQuery": 3,
+  "enterpriseLimit": 10,
+  "pagesPerQuery": 2,
   "autoRunHourly": false
 }

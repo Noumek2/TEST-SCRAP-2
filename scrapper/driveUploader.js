@@ -1,6 +1,20 @@
 const fs = require("fs");
 const path = require("path");
 const { google } = require("googleapis");
+const DRIVE_UPLOAD_TIMEOUT_MS = parseInt(process.env.GOOGLE_DRIVE_UPLOAD_TIMEOUT_MS, 10) || 45000;
+
+function withTimeout(promise, ms, label) {
+  let timer = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error(label + " timed out after " + ms + "ms"));
+    }, ms);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
+}
 
 function parseServiceAccountFromEnv() {
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
@@ -101,10 +115,14 @@ async function uploadFilesToDrive(files = []) {
 
     try {
       console.log("  [drive] Uploading " + file.path + "...");
-      const result = await uploadFileToDrive(file.path, {
-        fileName: file.name,
-        mimeType: file.mimeType,
-      });
+      const result = await withTimeout(
+        uploadFileToDrive(file.path, {
+          fileName: file.name,
+          mimeType: file.mimeType,
+        }),
+        DRIVE_UPLOAD_TIMEOUT_MS,
+        "Google Drive upload for " + path.basename(file.path)
+      );
       uploaded.push(result);
       console.log("  [drive] Uploaded: " + (result.webViewLink || result.id));
     } catch (error) {

@@ -16,6 +16,8 @@ const { isGoogleDriveConfigured, uploadFilesToDrive } = require("./driveUploader
 const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
 const isVercel = process.env.VERCEL === "1";
 const isRender = process.env.RENDER === "true";
+const STORAGE_SCRAP_TABLE = process.env.SUPABASE_STORAGE_TABLE || "storage-scrap";
+const STORAGE_FB_SCRAP_TABLE = process.env.SUPABASE_FB_TABLE || "storage-fb-scrap";
 
 function getOutputDir() {
   return (isVercel || isRender)
@@ -312,7 +314,7 @@ function printSummary(companies) {
  * Saves enriched company data to Supabase database.
  */
 async function saveToSupabase(companies, tableName = null) {
-  const defaultTable = process.env.SUPABASE_TABLE || "storage-fb-scrap";
+  const defaultTable = process.env.SUPABASE_TABLE || STORAGE_FB_SCRAP_TABLE;
   const targetTable = tableName || defaultTable;
   const columnName = process.env.SUPABASE_COLUMN || "json_files";
 
@@ -331,7 +333,7 @@ async function saveToSupabase(companies, tableName = null) {
   let dataToSave = companies;
   let tableDescription = "all companies";
 
-  if (targetTable === "storage-fb-scrap" || targetTable.includes("fb")) {
+  if (targetTable === STORAGE_FB_SCRAP_TABLE || targetTable.includes("fb")) {
     // Filter to only companies with Facebook pages
     dataToSave = companies.filter(company => company.hasFacebook);
     tableDescription = "Facebook companies only";
@@ -366,7 +368,7 @@ async function saveToSupabase(companies, tableName = null) {
 
     
     // Send email after the enriched results table is saved, unless Drive delivery is enabled.
-    if (targetTable === "storage-fb-scrap" && dataToSave.length > 0) {
+    if (targetTable === STORAGE_FB_SCRAP_TABLE && dataToSave.length > 0) {
       if (isGoogleDriveConfigured()) {
         console.log("  [delivery] Google Drive delivery is enabled - skipping email.");
       } else {
@@ -376,4 +378,13 @@ async function saveToSupabase(companies, tableName = null) {
   }
 }
 
-module.exports = { saveAll, printSummary, toCsv, toXml, saveToSupabase, getOutputDir };
+module.exports = {
+  STORAGE_FB_SCRAP_TABLE,
+  STORAGE_SCRAP_TABLE,
+  saveAll,
+  printSummary,
+  toCsv,
+  toXml,
+  saveToSupabase,
+  getOutputDir,
+};

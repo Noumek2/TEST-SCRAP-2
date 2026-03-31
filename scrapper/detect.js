@@ -776,6 +776,7 @@ async function detectAll(companies, options) {
   const facebookOnly = options.facebookOnly || false;
   const delayMs = options.delayMs || 2500;
   const companyTimeoutMs = options.companyTimeoutMs || 120000;
+  const pageSetupTimeoutMs = options.pageSetupTimeoutMs || 30000;
   const results = [];
   const locationContext = getLocationContext(options.country || "Cameroon");
   const context = {
@@ -802,9 +803,17 @@ async function detectAll(companies, options) {
 
       try {
         console.log("  Opening page for: " + company.name);
-        page = await browser.newPage();
+        page = await withTimeout(
+          browser.newPage(),
+          pageSetupTimeoutMs,
+          "Opening page for " + company.name
+        );
         console.log("  Applying session for: " + company.name);
-        await applySession(page, session);
+        await withTimeout(
+          applySession(page, session),
+          pageSetupTimeoutMs,
+          "Applying session for " + company.name
+        );
 
         await page.setRequestInterception(true);
         page.on("request", (req) => {
