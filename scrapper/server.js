@@ -6,7 +6,6 @@ const path = require("path");
 const { loadSettings, saveSettings, sanitizeSettings } = require("./settings");
 const { getOutputDir } = require("./save");
 const { normalizeRunOptions, runScraperManaged, logErrorWithStack, getIsRunInProgress, getLatestRunState } = require("./index");
-const { enqueueJob, getLatestCompletedJob, getLatestJob, hasJobQueue } = require("./jobQueue");
 
 const app = express();
 
@@ -49,7 +48,7 @@ function refreshScheduler() {
   }
 
   schedulerTimer = setInterval(async () => {
-    if (!hasJobQueue() && getIsRunInProgress()) {
+    if (getIsRunInProgress()) {
       console.log("[scheduler] Skipping hourly run because another run is already in progress.");
       return;
     }
@@ -64,13 +63,8 @@ function refreshScheduler() {
         noOpen: true,
       };
 
-      if (hasJobQueue()) {
-        const job = await enqueueJob(options);
-        console.log("[scheduler] Queued hourly scraper job " + job.id + ".");
-      } else {
-        console.log("[scheduler] Starting hourly scraper run.");
-        await runScraperManaged(options);
-      }
+      console.log("[scheduler] Starting hourly scraper run.");
+      await runScraperManaged(options);
 
       schedulerState.lastCompletedAt = new Date().toISOString();
       console.log("[scheduler] Hourly scraper run completed.");
@@ -90,30 +84,12 @@ app.get("/api/settings", (req, res) => {
     settings: getControlSettings(),
     scheduler: {
       ...schedulerState,
-      runningNow: hasJobQueue() ? false : getIsRunInProgress(),
+      runningNow: getIsRunInProgress(),
     },
   });
 });
 
 app.get("/api/results", async (req, res) => {
-  if (hasJobQueue()) {
-    try {
-      const job = await getLatestCompletedJob();
-      const latestResults = job && job.result ? job.result.latestResults : null;
-
-      if (!latestResults) {
-        res.status(404).json({ ok: false, message: "No scrape results available yet." });
-        return;
-      }
-
-      res.json({ ok: true, results: latestResults });
-      return;
-    } catch (error) {
-      res.status(500).json({ ok: false, message: "Failed to load latest results." });
-      return;
-    }
-  }
-
   const resultsPath = path.join(getOutputDir(), "latest_results.json");
 
   if (!fs.existsSync(resultsPath)) {
@@ -130,20 +106,6 @@ app.get("/api/results", async (req, res) => {
 });
 
 app.get("/api/run-status", async (req, res) => {
-  if (hasJobQueue()) {
-    try {
-      const job = await getLatestJob();
-      res.json({
-        ok: true,
-        run: job || { status: "idle", logs: [] },
-      });
-      return;
-    } catch (error) {
-      res.status(500).json({ ok: false, message: "Failed to load run status." });
-      return;
-    }
-  }
-
   res.json({
     ok: true,
     run: getLatestRunState(),
@@ -158,14 +120,14 @@ app.post("/api/settings", (req, res) => {
     settings: nextSettings,
     scheduler: {
       ...schedulerState,
-      runningNow: hasJobQueue() ? false : getIsRunInProgress(),
+      runningNow: getIsRunInProgress(),
     },
   });
 });
 
 app.all("/api/run", async (req, res) => {
   try {
-    if (!hasJobQueue() && getIsRunInProgress()) {
+    if (getIsRunInProgress()) {
       res.status(409).json({
         ok: false,
         message: "A scraper run is already in progress.",
@@ -182,26 +144,6 @@ app.all("/api/run", async (req, res) => {
       facebookOnly: payload.facebookOnly === true || payload.facebookOnly === "true",
       noOpen: true,
     });
-
-    if (hasJobQueue()) {
-      const latestJob = await getLatestJob();
-      if (latestJob && (latestJob.status === "pending" || latestJob.status === "running")) {
-        res.status(409).json({
-          ok: false,
-          message: "A scraper job is already pending or running.",
-          run: latestJob,
-        });
-        return;
-      }
-
-      const job = await enqueueJob(options);
-      res.status(202).json({
-        ok: true,
-        message: "Scraper job queued.",
-        run: job,
-      });
-      return;
-    }
 
     runScraperManaged(options).catch((error) => {
       logErrorWithStack("api-run", error);

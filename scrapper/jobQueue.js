@@ -3,9 +3,10 @@ require("./env");
 const { supabase } = require("./supabaseClient");
 
 const JOBS_TABLE = process.env.SCRAPE_JOBS_TABLE || "scrape_jobs";
+const isQueueEnabled = process.env.SCRAPE_USE_QUEUE === "true";
 
 function hasJobQueue() {
-  return !!supabase;
+  return !!supabase && isQueueEnabled;
 }
 
 function mapJobRow(row) {
@@ -140,5 +141,6 @@ module.exports = {
   getLatestJob,
   getPendingJob,
   hasJobQueue,
+  isQueueEnabled,
   updateJob,
 };
