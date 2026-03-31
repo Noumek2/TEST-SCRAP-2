@@ -1,6 +1,6 @@
-import postgres from 'postgres'
+const postgres = require('postgres');
 
-const connectionString = process.env.DATABASE_URL
-const sql = postgres(connectionString)
+const connectionString = process.env.DATABASE_URL;
+const sql = postgres(connectionString);
 
-export default sql
+module.exports = sql;
