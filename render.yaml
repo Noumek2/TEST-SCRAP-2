@@ -11,7 +11,7 @@ services:
         value: "true"
       - key: SCRAPE_JOBS_TABLE
         value: "scrape_jobs"
-      - key: SERPAPI_KEY
+      - key: SERPER_KEY
         sync: false
       - key: SUPABASE_URL
         sync: false
@@ -33,7 +33,7 @@ services:
         value: "true"
       - key: SCRAPE_JOBS_TABLE
         value: "scrape_jobs"
-      - key: SERPAPI_KEY
+      - key: SERPER_KEY
         sync: false
       - key: SUPABASE_URL
         sync: false

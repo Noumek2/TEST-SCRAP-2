@@ -5,8 +5,8 @@
   "startCommand": "node server.js",
   "envs": [
     {
-      "key": "SERPAPI_KEY",
-      "description": "Your SerpAPI key for Google search",
+      "key": "SERPER_KEY",
+      "description": "Your SerperAPI key for Google search",
       "sync": false
     },
     {
