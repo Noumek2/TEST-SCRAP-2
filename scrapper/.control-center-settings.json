@@ -1,6 +1,7 @@
 {
-  "country": "Cote d'Ivoire",
-  "enterpriseLimit": 10,
+  "country": "Maroc",
+  "enterpriseLimit": 25,
   "pagesPerQuery": 2,
-  "autoRunHourly": false
+  "autoRunHourly": false,
+  "emailTo": "noumek.aaron@giortech.com"
 }

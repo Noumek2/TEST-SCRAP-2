@@ -225,25 +225,21 @@ const COUNTRY_LINK_TEXT = [
 ];
 
 const COUNTRY_ALIASES = {
-  cameroon: {
-    canonical: "Cameroon",
+  cameroun: {
+    canonical: "Cameroun",
     gl: "cm",
-    aliases: ["cameroon", "cameroun", "douala", "yaounde", "yaoundé", "bafoussam", "bamenda", "garoua", "buea", "+237"],
+    aliases: ["cameroun",  "+237"],
   },
-  "ivory coast": {
-    canonical: "Ivory Coast",
-    gl: "ci",
-    aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
-  },
+  
   "cote d'ivoire": {
-    canonical: "Ivory Coast",
+    canonical: "cote d'ivoire",
     gl: "ci",
-    aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
+    aliases: ["cote d'ivoire", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
   },
   "cote divoire": {
-    canonical: "Ivory Coast",
+    canonical: "cote d'ivoire",
     gl: "ci",
-    aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
+    aliases: ["ivory cote d'ivoire", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
   },
 };
 

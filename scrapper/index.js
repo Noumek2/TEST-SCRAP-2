@@ -168,10 +168,11 @@ async function runScraper(inputOptions = {}) {
     try {
       const leadsCount = enriched.filter(c => c.hasFacebook).length;
       await sendCsv({ 
-        csvPath: fbCsv, 
+        csvPath: fbCsv,
+        to: options.emailTo,
         subject: `Rapport Scraper : ${leadsCount} prospects Facebook trouvés` 
       });
-      console.log("  ✅ Email envoyé avec succès !");
+      console.log("  ✅ Email envoyé avec succès à " + options.emailTo + " !");
     } catch (emailErr) {
       console.error("  ❌ Erreur lors de l'envoi automatique : " + emailErr.message);
     }

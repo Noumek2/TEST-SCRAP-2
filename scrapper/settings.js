@@ -8,18 +8,21 @@ const DEFAULT_SETTINGS = {
   enterpriseLimit: 25,
   pagesPerQuery: 2,
   autoRunHourly: false,
+  emailTo: process.env.EMAIL_TO || "juniorsmil24@gmail.com",
 };
 
 function sanitizeSettings(input = {}) {
   const enterpriseLimit = Math.max(1, Math.min(500, parseInt(input.enterpriseLimit, 10) || DEFAULT_SETTINGS.enterpriseLimit));
   const pagesPerQuery = Math.max(1, Math.min(10, parseInt(input.pagesPerQuery, 10) || DEFAULT_SETTINGS.pagesPerQuery));
   const country = String(input.country || DEFAULT_SETTINGS.country).trim() || DEFAULT_SETTINGS.country;
+  const emailTo = String(input.emailTo || DEFAULT_SETTINGS.emailTo).trim() || DEFAULT_SETTINGS.emailTo;
 
   return {
     country,
     enterpriseLimit,
     pagesPerQuery,
     autoRunHourly: input.autoRunHourly === true || input.autoRunHourly === "true",
+    emailTo,
   };
 }
 

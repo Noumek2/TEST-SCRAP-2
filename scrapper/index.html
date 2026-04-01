@@ -487,6 +487,11 @@
               <input id="pagesPerQuery" name="pagesPerQuery" type="number" min="1" max="10" required>
             </div>
 
+            <div class="field">
+              <label for="emailTo">Recipient Email Address</label>
+              <input id="emailTo" name="emailTo" type="email" placeholder="recipient@example.com" required>
+            </div>
+
             <div class="field full">
               <div class="toggle">
                 <div>
@@ -574,6 +579,7 @@
     const countryInput = document.getElementById("country");
     const enterpriseLimitInput = document.getElementById("enterpriseLimit");
     const pagesPerQueryInput = document.getElementById("pagesPerQuery");
+    const emailToInput = document.getElementById("emailTo");
     const autoRunHourlyInput = document.getElementById("autoRunHourly");
     const saveBtn = document.getElementById("saveBtn");
     const refreshBtn = document.getElementById("refreshBtn");
@@ -619,6 +625,7 @@
         country: countryInput.value.trim(),
         enterpriseLimit: Number(enterpriseLimitInput.value),
         pagesPerQuery: Number(pagesPerQueryInput.value),
+        emailTo: emailToInput.value.trim(),
         autoRunHourly: autoRunHourlyInput.checked,
       };
     }
@@ -627,6 +634,7 @@
       countryInput.value = settings.country || "Cameroon";
       enterpriseLimitInput.value = settings.enterpriseLimit || 25;
       pagesPerQueryInput.value = settings.pagesPerQuery || 2;
+      emailToInput.value = settings.emailTo || "juniorsmil24@gmail.com";
       autoRunHourlyInput.checked = !!settings.autoRunHourly;
 
       heroCountry.textContent = settings.country || "Cameroon";
