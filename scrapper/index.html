@@ -757,14 +757,20 @@
       }
     }
 
+    function setRunButtonsDisabled(disabled) {
+      startBtn.disabled = disabled;
+      saveBtn.disabled = disabled;
+      refreshBtn.disabled = disabled;
+      viewResultsBtn.disabled = disabled;
+      refreshResultsBtn.disabled = disabled;
+    }
+
     async function startScraperRun() {
       const settings = collectFormSettings();
+      let pollInterval = null;
+      let timeoutId = null;
 
-      startBtn.disabled = true;
-      saveBtn.disabled = true;
-      refreshBtn.disabled = true;
-      viewResultsBtn.disabled = true;
-      refreshResultsBtn.disabled = true;
+      setRunButtonsDisabled(true);
       logOutput.textContent = "Connecting to scraper...\n";
       runSummary.textContent = `Launching scrape for ${settings.country}...`;
 
@@ -775,33 +781,68 @@
           body: JSON.stringify(settings),
         });
 
-        if (!response.ok || !response.body) {
-          const message = await response.text();
-          throw new Error(message || "Failed to start scraper");
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+          throw new Error(errorData.message || "Failed to start scraper");
         }
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
+        await response.json();
+        logOutput.textContent = "Scraper started successfully!\n\n";
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          logOutput.textContent += decoder.decode(value, { stream: true });
-          logOutput.scrollTop = logOutput.scrollHeight;
-        }
+        // Poll for logs every 2 seconds
+        pollInterval = setInterval(async () => {
+          try {
+            const statusResponse = await fetch("/api/run-status");
+            if (!statusResponse.ok) return;
 
-        runSummary.textContent = `Run finished for ${settings.country}.`;
-        await loadSettings(false);
-        await loadResults(true);
+            const statusData = await statusResponse.json();
+            const run = statusData.run;
+
+            if (run && run.logs && run.logs.length > 0) {
+              // Display all logs from the server
+              const allLogs = run.logs.join('\n');
+              if (allLogs !== logOutput.textContent) {
+                logOutput.textContent = allLogs;
+                logOutput.scrollTop = logOutput.scrollHeight;
+              }
+            }
+
+            // Update run summary with current status
+            if (run) {
+              if (run.status === 'running') {
+                runSummary.textContent = `Running scrape for ${settings.country}...`;
+              } else if (run.status === 'completed') {
+                runSummary.textContent = `Run finished for ${settings.country}.`;
+                clearInterval(pollInterval);
+                if (timeoutId) clearTimeout(timeoutId);
+                setRunButtonsDisabled(false);
+                await loadSettings(false);
+                await loadResults(true);
+              } else if (run.status === 'failed') {
+                runSummary.textContent = `Run failed: ${run.error || 'Unknown error'}`;
+                clearInterval(pollInterval);
+                if (timeoutId) clearTimeout(timeoutId);
+                setRunButtonsDisabled(false);
+              }
+            }
+          } catch (pollError) {
+            console.warn('Error polling run status:', pollError);
+          }
+        }, 2000);
+
+        // Stop polling after 10 minutes as safety measure
+        timeoutId = setTimeout(() => {
+          clearInterval(pollInterval);
+          runSummary.textContent = 'Run timed out - check server logs';
+          setRunButtonsDisabled(false);
+        }, 600000);
+
       } catch (error) {
         logOutput.textContent += `\n\nError: ${error.message}`;
         runSummary.textContent = `Run failed: ${error.message}`;
-      } finally {
-        startBtn.disabled = false;
-        saveBtn.disabled = false;
-        refreshBtn.disabled = false;
-        viewResultsBtn.disabled = false;
-        refreshResultsBtn.disabled = false;
+        if (pollInterval) clearInterval(pollInterval);
+        if (timeoutId) clearTimeout(timeoutId);
+        setRunButtonsDisabled(false);
       }
     }
 
