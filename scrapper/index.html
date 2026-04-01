@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scraper Control Center</title>
+  <style>
+    :root {
+      --bg: #fff6eb;
+      --ink: #1a2233;
+      --muted: #63708a;
+      --panel: rgba(255, 255, 255, 0.9);
+      --line: rgba(33, 41, 62, 0.12);
+      --teal: #0f9d8a;
+      --cyan: #4db6ff;
+      --orange: #ff8c42;
+      --pink: #ff5fa2;
+      --yellow: #ffc857;
+      --purple: #7b61ff;
+      --danger: #d84343;
+      --shadow: 0 24px 60px rgba(37, 39, 89, 0.14);
+      --radius: 26px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(255, 95, 162, 0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(77, 182, 255, 0.22), transparent 32%),
+        radial-gradient(circle at bottom left, rgba(255, 200, 87, 0.25), transparent 28%),
+        linear-gradient(145deg, #fff3e2 0%, #fff9f0 45%, #eef8ff 100%);
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero,
+    .panel {
+      position: relative;
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero::before,
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: auto -40px -40px auto;
+      width: 140px;
+      height: 140px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(123, 97, 255, 0.16), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero {
+      padding: 32px;
+      display: grid;
+      gap: 18px;
+      background:
+        linear-gradient(135deg, rgba(15, 157, 138, 0.12), rgba(77, 182, 255, 0.08)),
+        rgba(255, 255, 255, 0.88);
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--pink);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      line-height: 0.95;
+      max-width: 10ch;
+    }
+
+    .hero p,
+    .panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 1rem;
+    }
+
+    .hero-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mini-card {
+      padding: 18px;
+      border-radius: 22px;
+      color: #fff;
+      min-height: 110px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .mini-card strong {
+      font-size: 1.35rem;
+      line-height: 1.1;
+    }
+
+    .mini-card span {
+      opacity: 0.88;
+      font-size: 0.92rem;
+    }
+
+    .mint { background: linear-gradient(135deg, #0f9d8a, #4cd9b8); }
+    .sun { background: linear-gradient(135deg, #ff8c42, #ffc857); color: #3f2c10; }
+    .sky { background: linear-gradient(135deg, #4db6ff, #7b61ff); }
+    .berry { background: linear-gradient(135deg, #ff5fa2, #ff8c42); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 22px;
+    }
+
+    .panel {
+      padding: 28px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel h2 {
+      margin: 0;
+      font-size: 1.55rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.83rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--ink);
+    }
+
+    .toggle {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(123, 97, 255, 0.1), rgba(77, 182, 255, 0.08));
+      border: 1px solid rgba(123, 97, 255, 0.15);
+    }
+
+    .toggle strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 1rem;
+    }
+
+    .toggle span {
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.94rem;
+    }
+
+    input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--purple);
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 22px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 30px rgba(42, 49, 87, 0.14);
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .primary {
+      background: linear-gradient(135deg, var(--pink), var(--orange));
+      color: #fff;
+    }
+
+    .secondary {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(246, 249, 255, 0.95));
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: rgba(15, 157, 138, 0.12);
+      color: var(--teal);
+      font-weight: 800;
+    }
+
+    .status-pill.error {
+      background: rgba(216, 67, 67, 0.12);
+      color: var(--danger);
+    }
+
+    .facts {
+      display: grid;
+      gap: 12px;
+    }
+
+    .fact {
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--line);
+    }
+
+    .fact strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .fact span {
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .feedback {
+      min-height: 24px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .feedback.error {
+      color: var(--danger);
+    }
+
+    .run-panel {
+      display: grid;
+      gap: 14px;
+      background:
+        linear-gradient(135deg, rgba(255, 200, 87, 0.14), rgba(255, 95, 162, 0.08)),
+        rgba(255, 255, 255, 0.92);
+    }
+
+    .run-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    .log {
+      min-height: 250px;
+      max-height: 360px;
+      overflow: auto;
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #181d30, #102635);
+      color: #dffcff;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .results-panel {
+      display: grid;
+      gap: 16px;
+    }
+
+    .results-toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .results-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(123, 97, 255, 0.08);
+      color: var(--purple);
+      font-weight: 700;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 980px;
+    }
+
+    th,
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(33, 41, 62, 0.08);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: linear-gradient(135deg, rgba(77, 182, 255, 0.16), rgba(123, 97, 255, 0.12));
+      font-size: 0.84rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15, 157, 138, 0.03);
+    }
+
+    .result-empty {
+      padding: 24px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px dashed var(--line);
+      color: var(--muted);
+    }
+
+    .link {
+      color: var(--purple);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge.yes {
+      background: rgba(15, 157, 138, 0.14);
+      color: var(--teal);
+    }
+
+    .badge.no {
+      background: rgba(216, 67, 67, 0.12);
+      color: var(--danger);
+    }
+
+    @media (max-width: 980px) {
+      .hero-strip,
+      .form-grid,
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">Scraper Control Center</div>
+      <h1>Bright, active, and built to show the work.</h1>
+      <p>
+        The control center now gives you settings, live activity, and a place to open your latest scrape results in
+        a clear table instead of leaving everything hidden in logs.
+      </p>
+      <div class="hero-strip">
+        <div class="mini-card mint">
+          <strong id="heroCountry">Cameroon</strong>
+          <span>Current target country</span>
+        </div>
+        <div class="mini-card sun">
+          <strong id="heroLimit">25 enterprises</strong>
+          <span>Collection target</span>
+        </div>
+        <div class="mini-card sky">
+          <strong id="heroSchedule">Manual mode</strong>
+          <span>Automation state</span>
+        </div>
+        <div class="mini-card berry">
+          <strong id="heroResults">No results yet</strong>
+          <span>Latest visible results</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel">
+        <h2>Scrape Settings</h2>
+        <p>Pick the country, choose how many enterprises to collect, and decide whether the scraper should launch every hour.</p>
+
+        <form id="settingsForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="country">Country</label>
+              <input id="country" name="country" type="text" placeholder="Cote d'Ivoire" required>
+            </div>
+
+            <div class="field">
+              <label for="enterpriseLimit">Number of enterprises</label>
+              <input id="enterpriseLimit" name="enterpriseLimit" type="number" min="1" max="500" required>
+            </div>
+
+            <div class="field">
+              <label for="pagesPerQuery">Search depth</label>
+              <input id="pagesPerQuery" name="pagesPerQuery" type="number" min="1" max="10" required>
+            </div>
+
+            <div class="field full">
+              <div class="toggle">
+                <div>
+                  <strong>Launch automatically every hour</strong>
+                  <span>When enabled, the server will re-run the scraper every 60 minutes with the saved settings.</span>
+                </div>
+                <input id="autoRunHourly" name="autoRunHourly" type="checkbox">
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="saveBtn" type="submit">Save Settings</button>
+            <button class="secondary" id="refreshBtn" type="button">Reload Settings</button>
+          </div>
+        </form>
+
+        <div class="feedback" id="settingsFeedback"></div>
+      </div>
+
+      <div class="panel">
+        <h2>Control Status</h2>
+        <p>This area keeps track of automation and lets you see whether the scraper is already busy.</p>
+
+        <div class="status-pill" id="schedulerPill">Loading status...</div>
+
+        <div class="facts">
+          <div class="fact">
+            <strong>Last hourly start</strong>
+            <span id="lastStartedAt">Not yet started</span>
+          </div>
+          <div class="fact">
+            <strong>Last hourly completion</strong>
+            <span id="lastCompletedAt">Not completed yet</span>
+          </div>
+          <div class="fact">
+            <strong>Last scheduler error</strong>
+            <span id="lastSchedulerError">No scheduler error recorded</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel run-panel">
+      <div>
+        <h2>Run The Scraper</h2>
+        <p>Launch a scrape directly from here and watch the live log update while it works.</p>
+      </div>
+
+      <div class="run-meta">
+        <span id="runSummary">Ready to launch.</span>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="startBtn" type="button">Start Scraper Run</button>
+        <button class="secondary" id="viewResultsBtn" type="button">Show Latest Results</button>
+      </div>
+
+      <div class="log" id="logOutput">Waiting for a run...</div>
+    </section>
+
+    <section class="panel results-panel">
+      <div class="results-toolbar">
+        <div>
+          <h2>Latest Results</h2>
+          <p>The latest completed scrape can be opened below in a tabulated and ordered way.</p>
+        </div>
+        <div class="actions">
+          <button class="secondary" id="refreshResultsBtn" type="button">Refresh Results</button>
+        </div>
+      </div>
+
+      <div class="results-meta" id="resultsMeta">
+        <span class="chip">No result snapshot loaded yet</span>
+      </div>
+
+      <div id="resultsContainer" class="result-empty">
+        Click <strong>Show Latest Results</strong> after a successful scrape to display the results table here.
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById("settingsForm");
+    const countryInput = document.getElementById("country");
+    const enterpriseLimitInput = document.getElementById("enterpriseLimit");
+    const pagesPerQueryInput = document.getElementById("pagesPerQuery");
+    const autoRunHourlyInput = document.getElementById("autoRunHourly");
+    const saveBtn = document.getElementById("saveBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const startBtn = document.getElementById("startBtn");
+    const viewResultsBtn = document.getElementById("viewResultsBtn");
+    const refreshResultsBtn = document.getElementById("refreshResultsBtn");
+    const logOutput = document.getElementById("logOutput");
+    const settingsFeedback = document.getElementById("settingsFeedback");
+    const schedulerPill = document.getElementById("schedulerPill");
+    const lastStartedAt = document.getElementById("lastStartedAt");
+    const lastCompletedAt = document.getElementById("lastCompletedAt");
+    const lastSchedulerError = document.getElementById("lastSchedulerError");
+    const runSummary = document.getElementById("runSummary");
+    const heroCountry = document.getElementById("heroCountry");
+    const heroLimit = document.getElementById("heroLimit");
+    const heroSchedule = document.getElementById("heroSchedule");
+    const heroResults = document.getElementById("heroResults");
+    const resultsMeta = document.getElementById("resultsMeta");
+    const resultsContainer = document.getElementById("resultsContainer");
+
+    function formatDate(value) {
+      if (!value) return "Not available";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function setFeedback(message, isError) {
+      settingsFeedback.textContent = message || "";
+      settingsFeedback.className = isError ? "feedback error" : "feedback";
+    }
+
+    function collectFormSettings() {
+      return {
+        country: countryInput.value.trim(),
+        enterpriseLimit: Number(enterpriseLimitInput.value),
+        pagesPerQuery: Number(pagesPerQueryInput.value),
+        autoRunHourly: autoRunHourlyInput.checked,
+      };
+    }
+
+    function applySettings(settings, scheduler) {
+      countryInput.value = settings.country || "Cameroon";
+      enterpriseLimitInput.value = settings.enterpriseLimit || 25;
+      pagesPerQueryInput.value = settings.pagesPerQuery || 2;
+      autoRunHourlyInput.checked = !!settings.autoRunHourly;
+
+      heroCountry.textContent = settings.country || "Cameroon";
+      heroLimit.textContent = `${settings.enterpriseLimit || 25} enterprises`;
+      heroSchedule.textContent = settings.autoRunHourly ? "Hourly automation on" : "Manual mode";
+      runSummary.textContent = `Ready for ${settings.country} with a target of ${settings.enterpriseLimit} enterprises.`;
+
+      const runningNow = scheduler && scheduler.runningNow;
+      const enabled = scheduler && scheduler.enabled;
+      schedulerPill.textContent = runningNow
+        ? "Scraper is running now"
+        : enabled
+          ? "Hourly automation is active"
+          : "Hourly automation is off";
+      schedulerPill.className = scheduler && scheduler.lastError ? "status-pill error" : "status-pill";
+
+      lastStartedAt.textContent = scheduler && scheduler.lastStartedAt ? formatDate(scheduler.lastStartedAt) : "Not yet started";
+      lastCompletedAt.textContent = scheduler && scheduler.lastCompletedAt ? formatDate(scheduler.lastCompletedAt) : "Not completed yet";
+      lastSchedulerError.textContent = scheduler && scheduler.lastError ? scheduler.lastError : "No scheduler error recorded";
+    }
+
+    function renderResults(results) {
+      const companies = Array.isArray(results.companies) ? results.companies : [];
+      const withFacebook = companies.filter((company) => company.hasFacebook).length;
+
+      heroResults.textContent = companies.length > 0 ? `${companies.length} rows ready` : "No results yet";
+      resultsMeta.innerHTML = `
+        <span class="chip">${escapeHtml(results.country || "Unknown country")}</span>
+        <span class="chip">${companies.length} companies</span>
+        <span class="chip">${withFacebook} with Facebook</span>
+        <span class="chip">${escapeHtml(formatDate(results.generatedAt))}</span>
+      `;
+
+      if (companies.length === 0) {
+        resultsContainer.className = "result-empty";
+        resultsContainer.innerHTML = "No companies were found in the latest result snapshot.";
+        return;
+      }
+
+      const rows = companies.map((company, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${escapeHtml(company.name)}</td>
+          <td>${company.websiteUrl ? `<a class="link" href="${escapeHtml(company.websiteUrl)}" target="_blank" rel="noreferrer">Open site</a>` : "-"}</td>
+          <td><span class="badge ${company.hasFacebook ? "yes" : "no"}">${company.hasFacebook ? "Facebook found" : "No Facebook"}</span></td>
+          <td>${company.facebookPageName ? escapeHtml(company.facebookPageName) : "-"}</td>
+          <td>${company.followers != null ? Number(company.followers).toLocaleString() : "-"}</td>
+          <td>${escapeHtml(company.facebookPhone || (Array.isArray(company.phones) ? company.phones.join(", ") : "")) || "-"}</td>
+          <td>${escapeHtml(company.facebookEmail || (Array.isArray(company.emails) ? company.emails.join(", ") : "")) || "-"}</td>
+          <td>${escapeHtml(company.category || company.source || "-")}</td>
+        </tr>
+      `).join("");
+
+      resultsContainer.className = "table-wrap";
+      resultsContainer.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Company</th>
+              <th>Website</th>
+              <th>Facebook</th>
+              <th>Page Name</th>
+              <th>Followers</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Category / Source</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    async function loadSettings(showFeedback) {
+      try {
+        const response = await fetch("/api/settings");
+        if (!response.ok) throw new Error("Failed to load settings");
+        const data = await response.json();
+        applySettings(data.settings, data.scheduler);
+        if (showFeedback) setFeedback("Saved settings reloaded.", false);
+      } catch (error) {
+        setFeedback(error.message, true);
+      }
+    }
+
+    async function loadResults(showErrorInLog = false) {
+      try {
+        const response = await fetch("/api/results");
+        if (response.status === 404) {
+          heroResults.textContent = "No results yet";
+          resultsMeta.innerHTML = '<span class="chip">No result snapshot loaded yet</span>';
+          resultsContainer.className = "result-empty";
+          resultsContainer.innerHTML = "No scrape results are available yet. Run the scraper first, then open the results here.";
+          return;
+        }
+
+        if (!response.ok) throw new Error("Failed to load latest results");
+        const data = await response.json();
+        renderResults(data.results);
+      } catch (error) {
+        if (showErrorInLog) {
+          logOutput.textContent += `\n\nResults error: ${error.message}`;
+        }
+      }
+    }
+
+    async function saveSettings() {
+      const settings = collectFormSettings();
+      saveBtn.disabled = true;
+      setFeedback("Saving control-center settings...", false);
+
+      try {
+        const response = await fetch("/api/settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(settings),
+        });
+
+        if (!response.ok) throw new Error("Failed to save settings");
+        const data = await response.json();
+        applySettings(data.settings, data.scheduler);
+        setFeedback("Control-center settings saved.", false);
+      } catch (error) {
+        setFeedback(error.message, true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    async function startScraperRun() {
+      const settings = collectFormSettings();
+
+      startBtn.disabled = true;
+      saveBtn.disabled = true;
+      refreshBtn.disabled = true;
+      viewResultsBtn.disabled = true;
+      refreshResultsBtn.disabled = true;
+      logOutput.textContent = "Connecting to scraper...\n";
+      runSummary.textContent = `Launching scrape for ${settings.country}...`;
+
+      try {
+        const response = await fetch("/api/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(settings),
+        });
+
+        if (!response.ok || !response.body) {
+          const message = await response.text();
+          throw new Error(message || "Failed to start scraper");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          logOutput.textContent += decoder.decode(value, { stream: true });
+          logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        runSummary.textContent = `Run finished for ${settings.country}.`;
+        await loadSettings(false);
+        await loadResults(true);
+      } catch (error) {
+        logOutput.textContent += `\n\nError: ${error.message}`;
+        runSummary.textContent = `Run failed: ${error.message}`;
+      } finally {
+        startBtn.disabled = false;
+        saveBtn.disabled = false;
+        refreshBtn.disabled = false;
+        viewResultsBtn.disabled = false;
+        refreshResultsBtn.disabled = false;
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await saveSettings();
+    });
+
+    refreshBtn.addEventListener("click", () => loadSettings(true));
+    startBtn.addEventListener("click", startScraperRun);
+    viewResultsBtn.addEventListener("click", () => loadResults(false));
+    refreshResultsBtn.addEventListener("click", () => loadResults(false));
+
+    loadSettings(false);
+    loadResults(false);
+  </script>
+</body>
+</html>
