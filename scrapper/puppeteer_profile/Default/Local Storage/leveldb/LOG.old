@@ -1,3 +1,6 @@
-2026/03/28-14:04:41.215 bf0 Reusing MANIFEST C:\Users\SURFACE\Desktop\scapper 2\TEST-SCRAP-2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/MANIFEST-000001
-2026/03/28-14:04:41.278 bf0 Recovering log #3
-2026/03/28-14:04:41.404 bf0 Reusing old log C:\Users\SURFACE\Desktop\scapper 2\TEST-SCRAP-2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/000003.log 
+2026/04/01-14:38:15.830 5564 Reusing MANIFEST C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/MANIFEST-000001
+2026/04/01-14:38:15.833 5564 Recovering log #4
+2026/04/01-14:38:15.836 5564 Reusing old log C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\Local Storage\leveldb/000004.log 
+2026/04/01-14:38:25.405 5750 Level-0 table #6: started
+2026/04/01-14:38:25.410 5750 Level-0 table #6: 12120 bytes OK
+2026/04/01-14:38:25.413 5750 Delete type=0 #4

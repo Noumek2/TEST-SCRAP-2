@@ -1,4 +1,3 @@
-2026/03/28-16:44:48.512 3964 Creating DB C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\shared_proto_db since it was missing.
-2026/03/28-16:44:48.542 3964 Reusing MANIFEST C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\shared_proto_db/MANIFEST-000001
-2026/03/28-16:44:48.543 3964 Recovering log #3
-2026/03/28-16:44:48.548 3964 Reusing old log C:\Users\SURFACE\Desktop\scapper 2\test-scrap-2\scrapper\puppeteer_profile\Default\shared_proto_db/000003.log 
+2026/04/01-14:50:51.783 6498 Reusing MANIFEST C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\shared_proto_db/MANIFEST-000001
+2026/04/01-14:50:51.784 6498 Recovering log #3
+2026/04/01-14:50:51.785 6498 Reusing old log C:\Users\Guest Aaron\OneDrive\Desktop\TEST SCRAP 2\scrapper\puppeteer_profile\Default\shared_proto_db/000003.log 

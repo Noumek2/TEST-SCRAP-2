@@ -2,11 +2,11 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 const https = require("https");
 
-const isServerRuntime = process.env.VERCEL === "1" || process.env.RENDER === "true";
+const isVercelRuntime = process.env.VERCEL === "1";
 
 let puppeteer = null;
 try {
-  puppeteer = require(isServerRuntime ? "puppeteer-core" : "puppeteer");
+  puppeteer = require(isVercelRuntime ? "puppeteer-core" : "puppeteer");
 } catch {
   try {
     puppeteer = require("puppeteer");
@@ -16,7 +16,7 @@ try {
 }
 
 let chromium = null;
-if (isServerRuntime) {
+if (isVercelRuntime) {
   try {
     chromium = require("@sparticuz/chromium");
   } catch {
@@ -25,37 +25,35 @@ if (isServerRuntime) {
 }
 
 const CONFIG = {
-  serpApiKey: process.env.SERPAPI_KEY,
+  // Use SCRAPE_DO_KEY for Scrape.do API
+  serperKey: process.env.SCRAPE_DO_KEY,
+  
+  // Initialize and validate once at startup
+  getApiKey: function() {
+    if (!this.serperKey) {
+      const errorMsg = "API Error: Both SCRAPE_DO_KEY and SERPAPI_KEY are missing. Please set one in your .env or environment variables.";
+      console.error("  [api] " + errorMsg);
+      throw new Error(errorMsg);
+    }
+    return this.serperKey;
+  },
 };
 
 const SEARCH_QUERY_TEMPLATES = [
-  "entreprises au {country}",
-  "entreprises {country}",
-  "startups au {country}",
-  "societes financieres au {country}",
-  "entreprise de construction au {country}",
-  "entreprise immobiliere au {country}",
+  "companies  {country}",
+  "entreprises  {country}",
+  "startups {country}",
+  "Coorperative en {country}",
+  "Entreprise de construction {country}",
+  "structures immobilieres en {country}",
   "entreprise BTP {country}",
-  "ecoles au {country}",
-  "hotel au {country}",
-  "imprimerie au {country}",
-  "entreprise import export au {country}",
-  "entreprises agricoles au {country}",
-  "entreprises industrielles au {country}",
+  "Ecoles {country}",
+  "hotels {country}",
+  "Imprimeries {country}",
+  "Entreprise import/export {country}",
+  "compagnie agricole au {country}",
+  "Super Marcher {country}",
 ];
-
-const SEARCH_QUERIES = [
-  "Hotels de comeroun", 
-  "real estate company Cameroon",
-  "societe construction Cameroun",
-  "entreprise bâtiment Cameroun",
-  "Retauration services Cameroon",
-  "Hotels in Cameroon",
-  "Tourism companies in Cameroon",
-  "Transport companies in Cameroon",
-  "Agriculture companies in Cameroon",
-  "Manufacturing companies in Cameroon",
-  ];
 
 const TRUSTED_DIRECTORY_HOSTS = [
   "businesslist.co.cm",
@@ -124,21 +122,6 @@ const NON_COMPANY_TEXT_KEYWORDS = [
 ];
 
 const GENERIC_ANCHOR_KEYWORDS = [
-  "business insight",
-  "career advice",
-  "campus gist",
-  "project tips",
-  "construction news",
-  "cv & motivation letters",
-  "cv and motivation letters",
-  "read more",
-  "learn more",
-  "en savoir plus",
-  "original",
-  "disclaimer",
-  "send enquiry",
-  "be the first to comment!",
-  "be the first to comment",
   "english",
   "francais",
   "français",
@@ -245,25 +228,21 @@ const COUNTRY_ALIASES = {
   cameroon: {
     canonical: "Cameroon",
     gl: "cm",
-    serpLocation: "Cameroon",
     aliases: ["cameroon", "cameroun", "douala", "yaounde", "yaoundé", "bafoussam", "bamenda", "garoua", "buea", "+237"],
   },
   "ivory coast": {
     canonical: "Ivory Coast",
     gl: "ci",
-    serpLocation: "",
     aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
   },
   "cote d'ivoire": {
     canonical: "Ivory Coast",
     gl: "ci",
-    serpLocation: "",
     aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
   },
   "cote divoire": {
     canonical: "Ivory Coast",
     gl: "ci",
-    serpLocation: "",
     aliases: ["ivory coast", "cote d'ivoire", "cote divoire", "côte d'ivoire", "cote d ivoire", "abidjan", "+225"],
   },
 };
@@ -480,10 +459,9 @@ function buildCountryContext(country = "Cameroon") {
   const aliases = config ? config.aliases : [key];
 
   return {
-    country: normalizedCountry,
+    country: config ? config.canonical : normalizedCountry,
     aliases: [...new Set([key, alphaOnly, ...aliases].filter(Boolean))],
     gl: config ? config.gl : "",
-    serpLocation: config ? config.serpLocation : "",
   };
 }
 
@@ -526,8 +504,7 @@ function looksLikeCompanyCandidate(result, countryContext) {
   const countryRelevant =
     isCountryRelevantUrl(result.url, countryContext) ||
     isCountryRelevantText(title, countryContext) ||
-    isCountryRelevantText(snippet, countryContext) ||
-    isCountryRelevantText(result.query || "", countryContext);
+    isCountryRelevantText(snippet, countryContext);
 
   if (!countryRelevant) {
     return false;
@@ -537,37 +514,34 @@ function looksLikeCompanyCandidate(result, countryContext) {
   return true;
 }
 
-async function searchGoogleSerpApi(query, apiKey, countryContext) {
+async function searchGoogleSerper(query, apiKey, countryContext) {
   const results = [];
   const params = new URLSearchParams({
     q: query,
-    hl: "en",
+    country: countryContext.gl || 'us',
     num: "10",
-    api_key: apiKey,
+    token: apiKey,
   });
 
-  if (countryContext.serpLocation) {
-    params.set("location", countryContext.serpLocation);
-  }
-
-  if (countryContext.gl) {
-    params.set("gl", countryContext.gl);
-  }
-
-  const url = `https://serpapi.com/search.json?${params.toString()}`;
+  const url = `https://api.scrape.do/plugin/google/search?${params.toString()}`;
+  console.log(`    [Google/Scrape.do] Searching: ${url.substring(0, 80)}...`);
 
   try {
-    const res = await fetchWithRetry(() => axios.get(url, { timeout: 15000 }), "SerpApi");
+    const res = await fetchWithRetry(() => axios.get(url, { timeout: 15000 }), "Scrape.do");
     const data = res.data;
 
     (data.organic_results || []).forEach((r) => {
       if (r.title && r.link && !r.link.includes("google.com")) {
-        results.push({ name: r.title, url: r.link, snippet: r.snippet || "", source: "google_serpapi", query });
+        results.push({ name: r.title, url: r.link, snippet: r.snippet || "", source: "google_scrape_do" });
       }
     });
-    console.log(`    [Google/SerpApi] "${query}" -> ${results.length} results`);
+    console.log(`    [Google/Scrape.do] "${query}" -> ${results.length} results`);
   } catch (err) {
-    console.log(`    [Google/SerpApi] Error: ${err.message}`);
+    console.error(`    [Google/Scrape.do] ❌ Error: ${err.message}`);
+    if (err.response) {
+      console.error(`    [Google/Scrape.do] Status: ${err.response.status}`);
+      console.error(`    [Google/Scrape.do] Response: ${JSON.stringify(err.response.data).substring(0, 200)}`);
+    }
   }
   return results;
 }
@@ -584,10 +558,9 @@ async function searchBing(query) {
     $("li.b_algo").each((_, el) => {
       const title = $(el).find("h2 a").first().text().trim();
       const href = $(el).find("h2 a").first().attr("href") || "";
-      const snippet = $(el).find(".b_caption p").first().text().trim();
       const resolved = normalizeUrl(href);
       if (title && resolved && resolved.startsWith("http")) {
-        results.push({ name: title, url: resolved, snippet, source: "bing", query });
+        results.push({ name: title, url: resolved, snippet: "", source: "bing" });
       }
     });
     console.log(`    [Bing] "${query}" -> ${results.length} results`);
@@ -599,7 +572,7 @@ async function searchBing(query) {
 
 async function searchDuckDuckGo(query) {
   const results = [];
-  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=cm-fr`;
   try {
     const res = await axios.get(url, { timeout: 15000 });
     const $ = cheerio.load(res.data);
@@ -613,7 +586,7 @@ async function searchDuckDuckGo(query) {
       }
       const resolved = normalizeUrl(href);
       if (name && resolved && resolved.startsWith("http")) {
-        results.push({ name, url: resolved, snippet: "", source: "duckduckgo", query });
+        results.push({ name, url: resolved, snippet: "", source: "duckduckgo" });
       }
     });
     console.log(`    [DuckDuckGo] "${query}" -> ${results.length} results`);
@@ -663,11 +636,11 @@ async function fetchListingHtmlWithBrowser(url) {
     throw new Error("Puppeteer is not available for browser fallback");
   }
 
-  const executablePath = isServerRuntime ? await getServerlessChromePath() : undefined;
+  const executablePath = isVercelRuntime ? await getServerlessChromePath() : undefined;
   const launchOptions = {
-    headless: isServerRuntime ? true : "new",
+    headless: isVercelRuntime ? true : "new",
     ignoreHTTPSErrors: true,
-    args: isServerRuntime && chromium ? chromium.args : [
+    args: isVercelRuntime && chromium ? chromium.args : [
       "--no-sandbox",
       "--disable-setuid-sandbox",
       "--disable-dev-shm-usage",
@@ -678,7 +651,7 @@ async function fetchListingHtmlWithBrowser(url) {
   if (executablePath) {
     launchOptions.executablePath = executablePath;
   }
-  if (isServerRuntime && chromium) {
+  if (isVercelRuntime && chromium) {
     launchOptions.defaultViewport = chromium.defaultViewport;
   }
 
@@ -818,15 +791,19 @@ async function searchCompanies(options = {}) {
   const delayMs = options.delayMs || 2000;
   const companyLimit = Math.max(1, parseInt(options.companyLimit, 10) || 25);
   let allResults = [];
-  const isHostedRuntime = process.env.VERCEL === "1" || process.env.RENDER === "true";
+  const isVercel = process.env.VERCEL === "1";
   const countryContext = buildCountryContext(options.country || "Cameroon");
   const queriesToRun = buildSearchQueries(countryContext.country);
 
   console.log(`\nSearching across Google + Bing + DuckDuckGo for ${countryContext.country}...\n`);
 
   for (const q of queriesToRun) {
-    if (CONFIG.serpApiKey) {
-      allResults = allResults.concat(await searchGoogleSerpApi(q, CONFIG.serpApiKey, countryContext));
+    try {
+      const apiKey = CONFIG.getApiKey();
+      allResults = allResults.concat(await searchGoogleSerper(q, apiKey, countryContext));
+    } catch (error) {
+      console.error("  [search] ❌ Google search failed: " + error.message);
+      console.error("  [search] Make sure SCRAPE_DO_KEY is set in your environment variables.");
     }
     allResults = allResults.concat(await searchBing(q));
     await sleep(delayMs);
@@ -838,8 +815,8 @@ async function searchCompanies(options = {}) {
   const companyCandidates = unique.filter((result) => isLikelyDirectoryResult(result) || looksLikeCompanyCandidate(result, countryContext));
   console.log(`    [filter] ${unique.length} raw candidates -> ${companyCandidates.length} likely company/listing pages`);
   const expanded = await expandDirectoryResults(companyCandidates, {
-    delayMs: isHostedRuntime ? 400 : 1000,
-    maxLinksPerListing: isHostedRuntime ? 5 : 6,
+    delayMs: isVercel ? 400 : 1000,
+    maxLinksPerListing: isVercel ? 5 : 6,
     countryContext,
   });
 
