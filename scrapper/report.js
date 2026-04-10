@@ -24,6 +24,7 @@ const path = require("path");
 function generateHtml(companies, title) {
   const generatedAt  = new Date().toLocaleString();
   const totalCount   = companies.length;
+  const websiteCount = companies.filter((c) => c.hasWebsite).length;
   const fbCount      = companies.filter((c) => c.hasFacebook).length;
   const verifiedCount = companies.filter((c) => c.isVerified).length;
   const withFollowers = companies.filter((c) => c.followers > 0).length;
@@ -33,6 +34,7 @@ function generateHtml(companies, title) {
   // Embed company data as JSON for the table
   const jsonData = JSON.stringify(companies.map((c) => ({
     name:             c.name             || "",
+    hasWebsite:       c.hasWebsite       || false,
     websiteUrl:       c.websiteUrl       || "",
     hasFacebook:      c.hasFacebook      || false,
     facebookUrl:      c.facebookUrl      || "",
@@ -324,21 +326,26 @@ function generateHtml(companies, title) {
     <div class="stat-sub">found &amp; processed</div>
   </div>
   <div class="stat-card green">
+    <div class="stat-label">Has Website</div>
+    <div class="stat-value">${websiteCount}</div>
+    <div class="stat-sub">${totalCount > 0 ? Math.round(websiteCount / totalCount * 100) : 0}% with a site</div>
+  </div>
+  <div class="stat-card purple">
     <div class="stat-label">On Facebook</div>
     <div class="stat-value">${fbCount}</div>
     <div class="stat-sub">${totalCount > 0 ? Math.round(fbCount / totalCount * 100) : 0}% of total</div>
   </div>
-  <div class="stat-card purple">
+  <div class="stat-card yellow">
     <div class="stat-label">Total Followers</div>
     <div class="stat-value">${totalFollowers >= 1000 ? (totalFollowers / 1000).toFixed(1) + "K" : totalFollowers}</div>
     <div class="stat-sub">across ${withFollowers} tracked pages</div>
   </div>
-  <div class="stat-card yellow">
+  <div class="stat-card pink">
     <div class="stat-label">Verified Pages</div>
     <div class="stat-value">${verifiedCount}</div>
     <div class="stat-sub">with verification badge</div>
   </div>
-  <div class="stat-card pink">
+  <div class="stat-card">
     <div class="stat-label">No Facebook</div>
     <div class="stat-value">${totalCount - fbCount}</div>
     <div class="stat-sub">companies without a page</div>
@@ -482,7 +489,7 @@ function renderTable() {
       '<td style="font-size:0.78rem;color:#a0aec0">' + esc(c.category) + '</td>' +
       '<td>' + (contacts.length > 0 ? contacts.join("") : '<span style="color:#4a5568">—</span>') + '</td>' +
       '<td><div class="about-text" title="' + esc(c.facebookAbout) + '">' + esc((c.facebookAbout || "").slice(0, 80)) + (c.facebookAbout && c.facebookAbout.length > 80 ? "..." : "") + '</div></td>' +
-      '<td>' + (c.websiteUrl || c.facebookWebsite
+      '<td>' + (c.hasWebsite && (c.websiteUrl || c.facebookWebsite)
           ? '<a class="link-ext" href="' + esc(c.facebookWebsite || c.websiteUrl) + '" target="_blank">'
             + esc((c.facebookWebsite || c.websiteUrl).replace(/https?:\/\/(www\.)?/, "").slice(0, 30)) + '</a>'
           : '<span style="color:#4a5568">—</span>') + '</td>' +

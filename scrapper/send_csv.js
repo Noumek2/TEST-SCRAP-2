@@ -56,6 +56,10 @@ function getSmtpConfig() {
   return null;
 }
 
+function isValidEmailAddress(value) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
+}
+
 async function sendCsv({ csvPath, to, subject, text }) {
   if (!fs.existsSync(csvPath)) {
     throw new Error("CSV file not found: " + csvPath);
@@ -64,6 +68,9 @@ async function sendCsv({ csvPath, to, subject, text }) {
   to = to || config.emailTo || process.env.EMAIL_TO;
   if (!to) {
     throw new Error("No recipient email provided. Set config.emailTo or provide it as an argument.");
+  }
+  if (!isValidEmailAddress(to)) {
+    throw new Error("Invalid recipient email address: " + to);
   }
 
   const smtpConfig = getSmtpConfig();

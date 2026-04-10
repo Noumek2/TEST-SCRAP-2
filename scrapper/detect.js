@@ -95,6 +95,95 @@ function normalizeFacebookUrl(url) {
   }
 }
 
+function normalizeWebUrl(url) {
+  if (!url || typeof url !== "string") return null;
+  try {
+    const parsed = new URL(url);
+    parsed.hash = "";
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return null;
+  }
+}
+
+function getHostname(url) {
+  try {
+    return new URL(url).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return "";
+  }
+}
+
+function resolveAbsoluteUrl(href, baseUrl) {
+  if (!href || typeof href !== "string") return null;
+  const trimmed = href.trim();
+  if (!trimmed || /^(mailto:|tel:|javascript:|#)/i.test(trimmed)) return null;
+  try {
+    return normalizeWebUrl(trimmed.startsWith("http") ? trimmed : new URL(trimmed, baseUrl).toString());
+  } catch {
+    return null;
+  }
+}
+
+function isSkippableWebsiteCandidate(url) {
+  const normalized = normalizeWebUrl(url);
+  if (!normalized) return true;
+  if (!/^https?:\/\//i.test(normalized)) return true;
+  if (/\.(pdf|jpg|jpeg|png|gif|webp|svg|zip)$/i.test(normalized)) return true;
+
+  const hostname = getHostname(normalized);
+  return [
+    "facebook.com",
+    "instagram.com",
+    "linkedin.com",
+    "youtube.com",
+    "x.com",
+    "twitter.com",
+    "wa.me",
+    "whatsapp.com",
+    "tiktok.com",
+    "google.com",
+    "bing.com",
+    "duckduckgo.com",
+  ].some((domain) => hostname.includes(domain));
+}
+
+function looksLikeWebsiteAnchor(text) {
+  const normalized = String(text || "").toLowerCase().replace(/\s+/g, " ").trim();
+  return /(^| )(website|site web|site officiel|official website|visit website|web site)( |$)/i.test(normalized);
+}
+
+function extractEnterpriseWebsite(baseUrl, html) {
+  const normalizedBaseUrl = normalizeWebUrl(baseUrl);
+  if (!normalizedBaseUrl || !html) return null;
+
+  const baseHostname = getHostname(normalizedBaseUrl);
+  const $ = cheerio.load(html);
+  let fallback = null;
+
+  $("a[href]").each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const text = $(el).text().trim();
+    const absolute = resolveAbsoluteUrl(href, normalizedBaseUrl);
+
+    if (!absolute || isSkippableWebsiteCandidate(absolute)) return;
+
+    const hostname = getHostname(absolute);
+    const isExternal = hostname && hostname !== baseHostname;
+
+    if (looksLikeWebsiteAnchor(text) && isExternal) {
+      fallback = absolute;
+      return false;
+    }
+
+    if (!fallback && isExternal) {
+      fallback = absolute;
+    }
+  });
+
+  return fallback;
+}
+
 function isScrapableFacebookUrl(url) {
   if (!url || !url.includes("facebook.com")) return false;
   try {
@@ -610,7 +699,7 @@ async function scrapeFacebookWithPuppeteer(fbUrl, page, locationContext = getLoc
 }
 
 async function scrapeWebsite(siteUrl) {
-  const result = { emails: [], phones: [], facebookUrls: [] };
+  const result = { emails: [], phones: [], facebookUrls: [], websiteUrl: null };
   try {
     const res = await axios.get(siteUrl, {
       headers: { "User-Agent": DESKTOP_UA, "Accept-Language": "en-US,en;q=0.9" },
@@ -618,6 +707,8 @@ async function scrapeWebsite(siteUrl) {
     });
     const html = res.data;
     const $ = cheerio.load(html);
+
+    result.websiteUrl = extractEnterpriseWebsite(siteUrl, html);
 
     $("a[href]").each((_, el) => {
       const href = $(el).attr("href") || "";
@@ -685,7 +776,8 @@ async function detectCompany(company, page, delayMs, context) {
 
   const enriched = {
     name: company.name,
-    websiteUrl: company.url,
+    websiteUrl: null,
+    hasWebsite: !!company.hasWebsite,
     snippet: company.snippet || "",
     source: company.source || "search",
     emails: [],
@@ -706,6 +798,8 @@ async function detectCompany(company, page, delayMs, context) {
 
   if (company.url && company.url.startsWith("http")) {
     const siteData = await scrapeWebsite(company.url);
+    enriched.websiteUrl = siteData.websiteUrl || (company.hasWebsite ? company.url : null);
+    enriched.hasWebsite = !!enriched.websiteUrl;
     enriched.emails = siteData.emails;
     enriched.phones = siteData.phones;
     const shouldTrustWebsiteFacebook = !looksLikeContentPageUrl(company.url);

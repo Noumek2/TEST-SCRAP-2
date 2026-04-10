@@ -84,12 +84,13 @@ function normalizeRunOptions(options = {}) {
     pagesPerQuery: Math.max(1, parseInt(options.pagesPerQuery, 10) || 2),
     enterpriseLimit: Math.max(1, parseInt(options.enterpriseLimit, 10) || 25),
     country: String(options.country || "Cameroon").trim() || "Cameroon",
+    emailTo: String(options.emailTo || process.env.EMAIL_TO || "").trim(),
   };
 }
 
 async function runScraper(inputOptions = {}) {
   const options = normalizeRunOptions(inputOptions);
-  const { facebookOnly, noOpen, pagesPerQuery, enterpriseLimit, country } = options;
+  const { facebookOnly, noOpen, pagesPerQuery, enterpriseLimit, country, emailTo } = options;
 
   console.log("==========================================================");
   console.log("   Company Scraper Control Center Run");
@@ -98,6 +99,7 @@ async function runScraper(inputOptions = {}) {
   console.log("  Target count: " + enterpriseLimit);
   console.log("  Mode        : " + (facebookOnly ? "Facebook-only" : "All companies"));
   console.log("  Pages/query : " + pagesPerQuery);
+  console.log("  Email to    : " + (emailTo || "(not set)"));
   console.log("");
 
   try {
@@ -169,10 +171,10 @@ async function runScraper(inputOptions = {}) {
       const leadsCount = enriched.filter(c => c.hasFacebook).length;
       await sendCsv({ 
         csvPath: fbCsv,
-        to: options.emailTo,
+        to: emailTo,
         subject: `Rapport Scraper : ${leadsCount} prospects Facebook trouvés` 
       });
-      console.log("  ✅ Email envoyé avec succès à " + options.emailTo + " !");
+      console.log("  ✅ Email envoyé avec succès à " + emailTo + " !");
     } catch (emailErr) {
       console.error("  ❌ Erreur lors de l'envoi automatique : " + emailErr.message);
     }

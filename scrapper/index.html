@@ -658,12 +658,14 @@
 
     function renderResults(results) {
       const companies = Array.isArray(results.companies) ? results.companies : [];
+      const withWebsite = companies.filter((company) => company.hasWebsite).length;
       const withFacebook = companies.filter((company) => company.hasFacebook).length;
 
       heroResults.textContent = companies.length > 0 ? `${companies.length} rows ready` : "No results yet";
       resultsMeta.innerHTML = `
         <span class="chip">${escapeHtml(results.country || "Unknown country")}</span>
         <span class="chip">${companies.length} companies</span>
+        <span class="chip">${withWebsite} with website</span>
         <span class="chip">${withFacebook} with Facebook</span>
         <span class="chip">${escapeHtml(formatDate(results.generatedAt))}</span>
       `;
@@ -678,7 +680,8 @@
         <tr>
           <td>${index + 1}</td>
           <td>${escapeHtml(company.name)}</td>
-          <td>${company.websiteUrl ? `<a class="link" href="${escapeHtml(company.websiteUrl)}" target="_blank" rel="noreferrer">Open site</a>` : "-"}</td>
+          <td><span class="badge ${company.hasWebsite ? "yes" : "no"}">${company.hasWebsite ? "Website found" : "No website"}</span></td>
+          <td>${company.hasWebsite && company.websiteUrl ? `<a class="link" href="${escapeHtml(company.websiteUrl)}" target="_blank" rel="noreferrer">Open site</a>` : "-"}</td>
           <td><span class="badge ${company.hasFacebook ? "yes" : "no"}">${company.hasFacebook ? "Facebook found" : "No Facebook"}</span></td>
           <td>${company.facebookPageName ? escapeHtml(company.facebookPageName) : "-"}</td>
           <td>${company.followers != null ? Number(company.followers).toLocaleString() : "-"}</td>
@@ -695,6 +698,7 @@
             <tr>
               <th>#</th>
               <th>Company</th>
+              <th>Has Website</th>
               <th>Website</th>
               <th>Facebook</th>
               <th>Page Name</th>

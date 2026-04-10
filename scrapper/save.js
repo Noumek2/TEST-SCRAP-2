@@ -30,6 +30,7 @@ function getOutputDir() {
 // CSV columns in order
 const CSV_COLUMNS = [
   { key: "name",             label: "Company Name" },
+  { key: "hasWebsite",       label: "Has Website" },
   { key: "websiteUrl",       label: "Website URL" },
   { key: "hasFacebook",      label: "Has Facebook" },
   { key: "facebookUrl",      label: "Facebook URL" },
@@ -127,6 +128,7 @@ function toXml(companies, meta) {
     return `
   <company index="${i + 1}">
     <name>${escapeXml(c.name)}</name>
+    <hasWebsite>${c.hasWebsite ? "true" : "false"}</hasWebsite>
     <websiteUrl>${escapeXml(c.websiteUrl)}</websiteUrl>
     <snippet>${escapeXml(c.snippet)}</snippet>
     <contacts>
