@@ -25,8 +25,8 @@ if (isVercelRuntime) {
 }
 
 const CONFIG = {
-  // Use SCRAPE_DO_KEY for Scrape.do API
-  serperKey: process.env.SCRAPE_DO_KEY,
+  // Use SERPER_KEY for Serper API
+  serperKey: process.env.SERPER_KEY,
   
   // Initialize and validate once at startup
   getApiKey: function() {
@@ -516,10 +516,10 @@ async function searchGoogleSerper(query, apiKey, countryContext) {
     q: query,
     country: countryContext.gl || 'us',
     num: "10",
-    token: apiKey,
+    api_key: apiKey,
   });
 
-  const url = `https://api.scrape.do/plugin/google/search?${params.toString()}`;
+  const url = `https://serpapi.com/search?engine=google&${params.toString()}`;
   console.log(`    [Google/Scrape.do] Searching: ${url.substring(0, 80)}...`);
 
   try {
@@ -531,12 +531,12 @@ async function searchGoogleSerper(query, apiKey, countryContext) {
         results.push({ name: r.title, url: r.link, snippet: r.snippet || "", source: "google_scrape_do" });
       }
     });
-    console.log(`    [Google/Scrape.do] "${query}" -> ${results.length} results`);
+    console.log(`    [Google/Serper] "${query}" -> ${results.length} results`);
   } catch (err) {
-    console.error(`    [Google/Scrape.do] ❌ Error: ${err.message}`);
+    console.error(`    [Google/Serper] ❌ Error: ${err.message}`);
     if (err.response) {
-      console.error(`    [Google/Scrape.do] Status: ${err.response.status}`);
-      console.error(`    [Google/Scrape.do] Response: ${JSON.stringify(err.response.data).substring(0, 200)}`);
+      console.error(`    [Google/Serper] Status: ${err.response.status}`);
+      console.error(`    [Google/Serper] Response: ${JSON.stringify(err.response.data).substring(0, 200)}`);
     }
   }
   return results;
