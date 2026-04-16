@@ -40,19 +40,12 @@ const CONFIG = {
 };
 
 const SEARCH_QUERY_TEMPLATES = [
-  "companies  {country}",
-  "entreprises  {country}",
+  "agro pastoral startups {country}",
+  "start up companies{country}",
   "startups {country}",
-  "Coorperative en {country}",
-  "Entreprise de construction {country}",
-  "structures immobilieres en {country}",
-  "entreprise BTP {country}",
-  "Ecoles {country}",
-  "hotels {country}",
-  "Imprimeries {country}",
-  "Entreprise import/export {country}",
-  "compagnie agricole au {country}",
-  "Super Marcher {country}",
+  "Tech Startups {country}",
+  "innovative companies {country}",
+  "startup hub {country}",
 ];
 
 const TRUSTED_DIRECTORY_HOSTS = [
