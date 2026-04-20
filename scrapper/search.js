@@ -40,7 +40,7 @@ const CONFIG = {
 };
 
 const SEARCH_QUERY_TEMPLATES = [
-  "agro pastoral startups {country}",
+  "agro pasto {country}",
   "start up companies{country}",
   "startups {country}",
   "Tech Startups {country}",
@@ -454,7 +454,12 @@ function buildCountryContext(country = "Cameroon") {
   };
 }
 
-function buildSearchQueries(country) {
+function buildSearchQueries(country, customQueries = []) {
+  // If custom queries are provided, use them directly
+  if (Array.isArray(customQueries) && customQueries.length > 0) {
+    return customQueries.filter(q => typeof q === 'string' && q.trim().length > 0).map(q => q.trim());
+  }
+  // Otherwise, use default templates
   return SEARCH_QUERY_TEMPLATES.map((template) => template.replace(/\{country\}/g, country));
 }
 
@@ -782,7 +787,8 @@ async function searchCompanies(options = {}) {
   let allResults = [];
   const isVercel = process.env.VERCEL === "1";
   const countryContext = buildCountryContext(options.country || "Cameroon");
-  const queriesToRun = buildSearchQueries(countryContext.country);
+  const customQueries = options.searchQueries || [];
+  const queriesToRun = buildSearchQueries(countryContext.country, customQueries);
 
   console.log(`\nSearching across Google + Bing + DuckDuckGo for ${countryContext.country}...\n`);
 

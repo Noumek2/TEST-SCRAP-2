@@ -493,6 +493,12 @@
             </div>
 
             <div class="field full">
+              <label for="searchQueries">Custom Search Queries (Optional)</label>
+              <textarea id="searchQueries" name="searchQueries" placeholder="Enter search queries separated by newlines or commas&#10;Example:&#10;tech startups cameroon&#10;software companies cameroon&#10;digital agencies cameroon" style="width: 100%; border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; font: inherit; background: rgba(255, 255, 255, 0.92); color: var(--ink); min-height: 120px; resize: vertical;"></textarea>
+              <small style="color: var(--muted); font-size: 0.85rem; margin-top: 6px; display: block;">Leave empty to use default search templates. Separate multiple queries with newlines or commas.</small>
+            </div>
+
+            <div class="field full">
               <div class="toggle">
                 <div>
                   <strong>Launch automatically every hour</strong>
@@ -580,6 +586,7 @@
     const enterpriseLimitInput = document.getElementById("enterpriseLimit");
     const pagesPerQueryInput = document.getElementById("pagesPerQuery");
     const emailToInput = document.getElementById("emailTo");
+    const searchQueriesInput = document.getElementById("searchQueries");
     const autoRunHourlyInput = document.getElementById("autoRunHourly");
     const saveBtn = document.getElementById("saveBtn");
     const refreshBtn = document.getElementById("refreshBtn");
@@ -626,6 +633,7 @@
         enterpriseLimit: Number(enterpriseLimitInput.value),
         pagesPerQuery: Number(pagesPerQueryInput.value),
         emailTo: emailToInput.value.trim(),
+        searchQueries: searchQueriesInput.value.trim(),
         autoRunHourly: autoRunHourlyInput.checked,
       };
     }
@@ -635,6 +643,9 @@
       enterpriseLimitInput.value = settings.enterpriseLimit || 25;
       pagesPerQueryInput.value = settings.pagesPerQuery || 2;
       emailToInput.value = settings.emailTo || "juniorsmil24@gmail.com";
+      searchQueriesInput.value = Array.isArray(settings.searchQueries) 
+        ? settings.searchQueries.join('\n') 
+        : (settings.searchQueries || '');
       autoRunHourlyInput.checked = !!settings.autoRunHourly;
 
       heroCountry.textContent = settings.country || "Cameroon";

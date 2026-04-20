@@ -9,6 +9,7 @@ const DEFAULT_SETTINGS = {
   pagesPerQuery: 2,
   autoRunHourly: false,
   emailTo: process.env.EMAIL_TO || "juniorsmil24@gmail.com",
+  searchQueries: [],
 };
 
 function sanitizeSettings(input = {}) {
@@ -17,12 +18,29 @@ function sanitizeSettings(input = {}) {
   const country = String(input.country || DEFAULT_SETTINGS.country).trim() || DEFAULT_SETTINGS.country;
   const emailTo = String(input.emailTo || DEFAULT_SETTINGS.emailTo).trim() || DEFAULT_SETTINGS.emailTo;
 
+  // Parse custom search queries
+  let searchQueries = [];
+  if (input.searchQueries) {
+    if (typeof input.searchQueries === 'string') {
+      // Split by newlines or commas
+      searchQueries = input.searchQueries
+        .split(/[\n,]/)
+        .map(q => q.trim())
+        .filter(q => q.length > 0);
+    } else if (Array.isArray(input.searchQueries)) {
+      searchQueries = input.searchQueries
+        .filter(q => typeof q === 'string' && q.trim().length > 0)
+        .map(q => q.trim());
+    }
+  }
+
   return {
     country,
     enterpriseLimit,
     pagesPerQuery,
     autoRunHourly: input.autoRunHourly === true || input.autoRunHourly === "true",
     emailTo,
+    searchQueries,
   };
 }
 

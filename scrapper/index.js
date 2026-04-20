@@ -78,6 +78,21 @@ function openFile(filePath) {
 
 
 function normalizeRunOptions(options = {}) {
+  // Parse search queries - can be array or string (comma/newline separated)
+  let searchQueries = [];
+  if (options.searchQueries) {
+    if (typeof options.searchQueries === 'string') {
+      searchQueries = options.searchQueries
+        .split(/[\n,]/)
+        .map(q => q.trim())
+        .filter(q => q.length > 0);
+    } else if (Array.isArray(options.searchQueries)) {
+      searchQueries = options.searchQueries
+        .filter(q => typeof q === 'string' && q.trim().length > 0)
+        .map(q => q.trim());
+    }
+  }
+
   return {
     facebookOnly: options.facebookOnly === true,
     noOpen: options.noOpen !== false,
@@ -85,12 +100,13 @@ function normalizeRunOptions(options = {}) {
     enterpriseLimit: Math.max(1, parseInt(options.enterpriseLimit, 10) || 25),
     country: String(options.country || "Cameroon").trim() || "Cameroon",
     emailTo: String(options.emailTo || process.env.EMAIL_TO || "").trim(),
+    searchQueries,
   };
 }
 
 async function runScraper(inputOptions = {}) {
   const options = normalizeRunOptions(inputOptions);
-  const { facebookOnly, noOpen, pagesPerQuery, enterpriseLimit, country, emailTo } = options;
+  const { facebookOnly, noOpen, pagesPerQuery, enterpriseLimit, country, emailTo, searchQueries } = options;
 
   console.log("==========================================================");
   console.log("   Company Scraper Control Center Run");
@@ -100,6 +116,12 @@ async function runScraper(inputOptions = {}) {
   console.log("  Mode        : " + (facebookOnly ? "Facebook-only" : "All companies"));
   console.log("  Pages/query : " + pagesPerQuery);
   console.log("  Email to    : " + (emailTo || "(not set)"));
+  if (searchQueries.length > 0) {
+    console.log("  Search queries:");
+    searchQueries.forEach(q => console.log("    - " + q));
+  } else {
+    console.log("  Search mode : Using default search templates");
+  }
   console.log("");
 
   try {
@@ -109,6 +131,7 @@ async function runScraper(inputOptions = {}) {
       country,
       companyLimit: enterpriseLimit,
       pagesPerQuery,
+      searchQueries,
       delayMs: 2000,
     });
     logStage("search:done", companies.length + " companies");

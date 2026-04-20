@@ -3,5 +3,8 @@
   "enterpriseLimit": 100,
   "pagesPerQuery": 2,
   "autoRunHourly": false,
-  "emailTo": "noumek.aaron@giortech.com"
+  "emailTo": "noumek.aaron@giortech.com",
+  "searchQueries": [
+    "immigrations company in cameroon"
+  ]
 }
