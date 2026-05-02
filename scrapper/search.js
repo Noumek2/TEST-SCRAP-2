@@ -474,8 +474,9 @@ function buildCountryContext(country = "Cameroon") {
   };
 }
 
-function buildSearchQueries(country) {
-  return SEARCH_QUERY_TEMPLATES.map((template) => template.replace(/\{country\}/g, country));
+function buildSearchQueries(country, customTemplates) {
+  const templates = (Array.isArray(customTemplates) && customTemplates.length > 0) ? customTemplates : SEARCH_QUERY_TEMPLATES;
+  return templates.map((template) => template.replace(/\{country\}/g, country));
 }
 
 function isCountryRelevantText(text, countryContext) {
@@ -587,8 +588,10 @@ async function searchBing(query) {
 async function searchDuckDuckGo(query) {
   const results = [];
   const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-  try {
-    const res = await axios.get(url, { timeout: 15000 });
+  try {    const res = await axios.get(url, {
+      headers: getAxiosHeaders(), // Ajout de l'en-tête User-Agent
+      timeout: 15000,
+    });
     const $ = cheerio.load(res.data);
     $(".result").each((_, el) => {
       const name = $(el).find(".result__title a").first().text().trim();
@@ -807,7 +810,8 @@ async function searchCompanies(options = {}) {
   let allResults = [];
   const isVercel = process.env.VERCEL === "1";
   const countryContext = buildCountryContext(options.country || "Cameroon");
-  const queriesToRun = buildSearchQueries(countryContext.country);
+  // Utilise les templates personnalisés s'ils sont fournis dans options
+  const queriesToRun = buildSearchQueries(countryContext.country, options.queryTemplates);
 
   console.log(`\nSearching across Google + Bing + DuckDuckGo for ${countryContext.country}...\n`);
 

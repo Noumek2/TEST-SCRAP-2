@@ -46,12 +46,20 @@ function normalizeRunOptions(options = {}) {
     pagesPerQuery: Math.max(1, parseInt(options.pagesPerQuery, 10) || 2),
     enterpriseLimit: Math.max(1, parseInt(options.enterpriseLimit, 10) || 25),
     country: String(options.country || "Cameroon").trim() || "Cameroon",
+    queryTemplates: Array.isArray(options.queryTemplates) ? options.queryTemplates : null,
   };
 }
 
 async function runScraper(inputOptions = {}) {
   const options = normalizeRunOptions(inputOptions);
-  const { facebookOnly, noOpen, pagesPerQuery, enterpriseLimit, country } = options;
+  const { 
+    facebookOnly, 
+    noOpen, 
+    pagesPerQuery, 
+    enterpriseLimit, 
+    country,
+    queryTemplates 
+  } = options;
 
   console.log("==========================================================");
   console.log("   Company Scraper Control Center Run");
@@ -60,6 +68,7 @@ async function runScraper(inputOptions = {}) {
   console.log("  Target count: " + enterpriseLimit);
   console.log("  Mode        : " + (facebookOnly ? "Facebook-only" : "All companies"));
   console.log("  Pages/query : " + pagesPerQuery);
+  if (queryTemplates) console.log("  Custom templates: " + queryTemplates.length);
   console.log("");
 
   try {
@@ -70,6 +79,7 @@ async function runScraper(inputOptions = {}) {
       companyLimit: enterpriseLimit,
       pagesPerQuery,
       delayMs: 2000,
+      queryTemplates,
     });
     logStage("search:done", companies.length + " companies");
 

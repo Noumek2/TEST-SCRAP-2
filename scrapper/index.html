@@ -180,6 +180,28 @@
       color: var(--ink);
     }
 
+    select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--ink);
+    }
+
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.92);
+      color: var(--ink);
+      resize: vertical;
+      min-height: 120px;
+    }
+
     .toggle {
       display: flex;
       justify-content: space-between;
@@ -473,8 +495,29 @@
         <form id="settingsForm">
           <div class="form-grid">
             <div class="field">
-              <label for="country">Country</label>
-              <input id="country" name="country" type="text" placeholder="Cote d'Ivoire" required>
+              <label for="country">Country (or select from list)</label>
+              <div style="display: flex; gap: 8px;">
+                <input id="country" name="country" type="text" placeholder="Cote d'Ivoire" required style="flex-grow: 1;">
+                <select id="predefinedCountry" style="flex-shrink: 0; width: auto;">
+                  <option value="">Select...</option>
+                  <option value="Cameroon">Cameroon</option>
+                  <option value="Algeria">Algeria</option>
+                  <option value="Angola">Angola</option>
+                  <option value="Benin">Benin</option>
+                  <option value="Burkina Faso">Burkina Faso</option>
+                  <option value="Congo Brazzaville">Congo Brazzaville</option>
+                  <option value="Congo Kinshasa">Congo Kinshasa</option>
+                  <option value="Ivory Coast">Ivory Coast</option>
+                  <option value="Djibouti">Djibouti</option>
+                  <option value="Egypt">Egypt</option>
+                  <option value="Gabon">Gabon</option>
+                  <option value="Ghana">Ghana</option>
+                  <option value="Guinea">Guinea</option>
+                  <option value="Mali">Mali</option>
+                  <option value="Senegal">Senegal</option>
+                  <option value="Togo">Togo</option>
+                </select>
+              </div>
             </div>
 
             <div class="field">
@@ -485,6 +528,11 @@
             <div class="field">
               <label for="pagesPerQuery">Search depth</label>
               <input id="pagesPerQuery" name="pagesPerQuery" type="number" min="1" max="10" required>
+            </div>
+
+            <div class="field full">
+              <label for="queryTemplates">Search Templates (one per line, use {country})</label>
+              <textarea id="queryTemplates" name="queryTemplates" placeholder="entreprises au {country}&#10;BTP {country}"></textarea>
             </div>
 
             <div class="field full">
@@ -574,6 +622,8 @@
     const countryInput = document.getElementById("country");
     const enterpriseLimitInput = document.getElementById("enterpriseLimit");
     const pagesPerQueryInput = document.getElementById("pagesPerQuery");
+    const predefinedCountrySelect = document.getElementById("predefinedCountry");
+    const queryTemplatesInput = document.getElementById("queryTemplates");
     const autoRunHourlyInput = document.getElementById("autoRunHourly");
     const saveBtn = document.getElementById("saveBtn");
     const refreshBtn = document.getElementById("refreshBtn");
@@ -619,6 +669,7 @@
         country: countryInput.value.trim(),
         enterpriseLimit: Number(enterpriseLimitInput.value),
         pagesPerQuery: Number(pagesPerQueryInput.value),
+        queryTemplates: queryTemplatesInput.value.split('\n').map(t => t.trim()).filter(t => t.length > 0),
         autoRunHourly: autoRunHourlyInput.checked,
       };
     }
@@ -627,6 +678,7 @@
       countryInput.value = settings.country || "Cameroon";
       enterpriseLimitInput.value = settings.enterpriseLimit || 25;
       pagesPerQueryInput.value = settings.pagesPerQuery || 2;
+      queryTemplatesInput.value = Array.isArray(settings.queryTemplates) ? settings.queryTemplates.join('\n') : "";
       autoRunHourlyInput.checked = !!settings.autoRunHourly;
 
       heroCountry.textContent = settings.country || "Cameroon";
@@ -804,6 +856,10 @@
         refreshResultsBtn.disabled = false;
       }
     }
+
+    predefinedCountrySelect.addEventListener("change", (event) => {
+      if (event.target.value) countryInput.value = event.target.value;
+    });
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
