@@ -11,26 +11,15 @@ const path = require("path");
 const os = require("os");
 const { supabase } = require("./supabaseClient");
 const { sendEmail } = require("./emailer");
-const { isGoogleDriveConfigured, uploadFilesToDrive } = require("./driveUploader");
+const { uploadFilesToDrive } = require("./driveUploader");
 
-const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
 const isVercel = process.env.VERCEL === "1";
-const isRender = process.env.RENDER === "true";
-const STORAGE_SCRAP_TABLE = process.env.SUPABASE_STORAGE_TABLE || "storage-scrap";
-const STORAGE_FB_SCRAP_TABLE = process.env.SUPABASE_FB_TABLE || "storage-fb-scrap";
-
-function getOutputDir() {
-  return (isVercel || isRender)
-    ? path.join(os.tmpdir(), "scrapper-output")
-    : path.join(__dirname, "output");
-}
 
 // ── CSV helpers ────────────────────────────────────────────────────────────
 
 // CSV columns in order
 const CSV_COLUMNS = [
   { key: "name",             label: "Company Name" },
-  { key: "hasWebsite",       label: "Has Website" },
   { key: "websiteUrl",       label: "Website URL" },
   { key: "hasFacebook",      label: "Has Facebook" },
   { key: "facebookUrl",      label: "Facebook URL" },
@@ -128,7 +117,6 @@ function toXml(companies, meta) {
     return `
   <company index="${i + 1}">
     <name>${escapeXml(c.name)}</name>
-    <hasWebsite>${c.hasWebsite ? "true" : "false"}</hasWebsite>
     <websiteUrl>${escapeXml(c.websiteUrl)}</websiteUrl>
     <snippet>${escapeXml(c.snippet)}</snippet>
     <contacts>
@@ -216,9 +204,9 @@ function saveLatestResultsSnapshot(companies, options = {}) {
  * @param {boolean} options.facebookOnly
  * @returns {{ csvPath, xmlPath }}
  */
-async function saveAll(companies, options = {}) {
+function saveAll(companies, options = {}) {
   const {
-    outputDir = getOutputDir(),
+    outputDir = isVercel ? path.join(os.tmpdir(), "scrapper-output") : path.join(__dirname, "output"),
     baseName,
     facebookOnly = false,
     country = "Cameroon",
@@ -258,14 +246,14 @@ async function saveAll(companies, options = {}) {
   });
   console.log("Latest results snapshot saved: " + snapshotPath);
 
-  await uploadFilesToDrive([
-    { path: csvPath, mimeType: "text/csv" },
-    { path: xmlPath, mimeType: "application/xml" },
-    { path: htmlPath, mimeType: "text/html" },
-    { path: snapshotPath, mimeType: "application/json" },
-  ]);
+  // --- GOOGLE DRIVE UPLOAD ---
+  uploadFilesToDrive([
+    { path: csvPath, name: path.basename(csvPath), mimeType: "text/csv" },
+    { path: xmlPath, name: path.basename(xmlPath), mimeType: "application/xml" },
+    { path: htmlPath, name: path.basename(htmlPath), mimeType: "text/html" }
+  ]).catch(err => console.error("  [drive] Background upload failed:", err.message));
 
-  return { csvPath, xmlPath, htmlPath, snapshotPath };
+  return { csvPath, xmlPath, htmlPath };
 }
 
 /**
@@ -316,7 +304,7 @@ function printSummary(companies) {
  * Saves enriched company data to Supabase database.
  */
 async function saveToSupabase(companies, tableName = null) {
-  const defaultTable = process.env.SUPABASE_TABLE || STORAGE_FB_SCRAP_TABLE;
+  const defaultTable = process.env.SUPABASE_TABLE || "storage-fb-scrap";
   const targetTable = tableName || defaultTable;
   const columnName = process.env.SUPABASE_COLUMN || "json_files";
 
@@ -335,7 +323,7 @@ async function saveToSupabase(companies, tableName = null) {
   let dataToSave = companies;
   let tableDescription = "all companies";
 
-  if (targetTable === STORAGE_FB_SCRAP_TABLE || targetTable.includes("fb")) {
+  if (targetTable === "storage-fb-scrap" || targetTable.includes("fb")) {
     // Filter to only companies with Facebook pages
     dataToSave = companies.filter(company => company.hasFacebook);
     tableDescription = "Facebook companies only";
@@ -367,26 +355,12 @@ async function saveToSupabase(companies, tableName = null) {
   } else {
     console.log(`  ✅ ${targetTable} insert succeeded!`);
     console.log(`     Saved ${dataToSave.length} ${tableDescription}`);
-
     
-    // Send email after the enriched results table is saved, unless Drive delivery is enabled.
-    if (targetTable === STORAGE_FB_SCRAP_TABLE && dataToSave.length > 0) {
-      if (isGoogleDriveConfigured()) {
-        console.log("  [delivery] Google Drive delivery is enabled - skipping email.");
-      } else {
-        await sendEmail(dataToSave);
-      }
+    // Send email after the enriched results table is saved.
+    if (targetTable === "storage-fb-scrap" && dataToSave.length > 0) {
+      await sendEmail(dataToSave);
     }
   }
 }
 
-module.exports = {
-  STORAGE_FB_SCRAP_TABLE,
-  STORAGE_SCRAP_TABLE,
-  saveAll,
-  printSummary,
-  toCsv,
-  toXml,
-  saveToSupabase,
-  getOutputDir,
-};
+module.exports = { saveAll, printSummary, toCsv, toXml, saveToSupabase };

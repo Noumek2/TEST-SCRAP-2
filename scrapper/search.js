@@ -455,12 +455,11 @@ function buildCountryContext(country = "Cameroon") {
 }
 
 function buildSearchQueries(country, customQueries = []) {
-  // If custom queries are provided, use them directly
-  if (Array.isArray(customQueries) && customQueries.length > 0) {
-    return customQueries.filter(q => typeof q === 'string' && q.trim().length > 0).map(q => q.trim());
-  }
-  // Otherwise, use default templates
-  return SEARCH_QUERY_TEMPLATES.map((template) => template.replace(/\{country\}/g, country));
+  const templates = (Array.isArray(customQueries) && customQueries.length > 0)
+    ? customQueries.filter(q => typeof q === 'string' && q.trim().length > 0)
+    : SEARCH_QUERY_TEMPLATES;
+
+  return templates.map((template) => template.replace(/\{country\}/g, country));
 }
 
 function isCountryRelevantText(text, countryContext) {
@@ -566,9 +565,14 @@ async function searchBing(query) {
 
 async function searchDuckDuckGo(query) {
   const results = [];
-  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=cm-fr`;
+  // Removed &kl=cm-fr as it can sometimes cause issues or be ignored by html.duckduckgo.com
+  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+  
   try {
-    const res = await axios.get(url, { timeout: 15000 });
+    const res = await axios.get(url, {
+      headers: getAxiosHeaders(), // Use standard headers to avoid bot detection
+      timeout: 10000,
+    });
     const $ = cheerio.load(res.data);
     $(".result").each((_, el) => {
       const name = $(el).find(".result__title a").first().text().trim();
@@ -584,8 +588,7 @@ async function searchDuckDuckGo(query) {
       }
     });
     console.log(`    [DuckDuckGo] "${query}" -> ${results.length} results`);
-  } catch (err) {
-    console.log(`    [DuckDuckGo] Error: ${err.message}`);
+  } catch (err) {    console.log(`    [DuckDuckGo] ⚠️ Could not fetch results: ${err.message}`);
   }
   return results;
 }

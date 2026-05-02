@@ -4,19 +4,10 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const { loadSettings, saveSettings, sanitizeSettings } = require("./settings");
-const { getOutputDir } = require("./save");
 const { normalizeRunOptions, runScraperManaged, logErrorWithStack, getIsRunInProgress, getLatestRunState } = require("./index");
 
 const app = express();
-
-const PORT = process.env.PORT || 10000; 
-/**
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Serveur démarré sur le port ${PORT}`);
-});
-*/
-
-
+const PORT = process.env.PORT || 3001;
 
 let schedulerTimer = null;
 let schedulerState = {
@@ -58,14 +49,11 @@ function refreshScheduler() {
     schedulerState.lastError = null;
 
     try {
-      const options = {
+      console.log("[scheduler] Starting hourly scraper run.");
+      await runScraperManaged({
         ...latestSettings,
         noOpen: true,
-      };
-
-      console.log("[scheduler] Starting hourly scraper run.");
-      await runScraperManaged(options);
-
+      });
       schedulerState.lastCompletedAt = new Date().toISOString();
       console.log("[scheduler] Hourly scraper run completed.");
     } catch (error) {
@@ -89,8 +77,8 @@ app.get("/api/settings", (req, res) => {
   });
 });
 
-app.get("/api/results", async (req, res) => {
-  const resultsPath = path.join(getOutputDir(), "latest_results.json");
+app.get("/api/results", (req, res) => {
+  const resultsPath = path.join(__dirname, "output", "latest_results.json");
 
   if (!fs.existsSync(resultsPath)) {
     res.status(404).json({ ok: false, message: "No scrape results available yet." });
@@ -105,11 +93,8 @@ app.get("/api/results", async (req, res) => {
   }
 });
 
-app.get("/api/run-status", async (req, res) => {
-  res.json({
-    ok: true,
-    run: getLatestRunState(),
-  });
+app.get("/api/run-status", (req, res) => {
+  res.json({ run: getLatestRunState() });
 });
 
 app.post("/api/settings", (req, res) => {
@@ -128,11 +113,7 @@ app.post("/api/settings", (req, res) => {
 app.all("/api/run", async (req, res) => {
   try {
     if (getIsRunInProgress()) {
-      res.status(409).json({
-        ok: false,
-        message: "A scraper run is already in progress.",
-        run: getLatestRunState(),
-      });
+      res.status(409).send("A scraper run is already in progress.");
       return;
     }
 
@@ -145,17 +126,12 @@ app.all("/api/run", async (req, res) => {
       noOpen: true,
     });
 
-    runScraperManaged(options).catch((error) => {
-      logErrorWithStack("api-run", error);
-    });
-
-    res.status(202).json({
-      ok: true,
-      message: "Scraper run started.",
-      run: getLatestRunState(),
-    });
+    runScraperManaged(options).catch(err => logErrorWithStack("api-run", err));
+    res.json({ ok: true, message: "Scraper started" });
   } catch (error) {
-    res.status(500).json({ ok: false, message: "Server Error: " + error.message });
+    if (!res.headersSent) {
+      res.status(500).send("Server Error: " + error.message);
+    }
   }
 });
 
