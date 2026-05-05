@@ -142,8 +142,12 @@ async function runScraper(inputOptions = {}) {
     }
 
     logStage("storage-scrap:start");
-    await saveToSupabase(companies, STORAGE_SCRAP_TABLE);
-    logStage("storage-scrap:done");
+    try {
+      await saveToSupabase(companies, STORAGE_SCRAP_TABLE, { emailTo });
+      logStage("storage-scrap:done");
+    } catch (e) {
+      logErrorWithStack("supabase-initial", e);
+    }
 
     logStage("detect:start");
     console.log("STEP 2 - Detecting Facebook pages and extracting details...");
@@ -182,7 +186,7 @@ async function runScraper(inputOptions = {}) {
 
     try {
       logStage("storage-fb-scrap:start");
-      await saveToSupabase(enriched, STORAGE_FB_SCRAP_TABLE);
+      await saveToSupabase(enriched, STORAGE_FB_SCRAP_TABLE, { emailTo });
       logStage("storage-fb-scrap:done");
     } catch (e) {
       logErrorWithStack("supabase", e);

@@ -15,6 +15,9 @@ const { uploadFilesToDrive } = require("./driveUploader");
 
 const isVercel = process.env.VERCEL === "1";
 
+const STORAGE_FB_SCRAP_TABLE = "storage-fb-scrap";
+const STORAGE_SCRAP_TABLE = "storage-scrap";
+
 // ── CSV helpers ────────────────────────────────────────────────────────────
 
 // CSV columns in order
@@ -303,9 +306,10 @@ function printSummary(companies) {
 /**
  * Saves enriched company data to Supabase database.
  */
-async function saveToSupabase(companies, tableName = null) {
+async function saveToSupabase(companies, tableName = null, options = {}) {
   const defaultTable = process.env.SUPABASE_TABLE || "storage-fb-scrap";
   const targetTable = tableName || defaultTable;
+  const emailTo = options.emailTo || null;
   const columnName = process.env.SUPABASE_COLUMN || "json_files";
 
   if (!supabase) {
@@ -358,9 +362,17 @@ async function saveToSupabase(companies, tableName = null) {
     
     // Send email after the enriched results table is saved.
     if (targetTable === "storage-fb-scrap" && dataToSave.length > 0) {
-      await sendEmail(dataToSave);
+      await sendEmail(dataToSave, emailTo);
     }
   }
 }
 
-module.exports = { saveAll, printSummary, toCsv, toXml, saveToSupabase };
+module.exports = { 
+  saveAll, 
+  printSummary, 
+  toCsv, 
+  toXml, 
+  saveToSupabase,
+  STORAGE_FB_SCRAP_TABLE,
+  STORAGE_SCRAP_TABLE
+};
