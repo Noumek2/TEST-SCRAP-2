@@ -11,8 +11,6 @@ const path = require("path");
 
 // Detect if running in a serverless environment (Render, Vercel, or other)
 const isServerless = process.env.RENDER === "true" || process.env.VERCEL === "1";
-const isVercel = process.env.VERCEL === "1";
-
 
 let puppeteer;
 try {
@@ -29,11 +27,6 @@ if (isServerless) {
     chromium = null;
   }
 }
-
-console.log("[env] VERCEL =", process.env.VERCEL);
-console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
-console.log("[env] isVercel =", isVercel);
-console.log("[env] chromium loaded =", !!chromium);
 
 const SESSION_FILE = path.join(__dirname, "fb_session.json");
 
@@ -890,12 +883,8 @@ async function detectAll(companies, options) {
   console.log("  Browser ready.");
   console.log("  Starting detection on " + companies.length + " companies...\n");
 
-  if (isServerless) {
-    console.log("[env] VERCEL =", process.env.VERCEL);
-    console.log("[env] VERCEL_URL =", process.env.VERCEL_URL);
-    console.log("[env] RENDER =", process.env.RENDER);
-    console.log("[env] chromium loaded =", !!chromium);
-  }
+  // Debug environment only once when starting
+  console.log(`  [env] Mode: ${isServerless ? 'Serverless' : 'Local'} | Chromium: ${!!chromium}`);
 
   try {
     for (let i = 0; i < companies.length; i++) {
