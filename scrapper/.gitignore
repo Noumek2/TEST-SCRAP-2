@@ -10,3 +10,7 @@ test_output.txt
 .control-center-settings.json
 scrapper-google-service-account.json
 google-drive-service-account.json
+scrapper/puppeteer_profile/
+.node_modules/
+.env/
+output/
